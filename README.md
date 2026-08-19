@@ -347,4 +347,21 @@ Build vertically:
 10. Mobile/accessibility polish
 11. Behavioral tests
 
+## Run the Proof of Concept
+
+The initial vertical slice is a dependency-free, client-only application. It includes one complete dictionary challenge and stores no personal information or quiz history.
+
+```bash
+npm run dev
+```
+
+Run the behavioral tests and production build with:
+
+```bash
+npm test
+npm run build
+```
+
+The feature definition and intentionally deferred scope are documented in [`docs/PR1.md`](docs/PR1.md).
+
 The first implementation should prove the experience before expanding the architecture.
