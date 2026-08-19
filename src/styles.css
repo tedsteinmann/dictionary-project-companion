@@ -32,7 +32,6 @@ p { line-height: 1.55; }
 .progress-copy { display: flex; justify-content: space-between; gap: 1rem; font-size: .78rem; font-weight: 750; color: #56647a; }
 .progress-track { height: 8px; margin: .55rem 0 1.5rem; overflow: hidden; border-radius: 99px; background: #dce5e4; }
 .progress-track span { display: block; width: 0; height: 100%; background: #1a806d; transition: width 0.3s ease; }
-.progress-track[aria-valuenow="1"] span { width: 100%; }
 .find-prompt { padding: 1rem; border-radius: 14px; background: #e8f5f1; color: #12584c; font-size: 1.1rem; font-weight: 850; }
 .challenge h1 { font-size: clamp(1.55rem, 6vw, 2.25rem); }
 .answer { text-align: left; color: #21304a; border-color: #d7e0e8; background: white; }
