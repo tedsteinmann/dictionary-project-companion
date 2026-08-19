@@ -134,7 +134,7 @@ app.addEventListener('click', (event) => {
 
   if (event.target.closest('[data-action="acknowledge"]')) {
     quizState = acknowledgeQuestion(quizState, questions[quizState.currentQuestionIndex]);
-    return navigate('complete');
+    return navigate('challenge', false);
   }
 
   if (event.target.closest('[data-action="complete"]')) return navigate('complete');
