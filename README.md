@@ -347,4 +347,23 @@ Build vertically:
 10. Mobile/accessibility polish
 11. Behavioral tests
 
+## Run the Proof of Concept
+
+The initial vertical slice is a client-only application with no build step or backend API. It includes one complete dictionary challenge and stores no personal information or quiz history.
+
+`npm run dev` starts a local development server using Python 3's built-in HTTP server. Make sure Python 3 is installed on your machine before running it.
+
+```bash
+npm run dev
+```
+
+Run the behavioral tests and production build with:
+
+```bash
+npm test
+npm run build
+```
+
+The feature definition and intentionally deferred scope are documented in [`docs/PR1.md`](docs/PR1.md).
+
 The first implementation should prove the experience before expanding the architecture.
