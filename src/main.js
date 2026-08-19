@@ -1,5 +1,13 @@
 import { questions } from './content/questions.js';
-import { answerQuestion, initialQuizState } from './quiz.js';
+import {
+  acknowledgeQuestion,
+  answerQuestion,
+  getProgress,
+  initialQuizState,
+  nextQuestion,
+  resetQuiz,
+  retryQuestion
+} from './quiz.js';
 
 const app = document.querySelector('#app');
 let quizState = initialQuizState;
@@ -42,21 +50,26 @@ function intro() {
 }
 
 function challenge() {
-  const question = questions[0];
+  const question = questions[quizState.currentQuestionIndex];
+  const progress = getProgress(quizState, questions.length);
+  const isLastQuestion = quizState.currentQuestionIndex === questions.length - 1;
+  const rotaryContext = question.rotaryContext ? `<p>${question.rotaryContext}</p>` : '';
   const feedback = quizState.status === 'correct'
-    ? `<div class="feedback success" role="status"><h2>${question.success}</h2><p>${question.rotaryContext}</p>${button('Finish Challenge →', 'complete', 'button button-primary')}</div>`
+    ? `<div class="feedback success" role="status"><h2>${question.success}</h2>${rotaryContext}<button class="button button-primary" data-action="${isLastQuestion ? 'complete' : 'next'}">${isLastQuestion ? 'See What You Learned →' : 'Next Challenge →'}</button></div>`
     : quizState.status === 'incorrect'
       ? `<div class="feedback retry" role="alert"><h2>Almost!</h2><p>${question.hint}</p><button class="button button-secondary" data-action="retry">Try Again</button></div>`
       : '';
 
   return layout(`<section class="card challenge" aria-labelledby="question-title">
-    <div class="progress-copy"><span>Challenge 1 of 1</span><span>Definition detective</span></div>
-    <div class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="0" aria-valuemax="1" aria-valuenow="${quizState.status === 'correct' ? 1 : 0}"><span></span></div>
+    <div class="progress-copy"><span>Challenge ${progress.current} of ${progress.total}</span><span>${question.mission}</span></div>
+    <div class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="1" aria-valuemax="${progress.total}" aria-valuenow="${progress.current}"><span style="width: ${progress.percent}%"></span></div>
     <p class="mission">Mission: ${question.mission}</p>
     <p class="find-prompt">${question.prompt}</p>
     <h1 id="question-title">${question.question}</h1>
     <div class="answers" ${quizState.status === 'correct' ? 'inert' : ''}>
-      ${question.answers.map((answer) => `<button class="answer${quizState.answerId === answer.id ? ' selected' : ''}" data-answer="${answer.id}">${answer.text}</button>`).join('')}
+      ${question.type === 'acknowledgement'
+        ? `<button class="button button-primary" data-action="acknowledge">${question.acknowledgementLabel}</button>`
+        : question.answers.map((answer) => `<button class="answer${quizState.answerId === answer.id ? ' selected' : ''}" data-answer="${answer.id}">${answer.text}</button>`).join('')}
     </div>
     ${feedback}
   </section>`, 'Dictionary mission');
@@ -68,9 +81,10 @@ function complete() {
     <p class="kicker">Mission complete</p>
     <h1 id="complete-title">You Did It!</h1>
     <p class="badge">Dictionary Explorer</p>
-    <p class="lede">You found a word, read its definition, and connected it to the world around you.</p>
-    <div class="next-challenge"><strong>One more challenge:</strong><br />What new word will you look up today?</div>
-    ${button('Play Again', 'intro', 'button button-primary')}
+    <p class="lede">You used your dictionary to find words, understand meanings, and discover something new.</p>
+    <p>You practiced alphabetical order, guide words, definitions, context, parts of speech, and vocabulary discovery.</p>
+    <div class="next-challenge"><strong>Keep discovering:</strong><br />What new word will you look up next?</div>
+    <button class="button button-primary" data-action="replay">Play Again</button>
     ${button('Back to Welcome', 'home', 'text-button centered')}
   </section>`);
 }
@@ -91,7 +105,7 @@ const screens = { home: welcome, intro, challenge, complete, adult };
 
 function navigate(route, push = true) {
   const safeRoute = screens[route] ? route : 'home';
-  if (safeRoute !== 'challenge') quizState = initialQuizState;
+  if (safeRoute === 'challenge' && location.hash !== '#challenge') quizState = resetQuiz();
   if (push) history.pushState({ route: safeRoute }, '', safeRoute === 'home' ? './' : `#${safeRoute}`);
   app.innerHTML = screens[safeRoute]();
   app.focus();
@@ -103,13 +117,31 @@ app.addEventListener('click', (event) => {
 
   const answerTarget = event.target.closest('[data-answer]');
   if (answerTarget) {
-    quizState = answerQuestion(questions[0], answerTarget.dataset.answer);
+    const question = questions[quizState.currentQuestionIndex];
+    quizState = answerQuestion(quizState, question, answerTarget.dataset.answer);
     return navigate('challenge', false);
   }
 
   if (event.target.closest('[data-action="retry"]')) {
-    quizState = initialQuizState;
-    navigate('challenge', false);
+    quizState = retryQuestion(quizState);
+    return navigate('challenge', false);
+  }
+
+  if (event.target.closest('[data-action="next"]')) {
+    quizState = nextQuestion(quizState, questions.length);
+    return navigate('challenge', false);
+  }
+
+  if (event.target.closest('[data-action="acknowledge"]')) {
+    quizState = acknowledgeQuestion(quizState, questions[quizState.currentQuestionIndex]);
+    return navigate('complete');
+  }
+
+  if (event.target.closest('[data-action="complete"]')) return navigate('complete');
+
+  if (event.target.closest('[data-action="replay"]')) {
+    quizState = resetQuiz();
+    return navigate('intro');
   }
 });
 

@@ -349,7 +349,7 @@ Build vertically:
 
 ## Run the Proof of Concept
 
-The initial vertical slice is a client-only application with no build step or backend API. It includes one complete dictionary challenge and stores no personal information or quiz history.
+The proof of concept is a client-only application with no backend API. Its intentional eight-question sequence covers alphabetical order, guide words, definitions, multiple meanings, parts of speech, context, related words, and independent lookup. It stores no personal information, score, or quiz history.
 
 `npm run dev` starts a local development server using Python 3's built-in HTTP server. Make sure Python 3 is installed on your machine before running it.
 
@@ -364,6 +364,6 @@ npm test
 npm run build
 ```
 
-The feature definition and intentionally deferred scope are documented in [`docs/PR1.md`](docs/PR1.md).
+The original vertical-slice definition and intentionally deferred infrastructure are documented in [`docs/PR1.md`](docs/PR1.md).
 
-The first implementation should prove the experience before expanding the architecture.
+The multi-question POC expands the learning experience without expanding the original static, client-only architecture.

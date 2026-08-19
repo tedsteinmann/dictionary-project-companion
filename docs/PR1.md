@@ -1,5 +1,7 @@
 # Initial Vertical Slice
 
+> Historical note: this first-PR definition has now been extended into an intentional eight-question POC sequence. The current experience covers alphabetical order, guide words, definitions, multiple meanings, parts of speech, context, related words, and independent lookup while retaining the same client-only architecture.
+
 ## Feature
 
 A visitor can choose a child or grown-up path. A child can prepare their physical dictionary, answer one structured definition challenge, retry after encouraging feedback, and reach a temporary completion screen. A grown-up can read a concise explanation of the dictionary's literacy purpose.
@@ -28,6 +30,6 @@ As a child who received a dictionary from Rotary, I can use my book to complete 
 
 ## Out of Scope
 
-- The full eight-question challenge and dictionary-edition validation.
+- Dictionary-edition validation and any questions beyond the intentional eight-question POC sequence.
 - Club customization, accounts, scores, databases, analytics, or a CMS.
 - Production Rotary branding assets and local-club contact details.
