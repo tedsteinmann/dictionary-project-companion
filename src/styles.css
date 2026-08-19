@@ -31,11 +31,14 @@ p { line-height: 1.55; }
 .note, .next-challenge { margin: 1.25rem 0; border-left: 4px solid #f7a81b; padding: .9rem 1rem; text-align: left; background: #fff9e9; color: #465268; }
 .progress-copy { display: flex; justify-content: space-between; gap: 1rem; font-size: .78rem; font-weight: 750; color: #56647a; }
 .progress-track { height: 8px; margin: .55rem 0 1.5rem; overflow: hidden; border-radius: 99px; background: #dce5e4; }
-.progress-track span { display: block; width: 100%; height: 100%; background: #1a806d; }
+.progress-track span { display: block; width: 0; height: 100%; background: #1a806d; transition: width 0.3s ease; }
+.progress-track[aria-valuenow="1"] span { width: 100%; }
 .find-prompt { padding: 1rem; border-radius: 14px; background: #e8f5f1; color: #12584c; font-size: 1.1rem; font-weight: 850; }
 .challenge h1 { font-size: clamp(1.55rem, 6vw, 2.25rem); }
 .answer { text-align: left; color: #21304a; border-color: #d7e0e8; background: white; }
 .answer::before { content: '○'; margin-right: .6rem; color: #63758e; }
+.answer.selected { border-color: #17458f; background: #eef2fc; color: #17458f; }
+.answer.selected::before { content: '●'; color: #17458f; }
 .feedback { margin-top: 1.2rem; padding: 1rem; border-radius: 16px; }
 .feedback h2 { margin: 0; font-size: 1.15rem; }
 .feedback p { margin: .5rem 0 1rem; }

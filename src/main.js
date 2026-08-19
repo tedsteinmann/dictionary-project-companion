@@ -1,4 +1,3 @@
-import './styles.css';
 import { questions } from './content/questions.js';
 import { answerQuestion, initialQuizState } from './quiz.js';
 
@@ -52,7 +51,7 @@ function challenge() {
 
   return layout(`<section class="card challenge" aria-labelledby="question-title">
     <div class="progress-copy"><span>Challenge 1 of 1</span><span>Definition detective</span></div>
-    <div class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="0" aria-valuemax="1" aria-valuenow="1"><span></span></div>
+    <div class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="0" aria-valuemax="1" aria-valuenow="${quizState.status === 'correct' ? 1 : 0}"><span></span></div>
     <p class="mission">Mission: ${question.mission}</p>
     <p class="find-prompt">${question.prompt}</p>
     <h1 id="question-title">${question.question}</h1>

@@ -349,7 +349,9 @@ Build vertically:
 
 ## Run the Proof of Concept
 
-The initial vertical slice is a dependency-free, client-only application. It includes one complete dictionary challenge and stores no personal information or quiz history.
+The initial vertical slice is a client-only application with no build step or backend API. It includes one complete dictionary challenge and stores no personal information or quiz history.
+
+`npm run dev` starts a local development server using Python 3's built-in HTTP server. Make sure Python 3 is installed on your machine before running it.
 
 ```bash
 npm run dev
