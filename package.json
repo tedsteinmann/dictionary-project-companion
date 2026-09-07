@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "python3 -m http.server 4173",
+    "dev": "npm run build && python3 scripts/dev.py",
     "build": "node scripts/build.js",
     "test": "node --test"
   }

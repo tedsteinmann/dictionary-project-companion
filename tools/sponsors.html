@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sponsor setup · Dictionary Detective Challenge</title>
+  <link rel="stylesheet" href="../src/styles.css" />
+  <style>
+    .setup h1 { font-size: 2.2rem; }
+    fieldset { border: 1px solid #b9cbe0; border-radius: 12px; padding: 1rem; margin: 1rem 0; min-width: 0; }
+    legend { font-weight: 800; padding: 0 .5rem; }
+    label { display: grid; gap: .35rem; font-weight: 700; margin: .8rem 0; }
+    input, textarea { font: inherit; color: #08265f; width: 100%; min-height: 44px; padding: .65rem; border: 1px solid #899db7; border-radius: 6px; background: white; }
+    input[type=file] { font-size: .85rem; }
+    input:focus-visible, textarea:focus-visible { outline: 3px solid #0057a8; outline-offset: 2px; }
+    textarea { resize: vertical; min-height: 100px; }
+    .setup-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+    .logo-preview { display: block; width: 160px; height: 80px; object-fit: contain; margin: .75rem 0; }
+    [hidden] { display: none !important; }
+    #setup-status { color: #9b2530; }
+  </style>
+</head>
+<body>
+  <main class="shell setup">
+    <section class="card">
+      <p class="kicker">Local build tool</p>
+      <h1>Sponsor setup</h1>
+      <p>Add the groups making your dictionary project possible. Choose a logo and add a title, description, and website for each sponsor.</p>
+      <p class="note">Files stay in your browser. Download your configuration, then build the site with it. This setup page is not included in the published site.</p>
+      <label>Open an existing configuration <input id="import-config" type="file" accept=".json,application/json" /></label>
+      <form id="sponsor-form">
+        <div id="sponsor-editors"></div>
+        <div class="setup-actions">
+          <button class="button button-secondary" type="button" id="add-sponsor">+ Add sponsor</button>
+          <button class="button button-primary" type="submit">Download configuration</button>
+        </div>
+      </form>
+      <p id="setup-status" role="status" aria-live="polite"></p>
+      <h2>Build your site</h2>
+      <p>Run this command with the path to your downloaded file:</p>
+      <pre style="white-space: pre-wrap; overflow-wrap: anywhere">npm run build -- --config /path/to/sponsors.json</pre>
+      <p>Deploy <code>dist/</code>, or preview it with <code>python3 -m http.server 4174 --directory dist</code>.</p>
+    </section>
+  </main>
+  <script type="module" src="./sponsors.js"></script>
+</body>
+</html>

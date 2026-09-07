@@ -476,3 +476,7 @@ Before adding a question, ask:
 - Would the question still be educational without the Rotary sentence?
 
 If the last answer is no, reconsider the question.
+
+## Sponsor recognition
+
+Sponsor titles, descriptions, logos, and website links are configured independently from questions; see [SPONSORS.md](SPONSORS.md). Builds may recognize one or many community service organizations. Existing Rotary snippets are examples of service, not claims that every sponsor is a Rotary Club. No sponsor-specific knowledge is needed to answer a question.

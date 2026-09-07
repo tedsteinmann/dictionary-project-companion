@@ -1,4 +1,4 @@
-# Rotary Dictionary Challenge
+# Dictionary Detective Challenge
 
 A mobile-first companion experience for dictionaries distributed by Rotary Clubs through literacy projects such as The Dictionary Project.
 
@@ -7,9 +7,9 @@ A generic QR code placed in a dictionary, bookmark, handout, or inside-cover sti
 - **Children** enter a short, fun challenge that teaches them how to use their new dictionary.
 - **Parents and other adults** learn why Rotary supports literacy, what Rotary does locally and internationally, and how to connect with a Rotary Club in their community.
 
-The initial proof of concept is intentionally **Rotary-focused**.
+The proof of concept grew from a Rotary literacy project. Its flyer-inspired **Dictionary Detective Challenge** branding now supports one or more community sponsors configured at build time. See [Sponsor builds](docs/SPONSORS.md) for logo upload and configuration instructions.
 
-The architecture should not unnecessarily prevent future adaptation for other community service organizations that participate in dictionary-distribution or literacy programs, but multi-organization support is not an MVP requirement.
+The architecture should not unnecessarily prevent future adaptation for other community service organizations that participate in dictionary-distribution or literacy programs, with a simple static sponsor list. Accounts, tenant management, and runtime theme switching remain out of scope.
 
 ## Why This Exists
 
@@ -121,9 +121,9 @@ No single Rotary initiative should dominate the experience.
 
 Polio eradication can appear as one useful example of Rotary's international reach, but the product should present a broader picture of Rotary service.
 
-## Rotary First, Extensible Later
+## Rotary Roots and Community Sponsors
 
-The POC is for Rotary Clubs.
+The POC supports Rotary Clubs and cooperating community sponsors.
 
 Do not build a generic service-club platform for the MVP.
 
@@ -146,7 +146,7 @@ Local Rotary Club Information
 
 A future version could replace the organization-specific layers for another sponsoring organization without redesigning how dictionary questions work.
 
-That future possibility is a design consideration, not an MVP feature.
+Build-time sponsor recognition is supported now; a generic organization platform remains out of scope.
 
 ## Primary Users
 
@@ -233,7 +233,7 @@ The POC does **not** need:
 - Location tracking
 - Production analytics
 - Multi-tenant architecture
-- Multi-organization branding
+- Runtime organization/theme switching
 - Native mobile applications
 
 ## Quiz Philosophy
@@ -351,7 +351,7 @@ Build vertically:
 
 The proof of concept is a client-only application with no backend API. Its intentional eight-question sequence covers alphabetical order, guide words, definitions, multiple meanings, parts of speech, context, related words, and independent lookup. It stores no personal information, score, or quiz history.
 
-`npm run dev` starts a local development server using Python 3's built-in HTTP server. Make sure Python 3 is installed on your machine before running it.
+`npm run dev` builds the site and starts a local preview at `http://localhost:4173` using Python 3's HTTP server. Make sure Python 3 is installed. Both build and dev automatically use `sponsors.json` in the project root when present, falling back to the default Rotary sponsor otherwise. After changing source files or sponsor configuration, run `npm run build` and refresh, or restart `npm run dev`. The sponsor editor remains available at `/tools/sponsors.html` during development.
 
 ```bash
 npm run dev

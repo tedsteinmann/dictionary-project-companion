@@ -230,17 +230,9 @@ Explain that a Rotary Club can:
 
 This gives parents a sense of scale without centering the experience on one Rotary program.
 
-### Page 5: Our Local Club
+### Page 5: Our Community Sponsors
 
-POC may use placeholder content.
-
-Eventually:
-
-- Club name
-- Community
-- A few local projects
-- Meeting/link information
-- Learn more CTA
+The current grown-up screen includes each build-configured sponsor’s logo, title, description, and learn-more link after the literacy explanation.
 
 ## Child Design Principles
 
@@ -281,7 +273,9 @@ Avoid patronizing language.
 
 ## Branding
 
-This is a Rotary project and can use appropriate Rotary branding.
+Use the flyer-inspired Dictionary Detective Challenge identity: bold navy and blue headings, yellow accents, colorful book spines, and blue kids/green grown-ups choices. The welcome headline is “Can you crack the dictionary?”
+
+A responsive “Made possible by” section recognizes every configured sponsor below the audience choices and on the grown-up page. Each has an optional contained logo (or letter fallback), title, description, and descriptive learn-more link. Sponsor details stay out of the question screens. Prize offers from reference artwork are not product requirements. See [sponsor setup](SPONSORS.md).
 
 However, the quiz UI should keep focus on:
 
@@ -289,7 +283,7 @@ However, the quiz UI should keep focus on:
 2. the dictionary,
 3. the challenge.
 
-Rotary branding should support the experience, not overwhelm it.
+Sponsor branding should support the literacy experience.
 
 ## Architecture Through the UX
 

@@ -70,9 +70,9 @@ It may appear as one example of Rotary's ability to participate in sustained int
 
 ## Future Extensibility
 
-Other community service organizations may eventually use a similar experience.
+Build-time sponsor recognition is in scope: one or more community service organizations can supply an optional logo, title, description, and learn-more link. See `docs/SPONSORS.md` for the authorized feature.
 
-This is **not** an MVP feature.
+A generic organization platform remains **out of scope**.
 
 Do not build:
 
@@ -344,11 +344,11 @@ As a child who received a dictionary from Rotary, I can open the QR experience, 
 
 - Full 8-question quiz
 - Adult page
-- Local club customization
+- Runtime club administration
 - Database
 - Authentication
 - Analytics
-- Multi-organization support
+- Multi-tenant platform
 - Production branding system
 
 ## Definition of Done

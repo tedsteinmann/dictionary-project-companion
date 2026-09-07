@@ -2,7 +2,7 @@
 
 ## Working Name
 
-**Rotary Dictionary Challenge**
+**Dictionary Detective Challenge**
 
 The name is provisional.
 
@@ -71,9 +71,9 @@ The primary educational objective is dictionary literacy and independent learnin
 
 Rotary provides context, not the answer key.
 
-### 3. Rotary Has a Clear Presence
+### 3. Community Sponsors Have a Clear Presence
 
-This is a Rotary experience.
+One or more configured community organizations are recognized on welcome and grown-up pages. Rotary remains the source of the existing service examples.
 
 Children should come away with a simple idea:
 
@@ -105,13 +105,11 @@ The experience should show that a Rotary Club is locally rooted while belonging 
 
 The application should not suggest that Rotary is primarily about one international cause.
 
-### 6. Future Reuse Is Possible, but Not the MVP
+### 6. Build-Time Sponsor Recognition
 
 Other community organizations participate in dictionary-distribution programs.
 
-The POC should not build multi-organization support.
-
-It should simply avoid deeply embedding Rotary-specific assumptions into the generic quiz mechanics when separation is easy.
+The POC supports a static list of sponsors, each with an optional logo, title, description, and website. A local setup tool exports configuration for the build. It has no accounts, hosted uploads, or tenant management. See [feature and acceptance criteria](SPONSORS.md).
 
 ## Users
 
@@ -282,9 +280,9 @@ As an adult, I want to understand why Rotary gave this dictionary and what Rotar
 #### Acceptance Criteria
 
 - Literacy is the entry point.
-- Rotary is clearly identified as the sponsor.
+- All configured sponsors are clearly identified.
 - Page distinguishes local and broader Rotary service.
-- Local-club details may be placeholder content for the POC.
+- Organizers supply sponsor details and links at build time.
 
 ## Non-Goals
 
@@ -351,7 +349,7 @@ A promising POC allows children to:
 
 Adults should understand:
 
-- Rotary provided or sponsored the dictionary,
+- the configured community organizations supported the dictionary project,
 - the project is intended to promote literacy and learning,
 - Rotary is active locally,
 - Rotary also participates in broader service efforts,
@@ -370,5 +368,4 @@ Only after validating the POC:
 - local project content,
 - printable certificates,
 - analytics,
-- organization configuration,
-- support for additional service organizations.
+- runtime organization configuration.

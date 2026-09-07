@@ -1,0 +1,7 @@
+{
+  "sponsors": [
+    { "title": "FM Rotary Foundation", "description": "Five Fargo-Moorhead Rotary Clubs", "url": "https://example.org/rotary", "logo": null },
+    { "title": "Horace Lions", "description": "Horace Lions Club", "url": "https://example.org/lions", "logo": null },
+    { "title": "Fargo Elks", "description": "Community service and learning", "url": "https://example.org/elks", "logo": null }
+  ]
+}

@@ -1,3 +1,5 @@
+import { sponsorConfig } from './content/sponsors.js';
+import { renderSponsors } from './sponsors.js';
 import { questions } from './content/questions.js';
 import {
   acknowledgeQuestion,
@@ -15,21 +17,31 @@ let quizState = initialQuizState;
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-function layout(content, eyebrow = 'Rotary Dictionary Challenge') {
-  return `<div class="shell"><header class="brand"><span class="brand-mark" aria-hidden="true">✦</span><span>${eyebrow}</span></header>${content}<footer>A literacy adventure powered by your book.</footer></div>`;
+function layout(content, eyebrow = 'Dictionary Detective Challenge', wide = false) {
+  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand"><a href="./" aria-label="Dictionary Detective Challenge home"><span class="brand-mark" aria-hidden="true">D<span>?</span></span><span>${eyebrow}</span></a><span class="brand-tag">Small book. Big discoveries.</span></header>${content}<footer>A literacy adventure powered by your book.<span class="color-bar" aria-hidden="true"></span></footer></div>`;
 }
 
 function welcome() {
-  return layout(`<section class="card welcome" aria-labelledby="welcome-title">
-    <p class="kicker">Open a book. Unlock an adventure.</p>
-    <h1 id="welcome-title">Welcome, explorer!</h1>
-    <p class="lede">Your dictionary has more inside it than you might think.</p>
-    <p class="question-copy">Who’s exploring today?</p>
-    <div class="choice-stack">
-      ${button('<span aria-hidden="true">📖</span> I’m a Kid', 'intro', 'button button-primary')}
-      ${button('<span aria-hidden="true">☀</span> I’m a Grown-up', 'adult', 'button button-secondary')}
+  return layout(`<section class="welcome" aria-labelledby="welcome-title">
+    <div class="hero">
+      <div class="hero-copy">
+        <p class="kicker">Calling all curious minds</p>
+        <h1 id="welcome-title">Can you crack<br /><span>the dictionary?</span></h1>
+        <p class="challenge-ribbon">Take the Dictionary Detective Challenge!</p>
+        <p class="lede">Grab your dictionary. Follow the clues.<br />There’s a whole world of words waiting inside.</p>
+      </div>
+      <div class="book-scene" aria-hidden="true">
+        <span class="spark spark-one">✦</span><span class="spark spark-two">✦</span>
+        <div class="detective-seal">8 clues.<br /><strong>Endless<br />discoveries.</strong></div>
+        <div class="book-stack"><div class="book book-blue">Explore</div><div class="book book-green">Learn</div><div class="book book-yellow">Discover</div><div class="book book-red">Grow</div><div class="book book-navy">Succeed</div></div>
+      </div>
     </div>
-  </section>`);
+    <div class="audience-choices">
+      ${button('<span class="audience-icon" aria-hidden="true">✎</span><span><strong>I’m a Kid</strong><span>Start the dictionary detective challenge!</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'intro', 'button audience-choice kid-choice')}
+      ${button('<span class="audience-icon" aria-hidden="true">☀</span><span><strong>I’m a Grown-up</strong><span>Meet the community groups behind the books.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'adult', 'button audience-choice adult-choice')}
+    </div>
+    <p class="welcome-note">Your book is the key. No timer. Just curiosity.</p>
+  </section>${renderSponsors(sponsorConfig, { compact: true })}`, undefined, true);
 }
 
 function intro() {
@@ -80,7 +92,7 @@ function complete() {
     <div class="celebration" aria-hidden="true">★</div>
     <p class="kicker">Mission complete</p>
     <h1 id="complete-title">You Did It!</h1>
-    <p class="badge">Dictionary Explorer</p>
+    <p class="badge">Dictionary Detective</p>
     <p class="lede">You used your dictionary to find words, understand meanings, and discover something new.</p>
     <p>You practiced alphabetical order, guide words, definitions, context, parts of speech, and vocabulary discovery.</p>
     <div class="next-challenge"><strong>Keep discovering:</strong><br />What new word will you look up next?</div>
@@ -94,21 +106,23 @@ function adult() {
     <button class="text-button" data-route="home">← Back</button>
     <p class="kicker">For grown-ups</p>
     <h1 id="adult-title">Why this dictionary?</h1>
-    <p class="lede">A local Rotary Club gave this dictionary as a tool for literacy, learning, and independence.</p>
-    <div class="adult-grid"><article><h2>A book to keep</h2><p>It can help children build vocabulary, improve spelling, understand what they read, and solve language questions on their own.</p></article><article><h2>Learning through service</h2><p>Rotary Clubs bring volunteers together to help their communities. Literacy projects are one way clubs invest in long-term opportunity.</p></article></div>
+    <p class="lede">Community sponsors help put dictionaries in children’s hands as a tool for literacy, learning, and independence.</p>
+    <div class="adult-grid"><article><h2>A book to keep</h2><p>It can help children build vocabulary, improve spelling, understand what they read, and solve language questions on their own.</p></article><article><h2>Learning through service</h2><p>Community service organizations bring volunteers together to help their neighbors. Supporting literacy gives children tools they can use for a lifetime.</p></article></div>
     <p class="note">This challenge teaches children to use the physical dictionary—it never replaces it.</p>
+    <h2>Local help, wider possibilities</h2><p>Service starts close to home. Rotary Clubs, for example, support education locally and work with clubs in other countries on projects such as clean water and health.</p>
+    ${renderSponsors(sponsorConfig)}
     ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
   </section>`);
 }
 
 const screens = { home: welcome, intro, challenge, complete, adult };
 
-function navigate(route, push = true) {
+function navigate(route, push = true, focus = true) {
   const safeRoute = screens[route] ? route : 'home';
   if (safeRoute === 'challenge' && location.hash !== '#challenge') quizState = resetQuiz();
   if (push) history.pushState({ route: safeRoute }, '', safeRoute === 'home' ? './' : `#${safeRoute}`);
   app.innerHTML = screens[safeRoute]();
-  app.focus();
+  if (focus) app.focus();
 }
 
 app.addEventListener('click', (event) => {
@@ -146,4 +160,4 @@ app.addEventListener('click', (event) => {
 });
 
 window.addEventListener('popstate', () => navigate(location.hash.slice(1) || 'home', false));
-navigate(location.hash.slice(1) || 'home', false);
+navigate(location.hash.slice(1) || 'home', false, false);
