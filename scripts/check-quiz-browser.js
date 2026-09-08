@@ -29,24 +29,42 @@ export default async function checkQuizBrowser(page) {
   await click('Start Codebreaker');
   const firstIds = (await state()).attempt.questionIds;
   await noOverflow('question');
-  await page.getByLabel('Your answer', { exact: true }).fill('   ');
   await click('Next question →');
-  assert((await state()).attempt.index === 0, 'Blank answer must not advance');
-  await page.getByLabel('Your answer', { exact: true }).fill('temporary');
+  assert((await state()).attempt.index === 0, 'An unanswered choice must not advance');
+  const firstOptions = await page.getByRole('radio').evaluateAll((radios) => radios.map((r) => r.value));
+  await page.getByRole('radio').first().focus();
+  await page.getByRole('radio').first().press('Space');
+  assert((await state()).attempt.index === 0, 'Choosing does not advance automatically');
   await click('Next question →');
   await click('← Previous');
-  assert(await page.getByLabel('Your answer', { exact: true }).inputValue() === 'temporary', 'Previous preserves answer');
+  assert(await page.getByRole('radio').first().isChecked(), 'Previous preserves selection');
   await page.reload();
-  assert(await page.getByLabel('Your answer', { exact: true }).inputValue() === 'temporary', 'Reload preserves answer');
-  await page.getByLabel('Your answer', { exact: true }).focus();
-  assert(await page.getByLabel('Your answer', { exact: true }).evaluate((el) => getComputedStyle(el).outlineStyle !== 'none'), 'Visible keyboard focus');
+  assert(await page.getByRole('radio').first().isChecked(), 'Reload preserves selection');
+  assert(JSON.stringify(await page.getByRole('radio').evaluateAll((radios) => radios.map((r) => r.value))) === JSON.stringify(firstOptions), 'Reload preserves choice order');
+  await page.getByRole('radio').first().focus();
+  assert(await page.getByRole('radio').first().evaluate((el) => getComputedStyle(el).outlineStyle !== 'none'), 'Visible keyboard focus');
+  await page.getByRole('radio').first().press('ArrowDown');
+  assert((await state()).attempt.answers[0] === firstOptions[1], 'Arrow keys select and save another choice');
+  assert(await page.locator('.choice-option').evaluateAll((labels) => labels.every((el) => el.getBoundingClientRect().height >= 44)), 'Large answer targets');
+  await page.locator('.dictionary-tip summary').click();
+  assert(await page.locator('.dictionary-tip p').isVisible(), 'Dictionary tip expands');
+  const formats = new Set();
+  const answer = async (target, question, correct) => {
+    formats.add(question.type);
+    if (question.choices) {
+      const value = correct ? question.answer : question.choices.find((choice) => choice !== question.answer);
+      await target.getByRole('radio', { name: value, exact: true }).check();
+    } else {
+      await target.getByLabel('Type your answer', { exact: true }).fill(correct ? `  ${question.answer.toUpperCase()}  ` : '<b>still exploring</b>');
+    }
+  };
 
   const finish = async (score) => {
     const ids = (await state()).attempt.questionIds;
     for (let index = 0; index < 10; index++) {
       const question = bank.find((q) => q.id === ids[index]);
-      const value = index < score ? `  ${question.answer.toUpperCase()}  ` : '<b>still exploring</b>';
-      await page.getByLabel('Your answer', { exact: true }).fill(value);
+      await answer(page, question, index < score);
+      await noOverflow(`question ${question.type}`);
       await noResults();
       await click(index === 9 ? 'Review answers →' : 'Next question →');
     }
@@ -66,6 +84,10 @@ export default async function checkQuizBrowser(page) {
       assert((await item.innerText()).includes(`Correct answer: ${answer}`), 'Primary answer shown unchanged');
     }
     await noOverflow('results');
+    await page.locator('.learning-review summary').click();
+    assert((await page.locator('.learning-review li').count()) === 10, 'Learning review includes every question');
+    await page.locator('.discovery-activity summary').click();
+    assert((await state()).attempt.submitted, 'Optional discovery does not change submission');
   };
   await finish(6);
   assert((await page.locator('[data-certificate]').count()) === 0, 'No certificate below passing score');
@@ -127,13 +149,39 @@ export default async function checkQuizBrowser(page) {
   for (let index = 0; index < 10; index++) {
     const title = await blockedStorage.locator('#question-title').innerText();
     const question = bank.find((q) => q.question === title);
-    await blockedStorage.getByLabel('Your answer', { exact: true }).fill(question.answer);
-    // Keyboard submission also exercises native form behavior.
-    await blockedStorage.getByLabel('Your answer', { exact: true }).press('Enter');
+    await answer(blockedStorage, question, true);
+    // Keyboard submission works with either input format.
+    await blockedStorage.getByRole('button', { name: index === 9 ? 'Review answers →' : 'Next question →', exact: true }).focus();
+    await blockedStorage.keyboard.press('Enter');
   }
   await blockedStorage.getByRole('button', { name: 'Submit quiz', exact: true }).click();
   assert(await blockedStorage.getByRole('heading', { name: 'You cracked 10 out of 10!', exact: true }).isVisible(), 'Quiz works with storage blocked');
   await blockedStorage.close();
+
+  // Exercise yes/no and its guide-word diagram through a real randomized attempt.
+  const guidePage = await page.context().newPage();
+  await guidePage.goto(`${base}/#levels`);
+  let guideIndex = -1;
+  let guideState;
+  for (let attempt = 0; attempt < 20 && guideIndex < 0; attempt++) {
+    await guidePage.getByRole('button', { name: 'Start Codebreaker', exact: true }).click();
+    guideState = await guidePage.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
+    guideIndex = guideState.attempt.questionIds.indexOf('community-guide-words');
+    if (guideIndex < 0) await guidePage.getByRole('button', { name: 'Back to levels', exact: true }).click();
+  }
+  assert(guideIndex >= 0, 'Guide-word lesson remains in the playable pool');
+  for (let index = 0; index < guideIndex; index++) {
+    await answer(guidePage, bank.find((q) => q.id === guideState.attempt.questionIds[index]), true);
+    await guidePage.getByRole('button', { name: 'Next question →', exact: true }).click();
+  }
+  await guidePage.setViewportSize({ width: 320, height: 720 });
+  assert(await guidePage.locator('.guide-example').isVisible(), 'SVG guide-word example');
+  assert((await guidePage.getByRole('radio').count()) === 2, 'Yes/no offers two native choices');
+  await answer(guidePage, bank.find((q) => q.id === 'community-guide-words'), true);
+  assert(await guidePage.getByRole('radio', { name: 'Yes', exact: true }).isChecked(), 'Yes/no selection');
+  assert(await guidePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Guide lesson fits phone');
+  await guidePage.close();
+  assert(formats.size === 3, 'All three input formats exercised');
   assert(errors.length === 0, `Browser errors: ${errors.join(', ')}`);
-  return { passed: true, checks: 'Child/adult paths; all levels; 6/7/8/10 scoring; answer editing/escaping; retakes; reload/history; certificates; print; route guards; 320–1280px layouts', firstCode };
+  return { passed: true, checks: 'Mixed input formats; original lessons; SVG guide words; teaching tips; child/adult paths; all levels; 6/7/8/10 scoring; answer editing/escaping; retakes; reload/history; certificates; print; route guards; 320–1280px layouts', firstCode };
 }

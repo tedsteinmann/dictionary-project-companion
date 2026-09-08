@@ -26,8 +26,9 @@ function shuffle(items, random) {
 const topicKey = (question) => `${question.category}/${question.subcategory}`;
 
 export function selectQuestions(bank, difficulty, { seenIds = [], previousIds = [], random = Math.random } = {}) {
-  const pool = shuffle(bank.filter((question) => question.difficulty === difficulty), random);
+  const pool = shuffle(bank.filter((question) => question.difficulty === difficulty && question.available !== false), random);
   if (pool.length < QUESTIONS_PER_ATTEMPT) throw new Error('This level needs at least ten questions.');
+  if (pool.some((q) => q.source)) return selectLearningMix(pool, difficulty, seenIds, previousIds, random);
   const seen = new Set(seenIds);
   const previous = new Set(previousIds);
   const selected = [];
@@ -70,6 +71,52 @@ export function selectQuestions(bank, difficulty, { seenIds = [], previousIds = 
   return shuffle(selected, random);
 }
 
+export function questionGroup(question) {
+  return question.source === 'lesson' ? 'lesson' : question.type === 'typed-answer' ? 'typed' : 'choice';
+}
+
+function selectLearningMix(pool, difficulty, seenIds, previousIds, random) {
+  const mix = levels.find((level) => level.difficulty === difficulty).mix;
+  const seen = new Set(seenIds);
+  const previous = new Set(previousIds);
+  const counts = (items, key, value) => items.filter((q) => key(q) === value).length;
+  // A short constrained search preserves the lesson/input mix even when a greedy
+  // category choice would leave no room for the remaining typed questions.
+  function search(selected, remaining, categoryLimit, topicLimit) {
+    if (selected.length === QUESTIONS_PER_ATTEMPT) {
+      return selected.every((q) => previous.has(q.id)) ? null : selected;
+    }
+    const eligible = pool.filter((q) => !selected.includes(q) && remaining[questionGroup(q)] > 0 &&
+      counts(selected, (item) => item.category, q.category) < categoryLimit &&
+      counts(selected, topicKey, topicKey(q)) < topicLimit);
+    const groups = Object.keys(remaining).filter((group) => remaining[group] > 0);
+    const available = (group) => eligible.filter((q) => questionGroup(q) === group);
+    if (groups.some((group) => available(group).length < remaining[group])) return null;
+    groups.sort((a, b) => available(a).length / remaining[a] - available(b).length / remaining[b]);
+    const group = groups[0];
+    const priority = (q) => Number(seen.has(q.id)) * 1000 + Number(previous.has(q.id)) * 100
+      + counts(selected, (item) => item.category, q.category) * 10 + counts(selected, topicKey, topicKey(q));
+    for (const question of available(group).sort((a, b) => priority(a) - priority(b))) {
+      const result = search([...selected, question], { ...remaining, [group]: remaining[group] - 1 }, categoryLimit, topicLimit);
+      if (result) return result;
+    }
+    return null;
+  }
+  for (let relaxation = 0; relaxation < QUESTIONS_PER_ATTEMPT; relaxation++) {
+    const selected = search([], mix, 3 + relaxation, 2 + relaxation);
+    if (selected) {
+      const shuffled = shuffle(selected, random);
+      // Level 1 teaches the tools before asking the child to explore independently.
+      return difficulty === 'Easy' ? [...shuffled.filter((q) => q.source === 'lesson'), ...shuffled.filter((q) => q.source !== 'lesson')] : shuffled;
+    }
+  }
+  throw new Error('This level needs more questions to provide its lesson and answer mix.');
+}
+
+export function choicesFor(attempt, question) {
+  return attempt.choiceOrders?.[question.id] || question.choices;
+}
+
 export function createSession() {
   return { seenIds: [], passedLevels: [], previousAttempts: {}, attempt: null, certificates: [] };
 }
@@ -91,7 +138,10 @@ export function startAttempt(session, bank, levelId, random = Math.random) {
     // Only mark a question seen when displayed, not merely selected.
     seenIds: [...new Set([...session.seenIds, questionIds[0]])],
     previousAttempts: { ...session.previousAttempts, [levelId]: questionIds },
-    attempt: { levelId, questionIds, answers: Array(QUESTIONS_PER_ATTEMPT).fill(''), index: 0, submitted: false }
+    attempt: {
+      levelId, questionIds, answers: Array(QUESTIONS_PER_ATTEMPT).fill(''), index: 0, submitted: false,
+      choiceOrders: Object.fromEntries(selected.filter((q) => q.choices).map((q) => [q.id, shuffle(q.choices, random)]))
+    }
   };
 }
 
@@ -178,12 +228,17 @@ export function restoreSession(storage, bank) {
       const level = levels.find((l) => l.id === attempt.levelId);
       if (!level || !canStartLevel(session, level.id) || !Array.isArray(attempt.questionIds) ||
         attempt.questionIds.length !== QUESTIONS_PER_ATTEMPT || new Set(attempt.questionIds).size !== QUESTIONS_PER_ATTEMPT ||
-        !attempt.questionIds.every((id) => bank.some((q) => q.id === id && q.difficulty === level.difficulty)) ||
+        !attempt.questionIds.every((id) => bank.some((q) => q.id === id && (q.difficulty === level.difficulty || q.sourceDifficulty === level.difficulty))) ||
         !Array.isArray(attempt.answers) || attempt.answers.length !== QUESTIONS_PER_ATTEMPT ||
         !attempt.answers.every((answer) => typeof answer === 'string') ||
         !Number.isInteger(attempt.index) || attempt.index < 0 || attempt.index >= QUESTIONS_PER_ATTEMPT ||
         typeof attempt.submitted !== 'boolean' ||
         (attempt.certificate && (!attempt.submitted || !validCertificate(attempt.certificate)))) throw new Error('Invalid attempt');
+      if (attempt.choiceOrders && Object.entries(attempt.choiceOrders).some(([id, order]) => {
+        const choices = bank.find((q) => String(q.id) === id)?.choices;
+        return !choices || !Array.isArray(order) || order.length !== choices.length ||
+          new Set(order).size !== order.length || !order.every((value) => choices.includes(value));
+      })) throw new Error('Invalid answer choices');
       if (attempt.submitted) {
         const result = gradeAttempt(attempt, bank);
         if (attempt.answers.some((answer) => !answer.trim()) ||

@@ -47,7 +47,7 @@ Example:
 
 ### Introduction and levels
 
-“Grab your dictionary” establishes that the physical book and its reference sections are required. Explain ten typed answers, no timer, a seven-answer passing threshold, and results only after submission. No name or login is needed.
+“Grab your dictionary” establishes that the physical book and its reference sections are required. Explain ten questions with mostly selectable answers, no timer, a seven-answer passing threshold, and results only after submission. No name or login is needed.
 
 The level list shows:
 
@@ -59,9 +59,11 @@ Completed levels remain available for retakes and viewing earned certificates. A
 
 ### Question screen
 
-Show level name, “Question 4 of 10,” a progress bar, category/topic, physical-dictionary reminder, question, and a labeled text input. Disable spelling suggestions and answer autocomplete. Keep normal text keyboards available for words and numbers.
+Level 1 starts with six guided lessons, followed by four simple book hunts. Its answer mix is eight selectable/two typed; later levels are six selectable/four typed. The level cards explain what to expect.
 
-Previous/Next controls preserve answers. Next requires a nonblank answer; previous navigation allows revisiting questions. Input, buttons, and links have visible keyboard focus. Feedback never exposes correctness during the attempt.
+Show level name, “Question 4 of 10,” a progress bar, category/topic, physical-dictionary instruction, an expandable dictionary tip, the question, and a reusable answer component. Multiple-choice and yes/no use native radio groups with large touch labels; typed questions use a labeled text input. Disable spelling suggestions and answer autocomplete. Keep normal text keyboards available for words and numbers.
+
+Previous/Next controls preserve answers. Next requires a selected or nonblank typed answer; previous navigation allows revisiting questions. Input, radio groups, buttons, links, and expandable tips have visible keyboard focus. Choice selection stays on the current question and exposes native checked state. Options shuffle once at attempt creation and retain that order through review/reload. Local SVGs supplement the book, choice, typing, and discovery labels; a guide-word page example includes visible text and a caption. Feedback never exposes correctness during the attempt.
 
 ### Review before submission
 
@@ -71,7 +73,7 @@ Show the ten questions and the child's answers, with a “Change answer” actio
 
 Show “You cracked # out of 10!” after submission. At 7/10 or higher, celebrate level completion, link to the printable certificate, and encourage the next level. Lower scores encourage another attempt with a new question set. All results allow retakes. Previously unlocked levels stay unlocked even after a lower retake score.
 
-Below the primary actions, list missed questions with the child's answer and the primary correct answer. Avoid punitive language. A perfect score receives a brief learning encouragement.
+Below the primary actions, list missed questions with the child's answer and the primary correct answer. Avoid punitive language. An expandable learning review offers explanations for all ten questions, including correct responses and relevant service context. An optional, unscored “Your own discovery” activity restores the original invitation to find a new word in the book.
 
 ### Certificate and prizes
 
@@ -165,7 +167,7 @@ Use the clean, contemporary Dictionary Detective Challenge identity: native syst
 
 Use modest 8–12px corners, thin borders, minimal shadows, and stationary hover states. Avoid tilted interface decorations, emoji tiles, ribbons, oversized illustrations, and multicolor accents. A restrained photograph of a physical navy dictionary accompanies the landing-page heading: beside the copy on desktop and as a compact image below it on phones. Keep the shared wordmark upright and separate the header and content with a quiet divider.
 
-Activity screens have a maximum width of 680px; welcome and grown-up screens expand to 1040px. Audience choices and adult information stack on phones and use two columns from 700px. Dictionary instructions appear in a blue-tinted inset above the question, with visible progress, a labeled typed answer, and encouraging results after submission. Sponsor recognition uses the same typography and restrained dividers.
+Activity screens have a maximum width of 680px; welcome and grown-up screens expand to 1040px. Audience choices and adult information stack on phones and use two columns from 700px. Dictionary instructions appear in a blue-tinted inset above the question, with visible progress, labeled answer choices or a short typed answer, and encouraging results after submission. Sponsor recognition uses the same typography and restrained dividers.
 
 A responsive “Made possible by” section recognizes every configured sponsor below the audience choices and on the grown-up page. Each has an optional contained logo (or letter fallback), title, description, and descriptive learn-more link. Sponsor details stay out of the question screens. Certificates connect to organizer-managed prize arrangements through the grown-up path. See [sponsor setup](SPONSORS.md).
 
@@ -251,17 +253,17 @@ As a child or adult visiting on a phone, I can quickly understand the experience
 - All public screens and feedback states fit 320, 390, 768, and 1280px widths without horizontal overflow.
 - Body text is 16–18px at default zoom; controls have at least 44px touch targets and visible keyboard focus.
 - Both audience paths, all three levels, ten-question attempts, review, submission, retakes, certificates, and browser navigation work.
-- Typed answers have visible labels and focus; screen changes focus the main content, and results use explicit text cues.
+- Answer components have visible labels and focus; screen changes focus the main content, and results use explicit text cues.
 - Text and controls have accessible contrast; layouts remain usable at 200% zoom and with reduced motion.
 - One or multiple sponsors, long text, missing logos, and embedded logos remain readable and contained.
 - Existing tests and the static build pass; representative phone and desktop screenshots are captured for review.
 
 ### Out of scope
 
-New quiz content or features, framework adoption, external fonts, backend services, tracking, theme configuration, and redesign of the local sponsor editor.
+Framework adoption, external fonts, backend services, tracking, theme configuration, and redesign of the local sponsor editor. The authorized mixed-question changes are specified in [MIXED-QUESTIONS.md](MIXED-QUESTIONS.md).
 
 
-### Validation performed
+### Historical visual-refresh validation
 
 - All 18 existing tests and the production build pass with the project’s three configured sponsors.
 - An isolated Chromium walkthrough passed 127 checks covering both paths, all question and feedback states at 320/390/768/1280px, replay, browser navigation, keyboard entry, visible focus, reduced motion, and 200% CSS zoom on all public screens.

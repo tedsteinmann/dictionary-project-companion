@@ -39,11 +39,11 @@ The core learning loop is:
 
 **Find → Understand → Apply → Discover**
 
-Children start at **Level 1 – Codebreaker** (Easy), then unlock **Level 2 – Code Cracker** (Medium) and **Level 3 – Master Codebreaker** (Hard). Each attempt randomly selects ten questions from the supplied 99-question bank, balancing categories and topics and preferring questions not yet shown in the tab session.
+Children start at **Level 1 – Codebreaker** (Easy), then unlock **Level 2 – Code Cracker** (Medium) and **Level 3 – Master Codebreaker** (Hard). The full 99-question source bank is preserved, alongside 16 guided dictionary lessons. Each ten-question attempt balances literacy skills, categories, answer formats, and questions not yet shown in the tab session.
 
-Children use the physical book and type short answers. Case, whitespace, accents, and grouped numeric commas are normalized; spelling is checked exactly. They can edit answers, then submit the whole quiz to see “You cracked # out of 10!” and review missed questions with the supplied correct answers.
+Children use the physical book and mostly select answers using large multiple-choice or yes/no controls, with a few short answers to type. Level 1 begins with six guided lessons and includes eight selectable answers and two typed answers. Levels 2 and 3 use six selectable answers and four typed answers. Case, whitespace, accents, and grouped numeric commas are normalized; spelling is checked exactly. They can edit answers, then submit the whole quiz to see “You cracked # out of 10!” and review missed questions with the supplied correct answers.
 
-A score of **7/10** completes a level, earns a printable challenge certificate with a random reference code, and unlocks the next level. Any level earns a certificate. Retakes use a new question set, with some repeats as pools are exhausted (54 Easy, 26 Medium, 19 Hard).
+A score of **7/10** completes a level, earns a printable challenge certificate with a random reference code, and unlocks the next level. Any level earns a certificate. Retakes use a new question set, with some repeats as pools are exhausted. More demanding source questions have moved from Easy to Medium, and two previously flagged source rows remain preserved pending review.
 
 See [the feature, acceptance criteria, and completion policy](docs/LEVELS.md).
 
@@ -145,7 +145,7 @@ The child should be able to complete the challenge using:
 
 - the physical dictionary,
 - short instructions,
-- short typed answers,
+- large answer choices and short typed answers,
 - and little or no adult assistance.
 
 ### Parent, Guardian, Teacher, or Other Adult
@@ -355,4 +355,4 @@ The original vertical-slice definition and intentionally deferred infrastructure
 
 The multi-question POC expands the learning experience without expanding the original static, client-only architecture.
 
-To regenerate the browser question bank after editing the source CSV, run `python3 scripts/import-questions.py`, then `npm test` and `npm run build`. Verification flags remain only in the source CSV.
+To regenerate the browser question bank after editing the source CSV, run `python3 scripts/import-questions.py`, then `npm test` and `npm run build`. Verification flags remain only in the source CSV. The importer writes `src/content/imported-questions.js`; authored lessons and presentation adaptations are kept in separate modules. See [mixed questions and teaching components](docs/MIXED-QUESTIONS.md).

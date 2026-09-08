@@ -1,9 +1,12 @@
 import { sponsorConfig } from './content/sponsors.js';
 import { escapeHtml, renderSponsors } from './sponsors.js';
 import { questions } from './content/questions.js';
+import { renderAnswerInput, readAnswer } from './components/answer-input.js';
+import { dictionaryHelp } from './components/dictionary-help.js';
+import { learningReview, discoveryActivity } from './components/learning-review.js';
 import { levels, PASSING_SCORE, QUESTIONS_PER_ATTEMPT } from './content/levels.js';
 import {
-  canStartLevel, gradeAttempt, moveToQuestion, persistSession, restoreSession,
+  canStartLevel, choicesFor, gradeAttempt, moveToQuestion, persistSession, restoreSession,
   saveAnswer, startAttempt, submitAttempt
 } from './quiz.js';
 
@@ -64,8 +67,8 @@ function intro() {
     <h1 id="intro-title">Grab your dictionary.</h1>
     <p class="lede">You’ll need the physical book, including its reference sections, for the challenges ahead.</p>
     <ol class="feature-list">
-      <li>Start as a Codebreaker and work up through three levels.</li>
-      <li>Use your dictionary to answer 10 questions. Type a word, a number, or a short phrase.</li>
+      <li>Start as a Codebreaker. Learn to use guide words, find entries, and read definitions.</li>
+      <li>Use your dictionary to answer 10 questions. Most answers are choices to tap; a few are short answers to type.</li>
       <li>Submit your quiz to see your results. Crack ${PASSING_SCORE} out of 10 to earn a certificate and unlock the next level.</li>
     </ol>
     <p class="note">Take your time. You can change answers before submitting and try any unlocked level again.</p>
@@ -88,6 +91,7 @@ function levelPicker() {
       return `<li class="level-card">
         <p class="kicker">Level ${level.id} · ${level.difficulty}${passed ? ' · Completed' : ''}</p>
         <h2>${level.name}</h2>
+        <p>${level.description}</p>
         ${unlocked ? `<button class="button ${passed ? 'button-secondary' : 'button-primary'}" data-level="${level.id}">${passed ? 'Retake' : 'Start'} ${level.name}</button>`
           : `<p class="progress-copy">Complete Level ${level.id - 1} to unlock this level.</p>`}
         ${certificate ? `<button class="text-button return-link" data-certificate="${certificate.code}">View ${level.name} certificate</button>` : ''}
@@ -107,12 +111,10 @@ function challenge() {
     <div class="progress-copy">Question ${current} of ${QUESTIONS_PER_ATTEMPT}</div>
     <div class="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${current}"><span style="width: ${current * 10}%"></span></div>
     <p class="mission">${escapeHtml(question.category)} · ${escapeHtml(question.subcategory)}</p>
-    <p class="find-prompt">${escapeHtml(question.prompt)}</p>
+    ${dictionaryHelp(question)}
     <h1 id="question-title">${escapeHtml(question.question)}</h1>
     <form id="answer-form">
-      <label for="typed-answer">Your answer</label>
-      <input id="typed-answer" name="answer" type="text" required maxlength="200" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="answer-help" value="${escapeHtml(attempt.answers[attempt.index])}" />
-      <p class="progress-copy" id="answer-help">Check your spelling in the book. Capital letters don’t matter. Results appear after you submit all 10 answers.</p>
+      ${renderAnswerInput(question, attempt.answers[attempt.index], choicesFor(attempt, question))}
       <div class="quiz-actions">
         ${attempt.index > 0 ? '<button type="button" class="button" data-action="previous">← Previous</button>' : ''}
         <button type="submit" class="button button-primary">${current === QUESTIONS_PER_ATTEMPT ? 'Review answers →' : 'Next question →'}</button>
@@ -156,6 +158,8 @@ function results() {
       <h2 id="missed-title">${missed.length ? 'Discover the answers you missed' : 'Great find—all 10 cracked!'}</h2>
       ${missed.length ? `<ol class="review-list">${result.details.map((item, index) => item.correct ? '' : `<li value="${index + 1}"><p>${escapeHtml(item.question.question)}</p><p><strong>Your answer:</strong> ${escapeHtml(item.answer)}</p><p><strong>Correct answer:</strong> ${escapeHtml(item.question.answer)}</p></li>`).join('')}</ol>` : '<p>Keep your dictionary close for your next discovery.</p>'}
     </section>
+    ${learningReview(result.details)}
+    ${discoveryActivity()}
     <p class="note">Keep discovering with your dictionary. Rotary volunteers support learning in local schools and work together on projects such as clean water and community health around the world.</p>
     ${button('Choose a level', 'levels', 'text-button return-link')}
   </section>`);
@@ -195,7 +199,7 @@ function adult() {
 
     <section class="adult-section" aria-labelledby="prize-title">
       <h2 id="prize-title">Certificates and prizes</h2>
-      <p>Children use their physical dictionary to answer 10 typed questions. A score of 7 or more at any level earns a printable certificate and unlocks the next level. Answers and learning feedback appear after submission.</p>
+      <p>Children use their physical dictionary to answer 10 questions using a mix of choices and short typed answers. Guided lessons teach children how to use the book. A score of 7 or more at any level earns a printable certificate and unlocks the next level. Answers and learning feedback appear after submission.</p>
       <p>Save or print the certificate before closing the quiz tab. Show it to a teacher, librarian, or the dictionary project organizer. A parent or guardian should ask the organizer about prize availability and any fulfillment details; the child’s quiz requests no names or contact information.</p>
       <p>The completion code is a reference for the certificate. It is not an online prize claim or a verified redemption code.</p>
     </section>
@@ -253,22 +257,23 @@ function navigate(route, push = true, focus = true) {
 }
 
 app.addEventListener('input', (event) => {
-  if (event.target.id === 'typed-answer') {
+  if (event.target.name === 'answer') {
     event.target.setCustomValidity('');
-    updateSession(saveAnswer(session, event.target.value));
+    updateSession(saveAnswer(session, readAnswer(event.target.form)));
   }
 });
 
 app.addEventListener('submit', (event) => {
   if (event.target.id !== 'answer-form') return;
   event.preventDefault();
-  const input = event.target.elements.answer;
-  if (!input.value.trim()) {
-    input.setCustomValidity('Use your dictionary and type an answer before continuing.');
+  const value = readAnswer(event.target);
+  if (!value.trim()) {
+    const input = event.target.querySelector('[name=answer]');
+    input.setCustomValidity('Use your dictionary and give an answer before continuing.');
     input.reportValidity();
     return;
   }
-  updateSession(saveAnswer(session, input.value));
+  updateSession(saveAnswer(session, value));
   if (session.attempt.index === QUESTIONS_PER_ATTEMPT - 1) return navigate('review');
   updateSession(moveToQuestion(session, session.attempt.index + 1));
   navigate('challenge', false);

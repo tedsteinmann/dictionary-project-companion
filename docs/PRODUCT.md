@@ -127,7 +127,7 @@ Needs:
 - large controls,
 - clear progress,
 - encouragement,
-- short typed answers,
+- mostly selectable answers, with occasional short typing,
 - results after quiz submission,
 - a reason to open and explore the book.
 
@@ -203,12 +203,14 @@ As a child, I want to solve short challenges using my own dictionary so I become
 #### Acceptance Criteria
 
 - Three sequential levels: Codebreaker (Easy), Code Cracker (Medium), Master Codebreaker (Hard).
-- Each attempt draws ten questions from the corresponding difficulty pool in the 99-question bank.
+- Each attempt draws ten questions from a bank preserving all 99 source records plus guided dictionary lessons.
+- Level 1 begins with six guided lessons and has eight selectable/two typed answers; Levels 2 and 3 have six selectable/four typed answers.
+- Demanding Easy source questions move to Medium, retaining original source metadata.
 - Category/topic limits and tab-session history provide variety; retakes change the question set.
 - Several dictionary skills are represented.
 - Most questions require or encourage use of the physical dictionary.
 - Progress is visible.
-- Children type and edit answers; correctness and missed-answer feedback appear only after submission.
+- Children select or type and edit answers. Optional tips teach how to search the book; correctness and learning explanations appear only after submission.
 - Case and reasonable formatting differences are normalized; misspellings are not automatically accepted.
 - No login is required.
 - No personal information is collected.
@@ -310,7 +312,7 @@ Do not build:
 - multi-tenant support,
 - multi-organization theme switching.
 
-See [three-level implementation scope and acceptance criteria](LEVELS.md).
+See [three-level implementation scope](LEVELS.md) and [mixed questions and guided lessons](MIXED-QUESTIONS.md).
 
 ## Privacy
 

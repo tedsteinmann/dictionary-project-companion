@@ -204,3 +204,37 @@ input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
   .certificate h1 { font-size: 26pt; }
   .certificate p, .certificate strong, .certificate .lede { color: #000; }
 }
+
+/* Answer and teaching components use native controls, with touch-sized labels. */
+.quiz-icon { flex: 0 0 1.4rem; width: 1.4rem; height: 1.4rem; vertical-align: middle; }
+.find-prompt { display: flex; align-items: flex-start; gap: .6rem; }
+.find-prompt .quiz-icon { margin-top: .15rem; }
+.answer-label { color: var(--heading); font-weight: 600; }
+.answer-label .quiz-icon { margin-right: .35rem; }
+#answer-form .answer-label { margin-bottom: var(--space-2); }
+.choice-input { min-width: 0; border: 0; padding: 0; margin: 0; }
+.choice-options { display: grid; gap: var(--space-2); margin-bottom: var(--space-2); }
+#answer-form .choice-option { display: flex; align-items: center; gap: .75rem; min-height: 52px; margin: 0; padding: .75rem; border: 1px solid var(--control-border); border-radius: var(--radius); cursor: pointer; font-weight: 500; }
+.choice-option input { flex: 0 0 1.2rem; width: 1.2rem; height: 1.2rem; margin: 0; accent-color: var(--blue); }
+.choice-option:has(input:checked) { border-color: var(--blue); background: var(--blue-tint); }
+.choice-option:has(input:focus-visible) { outline: 3px solid var(--blue); outline-offset: 3px; }
+.choice-binary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.challenge h1 { margin-bottom: var(--space-3); }
+.challenge .find-prompt { margin-bottom: var(--space-2); padding: var(--space-2); }
+.challenge #answer-help { margin-bottom: 0; }
+.dictionary-tip { margin: 0 0 var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); }
+.challenge .dictionary-tip { margin-bottom: var(--space-3); }
+summary { min-height: 44px; padding: .65rem .75rem; cursor: pointer; color: var(--blue); font-weight: 600; }
+summary:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+summary .quiz-icon { margin-right: .25rem; }
+.dictionary-tip p, .discovery-activity details p { padding: 0 var(--space-3) var(--space-2); margin: 0; }
+.guide-example { margin: 0 0 var(--space-3); padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); background: var(--page); }
+.guide-words { display: flex; justify-content: space-between; gap: 1rem; color: var(--heading); font-weight: 700; }
+.guide-words span:last-child { text-align: right; }
+.guide-words small { display: block; font-weight: 400; font-size: .75rem; color: var(--muted); }
+.guide-example svg { width: 100%; height: 30px; color: var(--line); margin-top: .75rem; }
+.guide-example figcaption { font-size: .75rem; color: var(--muted); }
+.learning-review { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: var(--space-4); }
+.learning-review .review-list { margin-right: var(--space-3); }
+.discovery-activity { margin-top: var(--space-4); padding: var(--space-3); background: var(--blue-tint); border-radius: var(--radius); }
+.discovery-activity h2 { margin-top: 0; }

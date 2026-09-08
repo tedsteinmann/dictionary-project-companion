@@ -2,24 +2,25 @@
 
 ## Feature
 
-Replace the fixed eight-question activity with a 99-question bank and three sequential typed-answer levels: Codebreaker (Easy), Code Cracker (Medium), and Master Codebreaker (Hard). Each attempt contains ten questions. Submit the whole attempt to see a score and missed answers; seven correct completes a level.
+Replace the fixed eight-question activity with a bank preserving 99 source questions plus guided literacy lessons and three sequential levels: Codebreaker (Easy), Code Cracker (Medium), and Master Codebreaker (Hard). Each attempt contains ten questions. Submit the whole attempt to see a score and missed answers; seven correct completes a level.
 
 ## User story
 
-As a child with a physical dictionary, I can explore varied questions, type answers, review what I missed, retry, and progress to a printable achievement without providing personal information.
+As a child with a physical dictionary, I can learn dictionary skills, select or type answers, review what I missed, retry, and progress to a printable achievement without providing personal information.
 
 ## Implementation tasks
 
 - Import all CSV rows, retaining source IDs, categories, topics, difficulty, and primary answers; keep verification metadata internal.
 - Select ten unique questions within a difficulty, balancing categories/topics and preferring unseen questions in the tab session.
-- Provide labeled typed inputs, previous/next navigation, an answer review before submission, and results only after submission.
+- Provide reusable choice, yes/no, and typed-input components, previous/next navigation, an answer review before submission, and results only after submission.
+- Level 1 has six guided lessons and four simple imported questions, with eight selectable/two typed answers. Later levels have six selectable/four typed answers; Level 2 includes two guided lessons.
 - Unlock levels in order at 7/10; allow retakes without removing previously earned progress.
 - Produce a printable challenge certificate after passing any level, with a random completion reference code.
 - Preserve state in sessionStorage with an in-memory fallback when storage is unavailable. Keep sponsors and adult information available.
 
 ## Acceptance criteria
 
-- All 99 IDs occur once; pools contain 54 Easy, 26 Medium, and 19 Hard questions.
+- All 99 imported IDs and answers are preserved in their source module (54 Easy, 26 Medium, 19 Hard source tags). The adapted playable pools contain 37 Easy, 57 Medium, and 19 Hard questions, including 16 guided lessons. Two flagged source rows remain stored but are withheld from new attempts.
 - Every attempt contains exactly ten distinct questions of the selected difficulty, normally at most three from a category and two from a subcategory.
 - A retake changes the question set; unseen questions are preferred within variety limits. Repeats are inevitable as pools are exhausted, especially the 19-question Hard pool.
 - Case, outer/repeated whitespace, accents, typographic apostrophes/hyphens, and properly grouped numeric thousands separators do not cause incorrect marking. Misspellings and different numeric values remain incorrect.
@@ -40,7 +41,7 @@ Passing any level earns a challenge certificate showing the level name, score, d
 
 ## Content provenance and review
 
-`content/dictionary-quiz.csv` preserves the supplied CSV. `scripts/import-questions.py` generates browser question content and keeps `Verified` out of the student bundle. The supplied verification flags are provenance, not independent verification. The exact dictionary edition was not provided; reference sections and definitions must be checked against the distributed book. Question 12's wording asks for types of food while its supplied answer is the number 2; its displayed prompt is clarified to ask how many types. All primary answers are preserved, including edition-sensitive entries such as question 22.
+`content/dictionary-quiz.csv` preserves the supplied CSV. `scripts/import-questions.py` generates `src/content/imported-questions.js` and keeps `Verified` out of the student bundle. The supplied verification flags are provenance, not independent verification. The exact dictionary edition was not provided; reference sections and definitions must be checked against the distributed book. Question 12's wording asks for types of food while its supplied answer is the number 2; its displayed prompt is clarified to ask how many types. All primary answers are preserved. Previously flagged questions 4 and 22 remain stored and are withheld from new attempts pending review. See [the teaching and mixed-format specification](MIXED-QUESTIONS.md).
 
 ## Validation
 

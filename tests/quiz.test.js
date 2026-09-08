@@ -1,10 +1,12 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { importedQuestions } from '../src/content/imported-questions.js';
+import { lessons } from '../src/content/lessons.js';
 import { questions } from '../src/content/questions.js';
 import { levels } from '../src/content/levels.js';
 import {
-  canStartLevel, checkAnswer, createCompletionCode, createSession, gradeAttempt,
+  canStartLevel, choicesFor, questionGroup, checkAnswer, createCompletionCode, createSession, gradeAttempt,
   moveToQuestion, normalizeAnswer, persistSession, restoreSession, saveAnswer,
   selectQuestions, startAttempt, submitAttempt
 } from '../src/quiz.js';
@@ -35,10 +37,10 @@ describe('CSV question bank', () => {
     const rows = JSON.parse(execFileSync('python3', ['-c',
       'import csv,json; print(json.dumps(list(csv.DictReader(open("content/dictionary-quiz.csv")))))'
     ], { encoding: 'utf8' }));
-    assert.equal(questions.length, 99);
-    assert.equal(new Set(questions.map((q) => q.id)).size, 99);
+    assert.equal(importedQuestions.length, 99);
+    assert.equal(new Set(importedQuestions.map((q) => q.id)).size, 99);
     for (const row of rows) {
-      const q = questions.find((item) => item.id === Number(row['#']));
+      const q = importedQuestions.find((item) => item.id === Number(row['#']));
       assert.equal(q.answer, row.Answer.trim());
       assert.equal(q.category, row.Category);
       assert.equal(q.subcategory, row.Subcategory);
@@ -50,7 +52,7 @@ describe('CSV question bank', () => {
       assert.doesNotMatch(q.answer, /rotary/i);
     }
     assert.match(questions.find((q) => q.id === 12).question, /How many types/);
-    assert.deepEqual(levels.map((level) => questions.filter((q) => q.difficulty === level.difficulty).length), [54, 26, 19]);
+    assert.deepEqual(levels.map((level) => importedQuestions.filter((q) => q.difficulty === level.difficulty).length), [54, 26, 19]);
   });
 });
 
@@ -65,6 +67,12 @@ describe('varied random attempts', () => {
           const selected = selectQuestions(questions, level.difficulty, { seenIds, previousIds, random });
           const ids = selected.map((q) => q.id);
           assert.equal(selected.length, 10);
+          assert.ok(selected.every((q) => q.available !== false));
+          for (const [group, count] of Object.entries(level.mix)) {
+            assert.equal(selected.filter((q) => questionGroup(q) === group).length, count);
+          }
+          if (level.id === 1) assert.ok(selected.slice(0, 6).every((q) => q.source === 'lesson'));
+
           assert.equal(new Set(ids).size, 10);
           assert.ok(selected.every((q) => q.difficulty === level.difficulty));
           assert.ok(Math.max(...counts(selected, (q) => q.category)) <= 3);
@@ -213,5 +221,63 @@ describe('tab-only state and storage fallback', () => {
     const storage = memoryStorage();
     persistSession(session, storage);
     assert.deepEqual(restoreSession(storage, questions), createSession());
+  });
+});
+
+
+describe('guided dictionary learning and reusable formats', () => {
+  it('retains all 99 source questions and restores the original seven scored lessons', () => {
+    assert.equal(questions.length, importedQuestions.length + lessons.length);
+    assert.equal(new Set(questions.map((q) => q.id)).size, questions.length);
+    for (const source of importedQuestions) {
+      const playable = questions.find((q) => q.id === source.id);
+      assert.equal(playable.answer, source.answer);
+      assert.equal(playable.sourceDifficulty, source.difficulty);
+    }
+    for (const id of ['alphabetical-order', 'community-guide-words', 'volunteer-definition', 'service-multiple-meanings', 'generous-part-of-speech', 'cooperate-context', 'leader-related-words']) {
+      assert.ok(lessons.some((q) => q.id === id), id);
+    }
+    assert.ok(lessons.every((q) => q.tip && q.success && q.dictionarySkill));
+    assert.deepEqual(questions.filter((q) => q.available === false).map((q) => q.id), [4, 22]);
+  });
+
+  it('provides unambiguous authored choices and exact grading for all formats', () => {
+    for (const question of questions) {
+      if (question.choices) {
+        assert.ok(['multiple-choice', 'yes-no'].includes(question.type));
+        assert.ok(question.choices.length >= 2 && question.choices.length <= 4);
+        assert.equal(new Set(question.choices.map(normalizeAnswer)).size, question.choices.length, String(question.id));
+        assert.equal(question.choices.filter((choice) => checkAnswer(question, choice)).length, 1, String(question.id));
+      } else assert.equal(question.type, 'typed-answer');
+    }
+    assert.equal(lessons.find((q) => q.id === 'community-guide-words').type, 'yes-no');
+  });
+
+  it('shuffles option positions and preserves the order through edits and reloads', () => {
+    const positions = new Set();
+    for (let seed = 1; seed <= 15; seed++) {
+      let session = startAttempt(createSession(), questions, 1, randomSource(seed));
+      const question = questions.find((q) => q.id === session.attempt.questionIds[0]);
+      const order = choicesFor(session.attempt, question);
+      positions.add(order.indexOf(question.answer));
+      session = saveAnswer(session, order[1]);
+      session = moveToQuestion(moveToQuestion(session, 1), 0);
+      assert.deepEqual(choicesFor(session.attempt, question), order);
+      assert.equal(session.attempt.answers[0], order[1]);
+      const storage = memoryStorage();
+      persistSession(session, storage);
+      assert.deepEqual(restoreSession(storage, questions), session);
+    }
+    assert.ok(positions.size > 1, 'Correct answer must not always occupy the same position');
+  });
+
+  it('preserves old typed-quiz certificates and attempts after difficulty adaptations', () => {
+    let legacy = startAttempt(createSession(), importedQuestions, 1, randomSource(42));
+    const storage = memoryStorage();
+    persistSession(legacy, storage);
+    assert.deepEqual(restoreSession(storage, questions), legacy);
+    legacy = submitAttempt(answerAttempt(legacy, 8), importedQuestions);
+    persistSession(legacy, storage);
+    assert.deepEqual(restoreSession(storage, questions), legacy);
   });
 });
