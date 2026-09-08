@@ -39,26 +39,13 @@ The core learning loop is:
 
 **Find → Understand → Apply → Discover**
 
-Example:
+Children start at **Level 1 – Codebreaker** (Easy), then unlock **Level 2 – Code Cracker** (Medium) and **Level 3 – Master Codebreaker** (Hard). Each attempt randomly selects ten questions from the supplied 99-question bank, balancing categories and topics and preferring questions not yet shown in the tab session.
 
-> Find the word **VOLUNTEER** in your dictionary.
->
-> Which description is closest to its meaning?
->
-> - Someone who chooses to help
-> - Someone who sells something
-> - Someone who wins a contest
-> - Someone who moves to another city
+Children use the physical book and type short answers. Case, whitespace, accents, and grouped numeric commas are normalized; spelling is checked exactly. They can edit answers, then submit the whole quiz to see “You cracked # out of 10!” and review missed questions with the supplied correct answers.
 
-After the child answers:
+A score of **7/10** completes a level, earns a printable challenge certificate with a random reference code, and unlocks the next level. Any level earns a certificate. Retakes use a new question set, with some repeats as pools are exhausted (54 Easy, 26 Medium, 19 Hard).
 
-> Great find!
->
-> Volunteers choose to give their time to help others.
->
-> Rotary Clubs are groups of volunteers who work on projects in their own communities and with people around the world.
-
-The dictionary provides the answer. Rotary provides meaningful real-world context.
+See [the feature, acceptance criteria, and completion policy](docs/LEVELS.md).
 
 ## Product Focus
 
@@ -158,7 +145,7 @@ The child should be able to complete the challenge using:
 
 - the physical dictionary,
 - short instructions,
-- simple answer choices,
+- short typed answers,
 - and little or no adult assistance.
 
 ### Parent, Guardian, Teacher, or Other Adult
@@ -203,14 +190,14 @@ The POC should demonstrate:
 
 - Mobile-first QR-code entry
 - Parent/child audience selection
-- A short child challenge of approximately 8 questions
+- Three sequential levels, each with ten randomly selected questions
 - Real use of the physical dictionary
 - Multiple dictionary skills
-- Immediate, encouraging feedback
+- Encouraging results and missed-answer review after submission
 - Literacy-oriented learning outcomes
 - Rotary service themes used as real-world context
 - A clear distinction between local Rotary service and Rotary's broader international capabilities
-- A simple completion experience
+- A printable certificate after passing any level
 - A parent/adult Rotary information page
 - Quiz content stored separately from application logic
 
@@ -321,10 +308,10 @@ The proof of concept is successful when a tester can:
 
 1. Scan/open the site on a phone.
 2. Choose the child or adult path.
-3. Complete an approximately eight-question child challenge.
+3. Complete a ten-question attempt and progress through three levels.
 4. Physically use the dictionary to answer several questions.
 5. Demonstrate several dictionary-navigation or comprehension skills.
-6. Receive immediate, encouraging feedback.
+6. Review results and missed answers after submitting the attempt.
 7. Encounter literacy as the central purpose of the activity.
 8. Learn that Rotary supports literacy as part of a broader commitment to service.
 9. Understand that Rotary operates both locally and internationally.
@@ -349,7 +336,7 @@ Build vertically:
 
 ## Run the Proof of Concept
 
-The proof of concept is a client-only application with no backend API. Its intentional eight-question sequence covers alphabetical order, guide words, definitions, multiple meanings, parts of speech, context, related words, and independent lookup. It stores no personal information, score, or quiz history.
+The proof of concept is a client-only application with no backend API. Answers, shown-question history, unlocked levels, and certificates stay in sessionStorage for the current browser tab, with an in-memory fallback if storage is blocked. There are no accounts or requests for personal information. Print or save a certificate before closing the tab. Completion codes are local references, not centrally verified prize claims. Parent/guardian information explains how to contact the organizer about available prizes.
 
 `npm run dev` builds the site and starts a local preview at `http://localhost:4173` using Python 3's HTTP server. Make sure Python 3 is installed. Both build and dev automatically use `sponsors.json` in the project root when present, falling back to the default Rotary sponsor otherwise. After changing source files or sponsor configuration, run `npm run build` and refresh, or restart `npm run dev`. The sponsor editor remains available at `/tools/sponsors.html` during development.
 
@@ -367,3 +354,5 @@ npm run build
 The original vertical-slice definition and intentionally deferred infrastructure are documented in [`docs/PR1.md`](docs/PR1.md).
 
 The multi-question POC expands the learning experience without expanding the original static, client-only architecture.
+
+To regenerate the browser question bank after editing the source CSV, run `python3 scripts/import-questions.py`, then `npm test` and `npm run build`. Verification flags remain only in the source CSV.

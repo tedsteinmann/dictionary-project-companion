@@ -1,133 +1,217 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { questions } from '../src/content/questions.js';
+import { levels } from '../src/content/levels.js';
 import {
-  acknowledgeQuestion,
-  answerQuestion,
-  getProgress,
-  initialQuizState,
-  nextQuestion,
-  resetQuiz,
-  retryQuestion
+  canStartLevel, checkAnswer, createCompletionCode, createSession, gradeAttempt,
+  moveToQuestion, normalizeAnswer, persistSession, restoreSession, saveAnswer,
+  selectQuestions, startAttempt, submitAttempt
 } from '../src/quiz.js';
 
-describe('multi-question quiz state', () => {
-  it('starts unanswered on question index zero', () => {
-    assert.deepEqual(initialQuizState, {
-      currentQuestionIndex: 0,
-      status: 'unanswered',
-      answerId: null
-    });
-  });
+const randomSource = (seed) => () => {
+  seed = (Math.imul(1664525, seed) + 1013904223) >>> 0;
+  return seed / 4294967296;
+};
+const counts = (items, key) => Object.values(items.reduce((result, item) => {
+  result[key(item)] = (result[key(item)] || 0) + 1;
+  return result;
+}, {}));
+const answerAttempt = (session, correctCount) => {
+  for (let index = 0; index < 10; index++) {
+    session = moveToQuestion(session, index);
+    const question = questions.find((q) => q.id === session.attempt.questionIds[index]);
+    session = saveAnswer(session, index < correctCount ? `  ${question.answer.toUpperCase()}  ` : 'still exploring');
+  }
+  return session;
+};
+const memoryStorage = () => {
+  const values = new Map();
+  return { getItem: (key) => values.get(key), setItem: (key, value) => values.set(key, value) };
+};
 
-  it('keeps a correct answer on the current question until next is selected', () => {
-    const answered = answerQuestion(initialQuizState, questions[0], 'read');
-    assert.equal(answered.status, 'correct');
-    assert.equal(answered.currentQuestionIndex, 0);
-  });
-
-  it('does not advance after an incorrect answer', () => {
-    const answered = answerQuestion(initialQuizState, questions[0], 'resource');
-    assert.equal(answered.status, 'incorrect');
-    assert.strictEqual(nextQuestion(answered, questions.length), answered);
-  });
-
-  it('retries without changing the question index', () => {
-    const state = { currentQuestionIndex: 3, status: 'incorrect', answerId: 'machine' };
-    assert.deepEqual(retryQuestion(state), {
-      currentQuestionIndex: 3,
-      status: 'unanswered',
-      answerId: null
-    });
-  });
-
-  it('increments the index and clears the answer for the next question', () => {
-    const answered = answerQuestion(initialQuizState, questions[0], 'read');
-    assert.deepEqual(nextQuestion(answered, questions.length), {
-      currentQuestionIndex: 1,
-      status: 'unanswered',
-      answerId: null
-    });
-  });
-
-  it('calculates challenge-position progress rather than score', () => {
-    assert.deepEqual(getProgress({ ...initialQuizState, currentQuestionIndex: 3 }, 8), {
-      current: 4,
-      total: 8,
-      percent: 50
-    });
-  });
-
-  it('acknowledges the final challenge and does not advance past it', () => {
-    const finalState = { ...initialQuizState, currentQuestionIndex: 7 };
-    const acknowledged = acknowledgeQuestion(finalState, questions[7]);
-    assert.equal(acknowledged.status, 'correct');
-    assert.equal(acknowledged.answerId, 'acknowledged');
-    assert.strictEqual(nextQuestion(acknowledged, questions.length), acknowledged);
-  });
-
-  it('replay resets the quiz to the beginning', () => {
-    assert.deepEqual(resetQuiz(), initialQuizState);
-    assert.notStrictEqual(resetQuiz(), initialQuizState);
+describe('CSV question bank', () => {
+  it('imports all source fields and primary answers while keeping verification internal', () => {
+    const rows = JSON.parse(execFileSync('python3', ['-c',
+      'import csv,json; print(json.dumps(list(csv.DictReader(open("content/dictionary-quiz.csv")))))'
+    ], { encoding: 'utf8' }));
+    assert.equal(questions.length, 99);
+    assert.equal(new Set(questions.map((q) => q.id)).size, 99);
+    for (const row of rows) {
+      const q = questions.find((item) => item.id === Number(row['#']));
+      assert.equal(q.answer, row.Answer.trim());
+      assert.equal(q.category, row.Category);
+      assert.equal(q.subcategory, row.Subcategory);
+      assert.equal(q.difficulty, row.Difficulty);
+      if (q.id !== 12) assert.equal(q.question, row.Question.trim());
+      assert.equal(q.type, 'typed-answer');
+      assert.ok(q.dictionarySkill && q.literacyObjective && q.theme && q.prompt && q.success);
+      assert.equal(q.verified, undefined);
+      assert.doesNotMatch(q.answer, /rotary/i);
+    }
+    assert.match(questions.find((q) => q.id === 12).question, /How many types/);
+    assert.deepEqual(levels.map((level) => questions.filter((q) => q.difficulty === level.difficulty).length), [54, 26, 19]);
   });
 });
 
-describe('structured question content', () => {
-  it('contains the intentional eight-question skill sequence with unique IDs', () => {
-    assert.equal(questions.length, 8);
-    assert.equal(new Set(questions.map(({ id }) => id)).size, questions.length);
-    assert.deepEqual(questions.map(({ dictionarySkill }) => dictionarySkill), [
-      'alphabetical-order',
-      'guide-words',
-      'definition',
-      'multiple-meanings',
-      'part-of-speech',
-      'context',
-      'related-words',
-      'independent-lookup'
-    ]);
-  });
-
-  it('gives every submitted-answer question exactly one correct answer', () => {
-    for (const question of questions.filter(({ type }) => type !== 'acknowledgement')) {
-      assert.ok(['multiple-choice', 'yes-no'].includes(question.type));
-      assert.equal(question.answers.filter(({ correct }) => correct).length, 1, question.id);
+describe('varied random attempts', () => {
+  it('selects exactly ten unique, difficulty-matched questions with category/topic limits over repeated sessions', () => {
+    for (const level of levels) {
+      for (let seed = 1; seed <= 100; seed++) {
+        const random = randomSource(seed);
+        let seenIds = [];
+        let previousIds = [];
+        for (let attempt = 0; attempt < 10; attempt++) {
+          const selected = selectQuestions(questions, level.difficulty, { seenIds, previousIds, random });
+          const ids = selected.map((q) => q.id);
+          assert.equal(selected.length, 10);
+          assert.equal(new Set(ids).size, 10);
+          assert.ok(selected.every((q) => q.difficulty === level.difficulty));
+          assert.ok(Math.max(...counts(selected, (q) => q.category)) <= 3);
+          assert.ok(Math.max(...counts(selected, (q) => `${q.category}/${q.subcategory}`)) <= 2);
+          if (previousIds.length) assert.notDeepEqual([...ids].sort(), [...previousIds].sort());
+          previousIds = ids;
+          seenIds = [...new Set([...seenIds, ...ids])];
+        }
+      }
     }
   });
 
-  it('keeps Rotary knowledge separate from answer correctness', () => {
-    for (const question of questions.filter(({ type }) => type !== 'acknowledgement')) {
-      assert.doesNotMatch(question.answers.find(({ correct }) => correct).text, /Rotary/i);
+  it('prefers unseen questions when a varied unseen pool is available', () => {
+    const seenIds = questions.filter((q) => q.category === 'Presidents').map((q) => q.id);
+    for (const level of levels) {
+      const selected = selectQuestions(questions, level.difficulty, { seenIds, random: randomSource(9) });
+      assert.ok(selected.every((q) => !seenIds.includes(q.id)));
     }
-    assert.equal(questions[0].rotaryContext, undefined);
-    assert.equal(questions[7].rotaryContext, undefined);
+  });
+
+  it('varies attempts with different random seeds and leaves bank order unchanged', () => {
+    const ids = questions.map((q) => q.id);
+    assert.notDeepEqual(selectQuestions(questions, 'Easy', { random: randomSource(1) }),
+      selectQuestions(questions, 'Easy', { random: randomSource(2) }));
+    assert.deepEqual(questions.map((q) => q.id), ids);
+  });
+
+  it('rejects undersized pools and relaxes variety only if necessary', () => {
+    assert.throws(() => selectQuestions(questions.slice(0, 2), 'Easy'), /at least ten/);
+    const narrow = Array.from({ length: 11 }, (_, id) => ({ id, difficulty: 'Easy', category: 'One', subcategory: 'One' }));
+    assert.equal(selectQuestions(narrow, 'Easy').length, 10);
   });
 });
 
-describe('client-only journey', () => {
-  it('renders dynamic progress, retry, next, acknowledgement, and completion behavior', async () => {
-    const source = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
-    assert.match(source, /questions\[quizState\.currentQuestionIndex\]/);
-    assert.match(source, /Challenge \$\{progress\.current\} of \$\{progress\.total\}/);
-    assert.match(source, /Try Again/);
-    assert.match(source, /Next Challenge/);
-    assert.match(source, /acknowledgeQuestion/);
-    assert.match(source, /You used your dictionary to find words, understand meanings, and discover something new/);
+describe('exact typed answer checking with formatting normalization', () => {
+  it('accepts case, surrounding/repeated spaces, accents and typographic punctuation', () => {
+    for (const value of ['BISMARCK', 'Bismarck', 'bismarck', '  bismarck  ']) assert.ok(checkAnswer({ answer: 'Bismarck' }, value));
+    assert.ok(checkAnswer({ answer: 'North America' }, ' north   america '));
+    assert.ok(checkAnswer({ answer: 'Brasília' }, 'Brasilia'));
+    assert.ok(checkAnswer({ answer: "a-word's" }, 'A–WORD’S'));
+    assert.equal(normalizeAnswer('  New\tYork\n'), 'new york');
   });
 
-  it('retains the child introduction and grown-up literacy path', async () => {
-    const source = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
-    assert.match(source, /I’m a Kid/);
-    assert.match(source, /physical book/);
-    assert.match(source, /I’m a Grown-up/);
-    assert.match(source, /Want to get more involved?/);
-    assert.match(source, /Your child’s dictionary is one example/);
-    assert.match(source, /Why get involved?/);
-    assert.equal((source.match(/class="benefit-icon"/g) || []).length, 6);
-    assert.match(source, /More than dictionaries/);
-    assert.match(source, /adultSponsorProjects/);
-    assert.match(source, /Find a club that fits your life/);
-    assert.match(source, /Meet the clubs behind the Dictionary Project/);
+  it('accepts properly formatted thousands separators, retaining meaningful punctuation and spelling', () => {
+    assert.ok(checkAnswer({ answer: '1,909' }, '1909'));
+    assert.ok(checkAnswer({ answer: '1909' }, '1,909'));
+    for (const value of ['19,09', '1.909', '190', '19090', '1 909']) assert.equal(checkAnswer({ answer: '1,909' }, value), false);
+    for (const value of ['bismark', 'bissmarck', 'bismarck!', '']) assert.equal(checkAnswer({ answer: 'Bismarck' }, value), false);
+    assert.equal(checkAnswer({ answer: '71%' }, '71'), false);
+    assert.equal(checkAnswer({ answer: '0' }, ''), false);
+  });
+
+  it('supports explicitly approved alternate answers without changing the primary display answer', () => {
+    const question = { answer: 'primary', acceptedAnswers: ['alternate'] };
+    assert.ok(checkAnswer(question, 'ALTERNATE'));
+    assert.equal(question.answer, 'primary');
+  });
+});
+
+describe('level progression and submission', () => {
+  it('starts at Level 1, prevents skipping locked levels, and tracks only displayed questions', () => {
+    const initial = createSession();
+    assert.equal(canStartLevel(initial, 1), true);
+    assert.equal(canStartLevel(initial, 2), false);
+    assert.strictEqual(startAttempt(initial, questions, 3), initial);
+    const session = startAttempt(initial, questions, 1);
+    assert.equal(session.attempt.index, 0);
+    assert.equal(session.seenIds.length, 1);
+    assert.equal(moveToQuestion(session, 1).seenIds.length, 2);
+    assert.strictEqual(moveToQuestion(session, -1), session);
+    assert.strictEqual(moveToQuestion(session, 10), session);
+  });
+
+  it('allows editing before submission and rejects incomplete attempts', () => {
+    let session = startAttempt(createSession(), questions, 1);
+    session = saveAnswer(session, 'first answer');
+    assert.equal(session.attempt.submitted, false);
+    assert.equal(session.attempt.score, undefined);
+    assert.equal(session.attempt.certificate, undefined);
+    session = moveToQuestion(session, 1);
+    session = moveToQuestion(session, 0);
+    assert.equal(session.attempt.answers[0], 'first answer');
+    session = saveAnswer(session, 'second answer');
+    assert.equal(session.attempt.answers[0], 'second answer');
+    assert.strictEqual(submitAttempt(session, questions), session);
+  });
+
+  it('6/10 offers a fresh retake without unlocking or issuing a certificate', () => {
+    let session = answerAttempt(startAttempt(createSession(), questions, 1), 6);
+    session = submitAttempt(session, questions);
+    assert.equal(gradeAttempt(session.attempt, questions).score, 6);
+    assert.equal(session.attempt.submitted, true);
+    assert.equal(session.attempt.certificate, null);
+    assert.equal(canStartLevel(session, 2), false);
+    const retry = startAttempt(session, questions, 1);
+    assert.equal(retry.attempt.submitted, false);
+    assert.notDeepEqual([...retry.attempt.questionIds].sort(), [...session.attempt.questionIds].sort());
+    assert.ok(retry.attempt.answers.every((answer) => answer === ''));
+  });
+
+  it('7/10 earns a certificate at every level and unlocks the next; submission is idempotent', () => {
+    let session = createSession();
+    for (const level of levels) {
+      session = answerAttempt(startAttempt(session, questions, level.id), 7);
+      session = submitAttempt(session, questions);
+      assert.equal(gradeAttempt(session.attempt, questions).score, 7);
+      assert.equal(gradeAttempt(session.attempt, questions).details.filter((item) => !item.correct).length, 3);
+      assert.ok(session.passedLevels.includes(level.id));
+      assert.equal(session.attempt.certificate.levelId, level.id);
+      assert.equal(session.certificates.length, level.id);
+      assert.strictEqual(submitAttempt(session, questions), session);
+      assert.strictEqual(saveAnswer(session, 'changed'), session);
+      assert.strictEqual(moveToQuestion(session, 0), session);
+    }
+    assert.equal(canStartLevel(session, 4), false);
+    const retry = submitAttempt(answerAttempt(startAttempt(session, questions, 1), 0), questions);
+    assert.deepEqual(retry.passedLevels, [1, 2, 3]);
+    assert.equal(retry.certificates.length, 3);
+  });
+
+  it('uses random human-readable certificate references', () => {
+    const codes = Array.from({ length: 100 }, createCompletionCode);
+    assert.equal(new Set(codes).size, codes.length);
+    assert.ok(codes.every((code) => /^DC-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/.test(code)));
+  });
+});
+
+describe('tab-only state and storage fallback', () => {
+  it('restores answers, seen history, unlocked levels and earned certificates after reload', () => {
+    let session = submitAttempt(answerAttempt(startAttempt(createSession(), questions, 1), 10), questions);
+    const storage = memoryStorage();
+    persistSession(session, storage);
+    assert.deepEqual(restoreSession(storage, questions), session);
+    session = saveAnswer(startAttempt(session, questions, 2), '<script>not markup</script>');
+    persistSession(session, storage);
+    assert.deepEqual(restoreSession(storage, questions), session);
+  });
+
+  it('continues without storage and safely resets malformed data', () => {
+    const blocked = { getItem() { throw Error('blocked'); }, setItem() { throw Error('blocked'); } };
+    assert.deepEqual(restoreSession(blocked, questions), createSession());
+    assert.doesNotThrow(() => persistSession(createSession(), blocked));
+    assert.deepEqual(restoreSession({ getItem: () => '{bad' }, questions), createSession());
+    const session = startAttempt(createSession(), questions, 1);
+    session.attempt.questionIds[0] = 999;
+    const storage = memoryStorage();
+    persistSession(session, storage);
+    assert.deepEqual(restoreSession(storage, questions), createSession());
   });
 });

@@ -1,18 +1,23 @@
 import { sponsorConfig } from './content/sponsors.js';
-import { renderSponsors } from './sponsors.js';
+import { escapeHtml, renderSponsors } from './sponsors.js';
 import { questions } from './content/questions.js';
+import { levels, PASSING_SCORE, QUESTIONS_PER_ATTEMPT } from './content/levels.js';
 import {
-  acknowledgeQuestion,
-  answerQuestion,
-  getProgress,
-  initialQuizState,
-  nextQuestion,
-  resetQuiz,
-  retryQuestion
+  canStartLevel, gradeAttempt, moveToQuestion, persistSession, restoreSession,
+  saveAnswer, startAttempt, submitAttempt
 } from './quiz.js';
 
 const app = document.querySelector('#app');
-let quizState = initialQuizState;
+let storage;
+try { storage = window.sessionStorage; } catch { /* Storage may be disabled. */ }
+let session = restoreSession(storage, questions);
+const updateSession = (next) => {
+  session = next;
+  persistSession(session, storage);
+};
+const currentLevel = () => levels.find((level) => level.id === session.attempt.levelId);
+const selectedCertificate = () => session.certificates.find((item) => item.code === session.certificateCode)
+  || session.attempt?.certificate || session.certificates.at(-1);
 
 const adultSponsorProjects = [
   { matches: /Rotary/i, description: 'Five Fargo–Moorhead Rotary Clubs have joined forces to create major community projects like the Rotary Natural Play Hill and Lindenwood Playground, along with literacy, arts, and international service projects.' },
@@ -40,7 +45,7 @@ function welcome() {
       <div class="hero-copy">
         <p class="kicker">A little curiosity goes a long way</p>
         <h1 id="welcome-title">Explore your dictionary.</h1>
-        <p class="lede">Use your book to solve eight short challenges.</p>
+        <p class="lede">Use your book to crack three levels, one discovery at a time.</p>
       </div>
       <img class="hero-dictionary" src="./src/assets/dictionary-detective.webp" alt="A cheerful dictionary character exploring words with a magnifying glass." width="1448" height="1086" fetchpriority="high" />
     </div>
@@ -54,55 +59,129 @@ function welcome() {
 
 function intro() {
   return layout(`<section class="card" aria-labelledby="intro-title">
-    <button class="text-button" data-route="home">← Back</button>
+    ${button('← Back', 'home', 'text-button')}
     <p class="kicker">Before you begin</p>
     <h1 id="intro-title">Grab your dictionary.</h1>
-    <p class="lede">You’ll need the physical book for the challenge ahead.</p>
+    <p class="lede">You’ll need the physical book, including its reference sections, for the challenges ahead.</p>
     <ol class="feature-list">
-      <li>Find words faster</li>
-      <li>Understand definitions</li>
-      <li>Discover new ideas</li>
+      <li>Start as a Codebreaker and work up through three levels.</li>
+      <li>Use your dictionary to answer 10 questions. Type a word, a number, or a short phrase.</li>
+      <li>Submit your quiz to see your results. Crack ${PASSING_SCORE} out of 10 to earn a certificate and unlock the next level.</li>
     </ol>
-    <p class="note">No timer. No score pressure. Just you and your dictionary.</p>
-    ${button('Start the Challenge →', 'challenge', 'button button-primary')}
+    <p class="note">Take your time. You can change answers before submitting and try any unlocked level again.</p>
+    <p class="progress-copy">No name or login needed. Your progress stays in this browser tab for this session.</p>
+    ${button('Choose your level →', 'levels', 'button button-primary')}
+  </section>`);
+}
+
+function levelPicker() {
+  return layout(`<section class="card" aria-labelledby="levels-title">
+    ${button('← Back', 'intro', 'text-button')}
+    <p class="kicker">Your dictionary adventure</p>
+    <h1 id="levels-title">Three levels to crack.</h1>
+    <p>Use your physical dictionary. Each quiz has 10 questions. Score ${PASSING_SCORE} or more to complete a level and earn a certificate.</p>
+    ${session.attempt && !session.attempt.submitted ? `<p class="note">You have a quiz in progress.</p>${button('Continue your quiz →', 'challenge', 'button button-primary')}` : ''}
+    <ol class="level-list">${levels.map((level) => {
+      const unlocked = canStartLevel(session, level.id);
+      const passed = session.passedLevels.includes(level.id);
+      const certificate = session.certificates.findLast((item) => item.levelId === level.id);
+      return `<li class="level-card">
+        <p class="kicker">Level ${level.id} · ${level.difficulty}${passed ? ' · Completed' : ''}</p>
+        <h2>${level.name}</h2>
+        ${unlocked ? `<button class="button ${passed ? 'button-secondary' : 'button-primary'}" data-level="${level.id}">${passed ? 'Retake' : 'Start'} ${level.name}</button>`
+          : `<p class="progress-copy">Complete Level ${level.id - 1} to unlock this level.</p>`}
+        ${certificate ? `<button class="text-button return-link" data-certificate="${certificate.code}">View ${level.name} certificate</button>` : ''}
+      </li>`;
+    }).join('')}</ol>
+    <p class="progress-copy">Retakes bring a new mix of questions. Some discoveries may appear again.</p>
   </section>`);
 }
 
 function challenge() {
-  const question = questions[quizState.currentQuestionIndex];
-  const progress = getProgress(quizState, questions.length);
-  const isLastQuestion = quizState.currentQuestionIndex === questions.length - 1;
-  const rotaryContext = question.rotaryContext ? `<p>${question.rotaryContext}</p>` : '';
-  const feedback = quizState.status === 'correct'
-    ? `<div class="feedback success" role="status"><h2>${question.success}</h2>${rotaryContext}<button class="button button-primary" data-action="${isLastQuestion ? 'complete' : 'next'}">${isLastQuestion ? 'See What You Learned →' : 'Next Challenge →'}</button></div>`
-    : quizState.status === 'incorrect'
-      ? `<div class="feedback retry" role="alert"><h2>Almost!</h2><p>${question.hint}</p><button class="button button-secondary" data-action="retry">Try Again</button></div>`
-      : '';
-
+  const { attempt } = session;
+  const level = currentLevel();
+  const question = questions.find((item) => item.id === attempt.questionIds[attempt.index]);
+  const current = attempt.index + 1;
   return layout(`<section class="card challenge" aria-labelledby="question-title">
-    <div class="progress-copy"><span>Challenge ${progress.current} of ${progress.total}</span></div>
-    <div class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="1" aria-valuemax="${progress.total}" aria-valuenow="${progress.current}"><span style="width: ${progress.percent}%"></span></div>
-    <p class="mission">Mission: ${question.mission}</p>
-    <p class="find-prompt">${question.prompt}</p>
-    <h1 id="question-title">${question.question}</h1>
-    <div class="answers" ${quizState.status === 'correct' ? 'inert' : ''}>
-      ${question.type === 'acknowledgement'
-        ? `<button class="button button-primary" data-action="acknowledge">${question.acknowledgementLabel}</button>`
-        : question.answers.map((answer) => `<button class="answer${quizState.answerId === answer.id ? ' selected' : ''}" data-answer="${answer.id}" aria-pressed="${quizState.answerId === answer.id}"><span class="answer-marker" aria-hidden="true"></span><span>${answer.text}</span></button>`).join('')}
-    </div>
-    ${feedback}
+    <p class="kicker">Level ${level.id} · ${level.name}</p>
+    <div class="progress-copy">Question ${current} of ${QUESTIONS_PER_ATTEMPT}</div>
+    <div class="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${current}"><span style="width: ${current * 10}%"></span></div>
+    <p class="mission">${escapeHtml(question.category)} · ${escapeHtml(question.subcategory)}</p>
+    <p class="find-prompt">${escapeHtml(question.prompt)}</p>
+    <h1 id="question-title">${escapeHtml(question.question)}</h1>
+    <form id="answer-form">
+      <label for="typed-answer">Your answer</label>
+      <input id="typed-answer" name="answer" type="text" required maxlength="200" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="answer-help" value="${escapeHtml(attempt.answers[attempt.index])}" />
+      <p class="progress-copy" id="answer-help">Check your spelling in the book. Capital letters don’t matter. Results appear after you submit all 10 answers.</p>
+      <div class="quiz-actions">
+        ${attempt.index > 0 ? '<button type="button" class="button" data-action="previous">← Previous</button>' : ''}
+        <button type="submit" class="button button-primary">${current === QUESTIONS_PER_ATTEMPT ? 'Review answers →' : 'Next question →'}</button>
+      </div>
+    </form>
+    ${button('Back to levels', 'levels', 'text-button return-link')}
   </section>`);
 }
 
-function complete() {
-  return layout(`<section class="card completion" aria-labelledby="complete-title">
-    <p class="kicker">Mission complete</p>
-    <h1 id="complete-title">You did it!</h1>
-    <p class="lede">You used your dictionary to find words, understand meanings, and discover something new.</p>
-    <p>You practiced alphabetical order, guide words, definitions, context, parts of speech, and vocabulary discovery.</p>
-    <div class="next-challenge"><strong>Keep discovering:</strong><br />What new word will you look up next?</div>
-    <button class="button button-primary" data-action="replay">Play Again</button>
-    ${button('Back to Welcome', 'home', 'text-button return-link')}
+function review() {
+  const { attempt } = session;
+  const answered = attempt.answers.filter((answer) => answer.trim()).length;
+  return layout(`<section class="card" aria-labelledby="review-title">
+    <p class="kicker">${currentLevel().name} · ${answered} of 10 answered</p>
+    <h1 id="review-title">Ready to crack the code?</h1>
+    <p>Check your answers below. You can change any answer before submitting. Your score and the correct answers will appear afterward.</p>
+    <ol class="review-list">${attempt.questionIds.map((id, index) => {
+      const question = questions.find((item) => item.id === id);
+      return `<li><p>${escapeHtml(question.question)}</p><p><strong>Your answer:</strong> ${escapeHtml(attempt.answers[index]) || 'Not answered yet'}</p><button class="text-button" data-question="${index}">Change answer<span class="sr-only"> for question ${index + 1}</span></button></li>`;
+    }).join('')}</ol>
+    ${answered === QUESTIONS_PER_ATTEMPT ? '<button class="button button-primary" data-action="submit">Submit quiz</button>' : '<p class="note">Answer each question before submitting your quiz.</p>'}
+    ${button('Back to quiz', 'challenge', 'text-button return-link')}
+  </section>`);
+}
+
+function results() {
+  const level = currentLevel();
+  const result = gradeAttempt(session.attempt, questions);
+  const missed = result.details.filter((item) => !item.correct);
+  return layout(`<section class="card" aria-labelledby="results-title">
+    <p class="kicker">Level ${level.id} · ${level.name}</p>
+    <h1 id="results-title">You cracked ${result.score} out of 10!</h1>
+    <p class="lede">${result.passed ? `Level completed! You earned your ${level.name} certificate.` : 'Keep exploring! Crack 7 or more to complete this level. Your dictionary can help you try again.'}</p>
+    <div class="quiz-actions">
+      ${result.passed ? `<button class="button button-primary" data-certificate="${session.attempt.certificate.code}">View and print certificate</button>` : ''}
+      ${result.passed && level.id < levels.length ? `<button class="button button-primary" data-level="${level.id + 1}">Try Level ${level.id + 1}: ${levels[level.id].name} →</button>` : ''}
+      <button class="button button-secondary" data-level="${level.id}">Try ${level.name} again</button>
+    </div>
+    ${result.passed && level.id === levels.length ? '<p class="note">You completed all three levels. Master Codebreaker—great detective work!</p>' : ''}
+    <section class="result-review" aria-labelledby="missed-title">
+      <h2 id="missed-title">${missed.length ? 'Discover the answers you missed' : 'Great find—all 10 cracked!'}</h2>
+      ${missed.length ? `<ol class="review-list">${result.details.map((item, index) => item.correct ? '' : `<li value="${index + 1}"><p>${escapeHtml(item.question.question)}</p><p><strong>Your answer:</strong> ${escapeHtml(item.answer)}</p><p><strong>Correct answer:</strong> ${escapeHtml(item.question.answer)}</p></li>`).join('')}</ol>` : '<p>Keep your dictionary close for your next discovery.</p>'}
+    </section>
+    <p class="note">Keep discovering with your dictionary. Rotary volunteers support learning in local schools and work together on projects such as clean water and community health around the world.</p>
+    ${button('Choose a level', 'levels', 'text-button return-link')}
+  </section>`);
+}
+
+function certificate() {
+  const earned = selectedCertificate();
+  const level = levels.find((item) => item.id === earned.levelId);
+  return layout(`<section aria-labelledby="certificate-title">
+    <div class="card certificate">
+      <p class="kicker">Dictionary Detective Challenge</p>
+      <h1 id="certificate-title">Certificate of completion</h1>
+      <p class="lede">Level ${level.id} · ${level.name}</p>
+      <p>You used your physical dictionary to find answers, explore ideas, and complete the challenge.</p>
+      <p class="certificate-score">You cracked ${earned.score} out of 10!</p>
+      <p>Completed <time datetime="${earned.date}">${earned.date}</time></p>
+      <p>Completion code<br /><strong class="completion-code">${earned.code}</strong></p>
+      <p>Show this certificate to a parent, guardian, teacher, or librarian. A parent or guardian can ask the organizer about any available prize and how to claim it.</p>
+      <p class="progress-copy">Supported by ${sponsorConfig.sponsors.map((item) => escapeHtml(item.title)).join(' · ')}</p>
+    </div>
+    <div class="quiz-actions no-print">
+      <button class="button button-primary" data-action="print">Print or save certificate</button>
+      ${level.id < levels.length ? `<button class="button button-secondary" data-level="${level.id + 1}">Continue to ${levels[level.id].name} →</button>` : ''}
+      ${button('Choose a level', 'levels', 'button')}
+      ${button('For parents and guardians', 'adult', 'text-button')}
+    </div>
   </section>`);
 }
 
@@ -113,6 +192,13 @@ function adult() {
     <h1 id="adult-title">Want to get more involved?</h1>
     <p class="lede">Your child’s dictionary is one example of what local service clubs make possible.</p>
     <p>The five Fargo–Moorhead Rotary Clubs, Horace Lions Club, and Fargo Elks bring people together to serve our community, build relationships, and make good things happen.</p>
+
+    <section class="adult-section" aria-labelledby="prize-title">
+      <h2 id="prize-title">Certificates and prizes</h2>
+      <p>Children use their physical dictionary to answer 10 typed questions. A score of 7 or more at any level earns a printable certificate and unlocks the next level. Answers and learning feedback appear after submission.</p>
+      <p>Save or print the certificate before closing the quiz tab. Show it to a teacher, librarian, or the dictionary project organizer. A parent or guardian should ask the organizer about prize availability and any fulfillment details; the child’s quiz requests no names or contact information.</p>
+      <p>The completion code is a reference for the certificate. It is not an online prize claim or a verified redemption code.</p>
+    </section>
 
     <section class="adult-section" aria-labelledby="why-involved-title">
       <h2 id="why-involved-title">Why get involved?</h2>
@@ -146,49 +232,81 @@ function adult() {
   </section>`, true);
 }
 
-const screens = { home: welcome, intro, challenge, complete, adult };
+const screens = { home: welcome, intro, levels: levelPicker, challenge, review, results, certificate, adult };
 
 function navigate(route, push = true, focus = true) {
-  const safeRoute = screens[route] ? route : 'home';
-  if (safeRoute === 'challenge' && location.hash !== '#challenge') quizState = resetQuiz();
-  if (push) history.pushState({ route: safeRoute }, '', safeRoute === 'home' ? './' : `#${safeRoute}`);
+  let safeRoute = screens[route] ? route : 'home';
+  if (['challenge', 'review', 'results'].includes(safeRoute)) {
+    if (!session.attempt) safeRoute = 'levels';
+    else if (session.attempt.submitted) safeRoute = 'results';
+    else if (safeRoute === 'results') safeRoute = 'challenge';
+  }
+  if (safeRoute === 'certificate' && !selectedCertificate()) safeRoute = 'levels';
+  const url = safeRoute === 'home' ? './' : `#${safeRoute}`;
+  if (push && location.hash !== `#${safeRoute}`) history.pushState({ route: safeRoute }, '', url);
+  else if (safeRoute !== route) history.replaceState({ route: safeRoute }, '', url);
   app.innerHTML = screens[safeRoute]();
-  if (focus) app.focus();
+  if (focus) {
+    app.focus();
+    window.scrollTo(0, 0);
+  }
 }
+
+app.addEventListener('input', (event) => {
+  if (event.target.id === 'typed-answer') {
+    event.target.setCustomValidity('');
+    updateSession(saveAnswer(session, event.target.value));
+  }
+});
+
+app.addEventListener('submit', (event) => {
+  if (event.target.id !== 'answer-form') return;
+  event.preventDefault();
+  const input = event.target.elements.answer;
+  if (!input.value.trim()) {
+    input.setCustomValidity('Use your dictionary and type an answer before continuing.');
+    input.reportValidity();
+    return;
+  }
+  updateSession(saveAnswer(session, input.value));
+  if (session.attempt.index === QUESTIONS_PER_ATTEMPT - 1) return navigate('review');
+  updateSession(moveToQuestion(session, session.attempt.index + 1));
+  navigate('challenge', false);
+});
 
 app.addEventListener('click', (event) => {
   const routeTarget = event.target.closest('[data-route]');
   if (routeTarget) return navigate(routeTarget.dataset.route);
-
-  const answerTarget = event.target.closest('[data-answer]');
-  if (answerTarget) {
-    const question = questions[quizState.currentQuestionIndex];
-    quizState = answerQuestion(quizState, question, answerTarget.dataset.answer);
+  const levelTarget = event.target.closest('[data-level]');
+  if (levelTarget) {
+    const next = startAttempt(session, questions, Number(levelTarget.dataset.level));
+    if (next === session) return;
+    updateSession(next);
+    return navigate('challenge');
+  }
+  const certificateTarget = event.target.closest('[data-certificate]');
+  if (certificateTarget) {
+    updateSession({ ...session, certificateCode: certificateTarget.dataset.certificate });
+    return navigate('certificate');
+  }
+  const questionTarget = event.target.closest('[data-question]');
+  if (questionTarget) {
+    updateSession(moveToQuestion(session, Number(questionTarget.dataset.question)));
+    return navigate('challenge');
+  }
+  if (event.target.closest('[data-action="previous"]')) {
+    updateSession(moveToQuestion(session, session.attempt.index - 1));
     return navigate('challenge', false);
   }
-
-  if (event.target.closest('[data-action="retry"]')) {
-    quizState = retryQuestion(quizState);
-    return navigate('challenge', false);
+  if (event.target.closest('[data-action="submit"]')) {
+    updateSession(submitAttempt(session, questions));
+    return navigate('results');
   }
-
-  if (event.target.closest('[data-action="next"]')) {
-    quizState = nextQuestion(quizState, questions.length);
-    return navigate('challenge', false);
-  }
-
-  if (event.target.closest('[data-action="acknowledge"]')) {
-    quizState = acknowledgeQuestion(quizState, questions[quizState.currentQuestionIndex]);
-    return navigate('challenge', false);
-  }
-
-  if (event.target.closest('[data-action="complete"]')) return navigate('complete');
-
-  if (event.target.closest('[data-action="replay"]')) {
-    quizState = resetQuiz();
-    return navigate('intro');
-  }
+  if (event.target.closest('[data-action="print"]')) window.print();
 });
 
-window.addEventListener('popstate', () => navigate(location.hash.slice(1) || 'home', false));
+window.addEventListener('popstate', () => {
+  if (location.hash === '#app') return app.focus();
+  navigate(location.hash.slice(1) || 'home', false);
+});
 navigate(location.hash.slice(1) || 'home', false, false);

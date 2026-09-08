@@ -127,8 +127,8 @@ Needs:
 - large controls,
 - clear progress,
 - encouragement,
-- little typing,
-- immediate feedback,
+- short typed answers,
+- results after quiz submission,
 - a reason to open and explore the book.
 
 ### Secondary User: Adult
@@ -202,11 +202,14 @@ As a child, I want to solve short challenges using my own dictionary so I become
 
 #### Acceptance Criteria
 
-- Approximately 8 questions in the POC.
+- Three sequential levels: Codebreaker (Easy), Code Cracker (Medium), Master Codebreaker (Hard).
+- Each attempt draws ten questions from the corresponding difficulty pool in the 99-question bank.
+- Category/topic limits and tab-session history provide variety; retakes change the question set.
 - Several dictionary skills are represented.
 - Most questions require or encourage use of the physical dictionary.
 - Progress is visible.
-- Feedback appears immediately.
+- Children type and edit answers; correctness and missed-answer feedback appear only after submission.
+- Case and reasonable formatting differences are normalized; misspellings are not automatically accepted.
 - No login is required.
 - No personal information is collected.
 
@@ -239,8 +242,8 @@ As a child, I want to see how the words I discover relate to helping people and 
 
 #### Acceptance Criteria
 
-- Rotary facts are usually feedback/context, not prerequisite knowledge.
-- Multiple Rotary service themes appear.
+- Rotary service examples are surrounding context, never prerequisite knowledge.
+- Multiple Rotary service themes appear in completion and grown-up context.
 - At least one example is clearly local.
 - At least one example demonstrates Rotary's broader/international capabilities.
 - No single initiative dominates the content.
@@ -255,9 +258,12 @@ As a child, I want a clear celebration when I finish.
 
 #### Acceptance Criteria
 
-- Completion emphasizes skills learned rather than score.
-- No persistent score is required.
-- Child receives a simple final service or learning challenge.
+- A result says “You cracked # out of 10!” and encourages continued dictionary exploration.
+- Seven correct completes a level and unlocks the next. Lower scores allow immediate randomized retry.
+- Passing any level earns a printable challenge certificate showing level, score, date, and a random reference code.
+- Answers, scores, level progress, and certificates remain only in the current browser tab session.
+- Children may continue upward, retake, or show their certificate to an adult.
+- Prize fulfillment is arranged by a parent/guardian with the organizer; no child contact details are requested.
 - Replay is possible.
 
 ---
@@ -303,6 +309,8 @@ Do not build:
 - production analytics,
 - multi-tenant support,
 - multi-organization theme switching.
+
+See [three-level implementation scope and acceptance criteria](LEVELS.md).
 
 ## Privacy
 
@@ -359,13 +367,9 @@ Adults should understand:
 
 Only after validating the POC:
 
-- question banks,
-- randomized challenges,
 - dictionary-edition profiles,
-- difficulty levels,
 - classroom mode,
 - club-specific QR codes,
 - local project content,
-- printable certificates,
 - analytics,
 - runtime organization configuration.

@@ -45,130 +45,43 @@ Example:
 
 ## Child Flow
 
-### Child Introduction
+### Introduction and levels
 
-Example:
+“Grab your dictionary” establishes that the physical book and its reference sections are required. Explain ten typed answers, no timer, a seven-answer passing threshold, and results only after submission. No name or login is needed.
 
-> # Grab Your Dictionary!
->
-> You'll need it for the challenges ahead.
->
-> We'll show you a few tricks for finding words, understanding definitions, and discovering new things.
->
-> **Start the Challenge**
+The level list shows:
 
-The copy should establish that the physical book is required.
+1. Level 1 – Codebreaker · Easy
+2. Level 2 – Code Cracker · Medium (unlocked after Level 1)
+3. Level 3 – Master Codebreaker · Hard (unlocked after Level 2)
 
-### Challenge Structure
+Completed levels remain available for retakes and viewing earned certificates. An unfinished quiz can be resumed from the level list. Starting or retaking a level explicitly creates a fresh attempt.
 
-Each screen should contain:
+### Question screen
 
-1. Mission/theme
-2. Progress
-3. Dictionary instruction
-4. Question
-5. Answer choices/action
-6. Feedback
-7. Next action
+Show level name, “Question 4 of 10,” a progress bar, category/topic, physical-dictionary reminder, question, and a labeled text input. Disable spelling suggestions and answer autocomplete. Keep normal text keyboards available for words and numbers.
 
-Example:
+Previous/Next controls preserve answers. Next requires a nonblank answer; previous navigation allows revisiting questions. Input, buttons, and links have visible keyboard focus. Feedback never exposes correctness during the attempt.
 
-```text
-MISSION: WORKING TOGETHER
+### Review before submission
 
-Challenge 4 of 8
+Show the ten questions and the child's answers, with a “Change answer” action for each. Submit only after all questions have a nonblank answer. This review contains no correct answers or score.
 
-Find COOPERATE in your dictionary.
+### Results
 
-Which meaning best describes people
-working toward the same goal?
+Show “You cracked # out of 10!” after submission. At 7/10 or higher, celebrate level completion, link to the printable certificate, and encourage the next level. Lower scores encourage another attempt with a new question set. All results allow retakes. Previously unlocked levels stay unlocked even after a lower retake score.
 
-[ Working together ]
+Below the primary actions, list missed questions with the child's answer and the primary correct answer. Avoid punitive language. A perfect score receives a brief learning encouragement.
 
-[ Refusing to help ]
+### Certificate and prizes
 
-[ Moving quickly ]
+Passing **any level** earns a challenge certificate displaying the completed level, score, date, and short completion code. It has no name or contact fields. The child can print/save it, show an adult, or continue to the next level. Print CSS hides navigation and prints the certificate alone.
 
-[ Changing your mind ]
-```
+The parent/guardian section directs adults to the organizer for prize availability and fulfillment. No automatic redemption or guaranteed prize is implied. Codes are local completion references.
 
-### Correct Feedback
+### Tab session
 
-Example:
-
-> **Great find!**
->
-> Cooperate means working together.
->
-> Rotary members work together on projects in their own communities. Rotary Clubs can also work with clubs in other parts of the world.
->
-> **Next Challenge**
-
-The pattern is:
-
-```text
-Dictionary Meaning
-       ↓
-Why the Word Matters
-       ↓
-Rotary Example
-```
-
-Not every answer needs all three layers if that makes feedback too long.
-
-### Incorrect Feedback
-
-Avoid:
-
-- Wrong
-- Incorrect
-- Failed
-
-Prefer:
-
-> **Almost!**
->
-> Look at the definition one more time.
->
-> Hint: Which answer describes people working together?
->
-> **Try Again**
-
-### Progress
-
-Prefer:
-
-`Challenge 4 of 8`
-
-A simple progress bar may supplement it.
-
-Do not make score the primary motivator.
-
-### Completion
-
-Example:
-
-> # You Did It!
->
-> **Dictionary Explorer**
->
-> You used your dictionary to:
->
-> - Find words
-> - Use alphabetical order
-> - Read definitions
-> - Understand words in context
-> - Discover new ideas
->
-> A dictionary can help you whenever you find a word you don't know.
->
-> **One more challenge:** What new word will you look up today?
->
-> **Play Again**
-
-Optional small Rotary footer:
-
-> Your dictionary was provided through a Rotary literacy project.
+Questions already displayed, the current attempt, completed levels, and earned certificates survive reloads through sessionStorage. If storage is blocked, the activity continues in memory. Closing the tab ends the normal session; browser session restoration may restore it. Print or save certificates before closing. Browser navigation and direct URLs cannot reveal results before submission or create a certificate without a pass.
 
 ## Adult Flow
 
@@ -227,7 +140,7 @@ Avoid:
 - dense content,
 - timers,
 - score pressure,
-- required typing,
+- long typed responses,
 - organizational jargon,
 - acronyms,
 - fundraising language.
@@ -248,13 +161,13 @@ Avoid patronizing language.
 
 ## Branding
 
-Use the clean, contemporary Dictionary Detective Challenge identity: native system sans-serif typography, navy headings, blue actions, white surfaces, and a light-gray page background. The welcome headline is “Explore your dictionary.” followed by “Use your book to solve eight short challenges.” Both audience paths remain prominent, with a blue child action and a bordered white grown-up action.
+Use the clean, contemporary Dictionary Detective Challenge identity: native system sans-serif typography, navy headings, blue actions, white surfaces, and a light-gray page background. The welcome headline is “Explore your dictionary.” followed by “Use your book to crack three levels, one discovery at a time.” Both audience paths remain prominent, with a blue child action and a bordered white grown-up action.
 
 Use modest 8–12px corners, thin borders, minimal shadows, and stationary hover states. Avoid tilted interface decorations, emoji tiles, ribbons, oversized illustrations, and multicolor accents. A restrained photograph of a physical navy dictionary accompanies the landing-page heading: beside the copy on desktop and as a compact image below it on phones. Keep the shared wordmark upright and separate the header and content with a quiet divider.
 
-Activity screens have a maximum width of 680px; welcome and grown-up screens expand to 1040px. Audience choices and adult information stack on phones and use two columns from 700px. Dictionary instructions appear in a blue-tinted inset above the question, with visible progress, clear answer selection, and encouraging feedback. Sponsor recognition uses the same typography and restrained dividers.
+Activity screens have a maximum width of 680px; welcome and grown-up screens expand to 1040px. Audience choices and adult information stack on phones and use two columns from 700px. Dictionary instructions appear in a blue-tinted inset above the question, with visible progress, a labeled typed answer, and encouraging results after submission. Sponsor recognition uses the same typography and restrained dividers.
 
-A responsive “Made possible by” section recognizes every configured sponsor below the audience choices and on the grown-up page. Each has an optional contained logo (or letter fallback), title, description, and descriptive learn-more link. Sponsor details stay out of the question screens. Prize offers from reference artwork are not product requirements. See [sponsor setup](SPONSORS.md).
+A responsive “Made possible by” section recognizes every configured sponsor below the audience choices and on the grown-up page. Each has an optional contained logo (or letter fallback), title, description, and descriptive learn-more link. Sponsor details stay out of the question screens. Certificates connect to organizer-managed prize arrangements through the grown-up path. See [sponsor setup](SPONSORS.md).
 
 However, the quiz UI should keep focus on:
 
@@ -288,8 +201,9 @@ Do not build a full theming system merely to enforce it.
 Home
  ├── Kid
  │    ├── Intro
- │    ├── Challenge
- │    └── Completion
+ │    ├── Levels
+ │    ├── Challenge → Review → Results
+ │    └── Certificate
  │
  └── Grown-up
       ├── Why This Dictionary
@@ -314,7 +228,7 @@ At minimum:
 - no timed responses,
 - no autoplay audio.
 
-## Visual refresh feature
+## Visual presentation
 
 ### Feature
 
@@ -336,8 +250,8 @@ As a child or adult visiting on a phone, I can quickly understand the experience
 
 - All public screens and feedback states fit 320, 390, 768, and 1280px widths without horizontal overflow.
 - Body text is 16–18px at default zoom; controls have at least 44px touch targets and visible keyboard focus.
-- Both audience paths, all eight questions, retry, progress, final acknowledgement, completion, replay, and browser navigation work.
-- Selected answers expose an accessible pressed state and visible marker; feedback retains status/alert semantics and text cues.
+- Both audience paths, all three levels, ten-question attempts, review, submission, retakes, certificates, and browser navigation work.
+- Typed answers have visible labels and focus; screen changes focus the main content, and results use explicit text cues.
 - Text and controls have accessible contrast; layouts remain usable at 200% zoom and with reduced motion.
 - One or multiple sponsors, long text, missing logos, and embedded logos remain readable and contained.
 - Existing tests and the static build pass; representative phone and desktop screenshots are captured for review.
