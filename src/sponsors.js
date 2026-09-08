@@ -53,3 +53,16 @@ export function renderSponsors(config, { compact = false, heading = 'Made possib
     </article>`).join('')}</div>
   </section>`;
 }
+
+export function renderSponsorNames(config, { heading = 'Made possible by' } = {}) {
+  const { sponsors } = validateSponsorConfig(config);
+  return `<section class="certificate-sponsors" aria-labelledby="certificate-sponsors-title">
+    <h2 id="certificate-sponsors-title">${escapeHtml(heading)}</h2>
+    <div class="certificate-sponsor-grid">${sponsors.map((sponsor) => `<div class="certificate-sponsor">
+      ${sponsor.logo
+        ? `<img class="sponsor-logo" src="${escapeHtml(sponsor.logo)}" alt="" width="160" height="80" />`
+        : `<span class="sponsor-letter" aria-hidden="true">${escapeHtml(Array.from(sponsor.title)[0])}</span>`}
+      <strong>${escapeHtml(sponsor.title)}</strong>
+    </div>`).join('')}</div>
+  </section>`;
+}

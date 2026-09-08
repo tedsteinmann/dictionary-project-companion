@@ -1,5 +1,5 @@
 import { sponsorConfig } from './content/sponsors.js';
-import { escapeHtml, renderSponsors } from './sponsors.js';
+import { escapeHtml, renderSponsorNames, renderSponsors } from './sponsors.js';
 import { questions } from './content/questions.js';
 import { renderAnswerInput, readAnswer } from './components/answer-input.js';
 import { dictionaryHelp } from './components/dictionary-help.js';
@@ -65,14 +65,8 @@ function intro() {
     ${button('← Back', 'home', 'text-button')}
     <p class="kicker">Before you begin</p>
     <h1 id="intro-title">Grab your dictionary.</h1>
-    <p class="lede">You’ll need the physical book, including its reference sections, for the challenges ahead.</p>
-    <ol class="feature-list">
-      <li>Start with Find It. Learn to use guide words, find entries, and read definitions.</li>
-      <li>Use your dictionary to answer 10 questions. Most answers are choices to tap; a few are short answers to type.</li>
-      <li>Submit your quiz to see your results. Crack ${PASSING_SCORE} out of 10 to earn a certificate and unlock the next stage.</li>
-    </ol>
-    <p class="note">Take your time. You can change answers before submitting and try any unlocked stage again.</p>
-    <p class="progress-copy">No name or login needed. Your progress stays in this browser tab for this session.</p>
+    <p class="lede">Use your physical book to answer 10 questions. Crack ${PASSING_SCORE} to earn a certificate and unlock the next stage.</p>
+    <p class="progress-copy">Take your time—you can change answers before submitting.</p>
     ${button('Choose your stage →', 'levels', 'button button-primary')}
   </section>`);
 }
@@ -117,8 +111,8 @@ function challenge() {
     <form id="answer-form">
       ${renderAnswerInput(question, attempt.answers[attempt.index], choicesFor(attempt, question))}
       <div class="quiz-actions">
-        ${attempt.index > 0 ? '<button type="button" class="button" data-action="previous">← Previous</button>' : ''}
-        <button type="submit" class="button button-primary">${current === QUESTIONS_PER_ATTEMPT ? 'Review answers →' : 'Next question →'}</button>
+        <button type="submit" class="button button-primary">${current === QUESTIONS_PER_ATTEMPT ? 'Submit answer and review →' : 'Submit answer →'}</button>
+        ${attempt.index > 0 ? '<a href="#challenge" class="text-button previous-link" data-action="previous">← Previous question</a>' : ''}
       </div>
     </form>
     ${button('Back to stages', 'levels', 'text-button return-link')}
@@ -179,7 +173,7 @@ function certificate() {
       <p>Completed <time datetime="${earned.date}">${earned.date}</time></p>
       <p>Completion code<br /><strong class="completion-code">${earned.code}</strong></p>
       <p>Show this certificate to a parent, guardian, teacher, or librarian. A parent or guardian can ask the organizer about any available prize and how to claim it.</p>
-      <p class="progress-copy">Supported by ${sponsorConfig.sponsors.map((item) => escapeHtml(item.title)).join(' · ')}</p>
+      ${renderSponsorNames(sponsorConfig)}
     </div>
     <div class="quiz-actions no-print">
       <button class="button button-primary" data-action="print">Print or save certificate</button>
@@ -301,6 +295,7 @@ app.addEventListener('click', (event) => {
     return navigate('challenge');
   }
   if (event.target.closest('[data-action="previous"]')) {
+    event.preventDefault();
     updateSession(moveToQuestion(session, session.attempt.index - 1));
     return navigate('challenge', false);
   }

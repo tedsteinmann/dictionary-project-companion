@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync, spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { validateSponsorConfig, renderSponsors } from '../src/sponsors.js';
+import { validateSponsorConfig, renderSponsorNames, renderSponsors } from '../src/sponsors.js';
 import { sponsorConfig } from '../src/content/sponsors.js';
 
 const sponsor = { title: 'Local club', description: 'Helping readers.', url: 'https://example.org', logo: null };
@@ -46,6 +46,14 @@ describe('sponsor configuration and rendering', () => {
     assert.match(html, /class="sponsor-logo"/);
     assert.match(html, /alt="" width="160" height="80"/);
     assert.match(html, /<h3>Local club<\/h3>/);
+  });
+
+  it('renders certificate sponsor names and logos without descriptions or links', () => {
+    const html = renderSponsorNames({ sponsors: [{ ...sponsor, logo: `data:image/png;base64,${png}` }] });
+    assert.match(html, /class="certificate-sponsors"/);
+    assert.match(html, /class="sponsor-logo"/);
+    assert.match(html, />Local club</);
+    assert.doesNotMatch(html, /Helping readers|<a /);
   });
 });
 
