@@ -45,23 +45,25 @@ Example:
 
 ## Child Flow
 
-### Introduction and levels
+### Introduction and challenge stages
 
 “Grab your dictionary” establishes that the physical book and its reference sections are required. Explain ten questions with mostly selectable answers, no timer, a seven-answer passing threshold, and results only after submission. No name or login is needed.
 
-The level list shows:
+The challenge list shows:
 
-1. Level 1 – Codebreaker · Easy
-2. Level 2 – Code Cracker · Medium (unlocked after Level 1)
-3. Level 3 – Master Codebreaker · Hard (unlocked after Level 2)
+1. **Find It** — learn how to navigate the dictionary and locate information.
+2. **Figure It Out** — use meanings, context, entry details, and reference sections to interpret what you find; unlocked after Find It.
+3. **Discover More** — combine dictionary skills more independently across a broader mix of searches; unlocked after Figure It Out.
 
-Completed levels remain available for retakes and viewing earned certificates. An unfinished quiz can be resumed from the level list. Starting or retaking a level explicitly creates a fresh attempt.
+The interface should avoid presenting Easy, Medium, or Hard as child-facing rank labels. Those may remain internal question metadata. The progression is about increasing independence with the book, not about judging the child.
+
+Completed stages remain available for retakes and viewing earned certificates. An unfinished quiz can be resumed from the challenge list. Starting or retaking a stage explicitly creates a fresh attempt.
 
 ### Question screen
 
-Level 1 starts with six guided lessons, followed by four simple book hunts. Its answer mix is eight selectable/two typed; later levels are six selectable/four typed. The level cards explain what to expect.
+**Find It** starts with six guided lessons, followed by four simple book hunts. Its answer mix is eight selectable/two typed; later stages are six selectable/four typed. The stage cards explain what the child will practice rather than emphasizing difficulty.
 
-Show level name, “Question 4 of 10,” a progress bar, category/topic, physical-dictionary instruction, an expandable dictionary tip, the question, and a reusable answer component. Multiple-choice and yes/no use native radio groups with large touch labels; typed questions use a labeled text input. Disable spelling suggestions and answer autocomplete. Keep normal text keyboards available for words and numbers.
+Show stage name, “Question 4 of 10,” a progress bar, category/topic, physical-dictionary instruction, an expandable dictionary tip, the question, and a reusable answer component. Multiple-choice and yes/no use native radio groups with large touch labels; typed questions use a labeled text input. Disable spelling suggestions and answer autocomplete. Keep normal text keyboards available for words and numbers.
 
 Previous/Next controls preserve answers. Next requires a selected or nonblank typed answer; previous navigation allows revisiting questions. Input, radio groups, buttons, links, and expandable tips have visible keyboard focus. Choice selection stays on the current question and exposes native checked state. Options shuffle once at attempt creation and retain that order through review/reload. Local SVGs supplement the book, choice, typing, and discovery labels; a guide-word page example includes visible text and a caption. Feedback never exposes correctness during the attempt.
 
@@ -71,19 +73,21 @@ Show the ten questions and the child's answers, with a “Change answer” actio
 
 ### Results
 
-Show “You cracked # out of 10!” after submission. At 7/10 or higher, celebrate level completion, link to the printable certificate, and encourage the next level. Lower scores encourage another attempt with a new question set. All results allow retakes. Previously unlocked levels stay unlocked even after a lower retake score.
+Show a clear score after submission. At 7/10 or higher, celebrate stage completion, link to the printable certificate, and encourage the next stage. Lower scores encourage another attempt with a new question set. All results allow retakes. Previously unlocked stages stay unlocked even after a lower retake score.
+
+Results should reinforce the learning progression. Useful language focuses on finding, figuring out, and discovering rather than game rank. The child should leave with the idea that being resourceful means knowing how to find and understand an answer, not already knowing everything.
 
 Below the primary actions, list missed questions with the child's answer and the primary correct answer. Avoid punitive language. An expandable learning review offers explanations for all ten questions, including correct responses and relevant service context. An optional, unscored “Your own discovery” activity restores the original invitation to find a new word in the book.
 
 ### Certificate and prizes
 
-Passing **any level** earns a challenge certificate displaying the completed level, score, date, and short completion code. It has no name or contact fields. The child can print/save it, show an adult, or continue to the next level. Print CSS hides navigation and prints the certificate alone.
+Passing **any stage** earns a challenge certificate displaying the completed stage, score, date, and short completion code. It has no name or contact fields. The child can print/save it, show an adult, or continue to the next stage. Print CSS hides navigation and prints the certificate alone.
 
 The parent/guardian section directs adults to the organizer for prize availability and fulfillment. No automatic redemption or guaranteed prize is implied. Codes are local completion references.
 
 ### Tab session
 
-Questions already displayed, the current attempt, completed levels, and earned certificates survive reloads through sessionStorage. If storage is blocked, the activity continues in memory. Closing the tab ends the normal session; browser session restoration may restore it. Print or save certificates before closing. Browser navigation and direct URLs cannot reveal results before submission or create a certificate without a pass.
+Questions already displayed, the current attempt, completed stages, and earned certificates survive reloads through sessionStorage. If storage is blocked, the activity continues in memory. Closing the tab ends the normal session; browser session restoration may restore it. Print or save certificates before closing. Browser navigation and direct URLs cannot reveal results before submission or create a certificate without a pass.
 
 ## Adult Flow
 
@@ -145,7 +149,8 @@ Avoid:
 - long typed responses,
 - organizational jargon,
 - acronyms,
-- fundraising language.
+- fundraising language,
+- rank-oriented labels such as “master,” “beginner,” or “hard mode.”
 
 ## Tone
 
@@ -153,17 +158,19 @@ Appropriate:
 
 > Great find!
 
-> Nice detective work.
+> Nice work figuring that out.
 
 > Check the guide words at the top of the page.
 
 > Your dictionary can help you figure that out.
 
+> See what else you can discover.
+
 Avoid patronizing language.
 
 ## Branding
 
-Use the clean, contemporary Dictionary Detective Challenge identity: native system sans-serif typography, navy headings, blue actions, white surfaces, and a light-gray page background. The welcome headline is “Explore your dictionary.” followed by “Use your book to crack three levels, one discovery at a time.” Both audience paths remain prominent, with a blue child action and a bordered white grown-up action.
+Use the clean, contemporary Dictionary Detective Challenge identity: native system sans-serif typography, navy headings, blue actions, white surfaces, and a light-gray page background. The welcome headline is “Explore your dictionary.” followed by copy that introduces the three-stage progression without framing it as Easy/Medium/Hard. Both audience paths remain prominent, with a blue child action and a bordered white grown-up action.
 
 Use modest 8–12px corners, thin borders, minimal shadows, and stationary hover states. Avoid tilted interface decorations, emoji tiles, ribbons, oversized illustrations, and multicolor accents. A restrained photograph of a physical navy dictionary accompanies the landing-page heading: beside the copy on desktop and as a compact image below it on phones. Keep the shared wordmark upright and separate the header and content with a quiet divider.
 
@@ -203,7 +210,7 @@ Do not build a full theming system merely to enforce it.
 Home
  ├── Kid
  │    ├── Intro
- │    ├── Levels
+ │    ├── Find It / Figure It Out / Discover More
  │    ├── Challenge → Review → Results
  │    └── Certificate
  │
@@ -252,7 +259,7 @@ As a child or adult visiting on a phone, I can quickly understand the experience
 
 - All public screens and feedback states fit 320, 390, 768, and 1280px widths without horizontal overflow.
 - Body text is 16–18px at default zoom; controls have at least 44px touch targets and visible keyboard focus.
-- Both audience paths, all three levels, ten-question attempts, review, submission, retakes, certificates, and browser navigation work.
+- Both audience paths, all three stages, ten-question attempts, review, submission, retakes, certificates, and browser navigation work.
 - Answer components have visible labels and focus; screen changes focus the main content, and results use explicit text cues.
 - Text and controls have accessible contrast; layouts remain usable at 200% zoom and with reduced motion.
 - One or multiple sponsors, long text, missing logos, and embedded logos remain readable and contained.
@@ -262,7 +269,6 @@ As a child or adult visiting on a phone, I can quickly understand the experience
 
 Framework adoption, external fonts, backend services, tracking, theme configuration, and redesign of the local sponsor editor. The authorized mixed-question changes are specified in [MIXED-QUESTIONS.md](MIXED-QUESTIONS.md).
 
-
 ### Historical visual-refresh validation
 
 - All 18 existing tests and the production build pass with the project’s three configured sponsors.
@@ -270,7 +276,6 @@ Framework adoption, external fonts, backend services, tracking, theme configurat
 - Sponsor checks covered the configured embedded logos, single/multiple sponsors, long text, missing-logo fallbacks, and the local editor at all four widths.
 - Palette contrast checks passed: normal text combinations exceed 4.5:1 and control boundaries meet 3:1. Selected-answer and feedback accessibility semantics were checked in the browser; spoken output with a screen reader was not manually tested.
 - Desktop and phone screenshots were reviewed for welcome, adult information, question feedback, and completion. No runtime dependencies or external font requests were added.
-
 
 ## Landing-page dictionary image and sponsor cutouts
 
