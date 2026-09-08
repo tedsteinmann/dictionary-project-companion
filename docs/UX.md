@@ -65,7 +65,7 @@ Completed stages remain available for retakes and viewing earned certificates. A
 
 Show stage name, “Question 4 of 10,” a progress bar, category/topic, physical-dictionary instruction, an expandable dictionary tip, the question, and a reusable answer component. Multiple-choice and yes/no use native radio groups with large touch labels; typed questions use a labeled text input. Disable spelling suggestions and answer autocomplete. Keep normal text keyboards available for words and numbers.
 
-Previous/Next controls preserve answers. Next requires a selected or nonblank typed answer; previous navigation allows revisiting questions. Input, radio groups, buttons, links, and expandable tips have visible keyboard focus. Choice selection stays on the current question and exposes native checked state. Options shuffle once at attempt creation and retain that order through review/reload. Local SVGs supplement the book, choice, typing, and discovery labels; a guide-word page example includes visible text and a caption. Feedback never exposes correctness during the attempt.
+Submitting an answer and going back preserve answers. “Submit answer” is the only button in the question form; previous navigation is an actual secondary back link below it on phones. Submission requires a selected or nonblank typed answer. Input, radio groups, buttons, links, and expandable tips have visible keyboard focus. Choice selection stays on the current question and exposes native checked state. Options shuffle once at attempt creation and retain that order through review/reload. Local SVGs supplement the book, choice, typing, and discovery labels; a guide-word page example includes visible text and a caption. Feedback never exposes correctness during the attempt.
 
 ### Review before submission
 
@@ -81,7 +81,7 @@ Below the primary actions, list missed questions with the child's answer and the
 
 ### Certificate and prizes
 
-Passing **any stage** earns a challenge certificate displaying the completed stage, score, date, and short completion code. It has no name or contact fields. The child can print/save it, show an adult, or continue to the next stage. Print CSS hides navigation and prints the certificate alone.
+Passing **any stage** earns a challenge certificate displaying the completed stage, score, date, short completion code, and each configured sponsor's name and logo. Sponsor descriptions and links stay off the certificate. It has no name or contact fields. The child can print/save it, show an adult, or continue to the next stage. Print CSS hides navigation and prints the certificate alone.
 
 The parent/guardian section directs adults to the organizer for prize availability and fulfillment. No automatic redemption or guaranteed prize is implied. Codes are local completion references.
 

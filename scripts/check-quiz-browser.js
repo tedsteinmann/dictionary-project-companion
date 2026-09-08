@@ -36,14 +36,14 @@ export default async function checkQuizBrowser(page) {
   await click('Start Find It');
   const firstIds = (await state()).attempt.questionIds;
   await noOverflow('question');
-  await click('Next question →');
+  await click('Submit answer →');
   assert((await state()).attempt.index === 0, 'An unanswered choice must not advance');
   const firstOptions = await page.getByRole('radio').evaluateAll((radios) => radios.map((r) => r.value));
   await page.getByRole('radio').first().focus();
   await page.getByRole('radio').first().press('Space');
   assert((await state()).attempt.index === 0, 'Choosing does not advance automatically');
-  await click('Next question →');
-  await click('← Previous');
+  await click('Submit answer →');
+  await click('← Previous question');
   assert(await page.getByRole('radio').first().isChecked(), 'Previous preserves selection');
   await page.reload();
   assert(await page.getByRole('radio').first().isChecked(), 'Reload preserves selection');
@@ -73,7 +73,7 @@ export default async function checkQuizBrowser(page) {
       await answer(page, question, index < score);
       await noOverflow(`question ${question.type}`);
       await noResults();
-      await click(index === 9 ? 'Review answers →' : 'Next question →');
+      await click(index === 9 ? 'Submit answer and review →' : 'Submit answer →');
     }
     await noResults();
     assert((await page.locator('.review-list li').count()) === 10, 'Review lists ten answers');
@@ -159,7 +159,7 @@ export default async function checkQuizBrowser(page) {
     const question = bank.find((q) => q.question === title);
     await answer(blockedStorage, question, true);
     // Keyboard submission works with either input format.
-    await blockedStorage.getByRole('button', { name: index === 9 ? 'Review answers →' : 'Next question →', exact: true }).focus();
+    await blockedStorage.getByRole('button', { name: index === 9 ? 'Submit answer and review →' : 'Submit answer →', exact: true }).focus();
     await blockedStorage.keyboard.press('Enter');
   }
   await blockedStorage.getByRole('button', { name: 'Submit quiz', exact: true }).click();
@@ -180,7 +180,7 @@ export default async function checkQuizBrowser(page) {
   assert(guideIndex >= 0, 'Guide-word lesson remains in the playable pool');
   for (let index = 0; index < guideIndex; index++) {
     await answer(guidePage, bank.find((q) => q.id === guideState.attempt.questionIds[index]), true);
-    await guidePage.getByRole('button', { name: 'Next question →', exact: true }).click();
+    await guidePage.getByRole('button', { name: 'Submit answer →', exact: true }).click();
   }
   await guidePage.setViewportSize({ width: 320, height: 720 });
   assert(await guidePage.locator('.guide-example').isVisible(), 'SVG guide-word example');

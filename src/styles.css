@@ -181,6 +181,8 @@ input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 #answer-form label { display: block; margin-bottom: var(--space-1); font-weight: 600; }
 #typed-answer { display: block; width: 100%; min-height: 52px; margin-bottom: var(--space-2); border: 1px solid var(--control-border); border-radius: var(--radius); padding: .75rem; color: var(--heading); background: var(--surface); }
 .quiz-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-4) 0; }
+.challenge .quiz-actions { align-items: center; }
+.previous-link { margin-left: var(--space-1); }
 .level-list { display: grid; gap: var(--space-3); padding: 0; list-style: none; margin: var(--space-4) 0; }
 .level-card { padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); }
 .level-card h2 { margin: 0 0 var(--space-3); }
@@ -191,9 +193,17 @@ input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .certificate { border: 3px double var(--blue); text-align: center; }
 .certificate .lede { color: var(--blue); font-weight: 600; }
 .certificate-score { font-size: 1.25rem; font-weight: 700; }
+.certificate-sponsors { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.certificate-sponsors h2 { margin: 0 0 var(--space-3); color: var(--muted); font-size: var(--small-size); font-weight: 600; }
+.certificate-sponsor-grid { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: var(--space-4) var(--space-5); }
+.certificate-sponsor { display: grid; justify-items: center; max-width: 180px; color: var(--heading); font-size: var(--small-size); line-height: 1.35; }
+.certificate-sponsor .sponsor-logo { object-position: center; margin-bottom: var(--space-2); }
+.certificate-sponsor .sponsor-letter { margin-bottom: var(--space-2); }
 .completion-code { display: inline-block; margin: var(--space-2) 0; color: var(--heading); font-family: ui-monospace, monospace; font-size: clamp(1rem, 4vw, 1.4rem); letter-spacing: .04em; }
 @media (max-width: 499px) {
   .quiz-actions > .button { width: 100%; }
+  .challenge .quiz-actions { flex-direction: column; align-items: stretch; }
+  .challenge .previous-link { order: 2; margin: 0; }
 }
 @media print {
   @page { margin: 16mm; }
