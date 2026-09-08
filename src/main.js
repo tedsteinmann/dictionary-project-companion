@@ -40,13 +40,12 @@ const button = (label, route, className = 'button') =>
 
 function layout(content, route, wide = false) {
   const kidRoute = session.attempt ? 'levels' : 'intro';
-  const kidRoutes = ['intro', 'levels', 'challenge', 'review', 'results', 'certificate'];
-  const kidCurrent = kidRoutes.includes(route) ? ' aria-current="page"' : '';
+  const kidCurrent = route === kidRoute ? ' aria-current="page"' : '';
   const adultCurrent = route === 'adult' ? ' aria-current="page"' : '';
   return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand"><a class="wordmark" href="./" aria-label="Dictionary Detective Challenge home">Dictionary Detective<span>Challenge</span></a><span class="brand-tag">Small book. Big discoveries.</span><nav class="primary-nav" aria-label="Primary"><button data-route="${kidRoute}"${kidCurrent}>Kid Challenge</button><button data-route="adult"${adultCurrent}>For Grown-ups</button></nav></header>${content}<footer>Discover more with your dictionary.</footer></div>`;
 }
 
-function welcome() {
+function welcome(route) {
   return layout(`<section class="welcome" aria-labelledby="welcome-title">
     <div class="hero">
       <div class="hero-copy">
@@ -61,10 +60,10 @@ function welcome() {
       ${button('<span><strong>I’m a Grown-up</strong><span>Learn about the project and its sponsors.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'adult', 'button audience-choice adult-choice')}
     </div>
     <p class="welcome-note">Your dictionary is all you need. Take your time.</p>
-  </section>${renderSponsors(sponsorConfig, { compact: true })}`, 'home', true);
+  </section>${renderSponsors(sponsorConfig, { compact: true })}`, route, true);
 }
 
-function intro() {
+function intro(route) {
   return layout(`<section class="card" aria-labelledby="intro-title">
     ${button('← Back', 'home', 'text-button')}
     <p class="kicker">Before you begin</p>
@@ -72,10 +71,10 @@ function intro() {
     <p class="lede">Use your physical book to answer 10 questions. Crack ${PASSING_SCORE} to earn a certificate and unlock the next stage.</p>
     <p class="progress-copy">Take your time—you can change answers before submitting.</p>
     ${button('Choose your stage →', 'levels', 'button button-primary')}
-  </section>`, 'intro');
+  </section>`, route);
 }
 
-function levelPicker() {
+function levelPicker(route) {
   return layout(`<section class="card" aria-labelledby="levels-title">
     ${button('← Back', 'intro', 'text-button')}
     <p class="kicker">Your dictionary adventure</p>
@@ -97,10 +96,10 @@ function levelPicker() {
       </li>`;
     }).join('')}</ol>
     <p class="progress-copy">Retakes bring a new mix of questions. Some discoveries may appear again.</p>
-  </section>`, 'levels');
+  </section>`, route);
 }
 
-function challenge() {
+function challenge(route) {
   const { attempt } = session;
   const level = currentLevel();
   const question = questions.find((item) => item.id === attempt.questionIds[attempt.index]);
@@ -120,10 +119,10 @@ function challenge() {
       </div>
     </form>
     ${button('Back to stages', 'levels', 'text-button return-link')}
-  </section>`, 'challenge');
+  </section>`, route);
 }
 
-function review() {
+function review(route) {
   const { attempt } = session;
   const answered = attempt.answers.filter((answer) => answer.trim()).length;
   return layout(`<section class="card" aria-labelledby="review-title">
@@ -136,10 +135,10 @@ function review() {
     }).join('')}</ol>
     ${answered === QUESTIONS_PER_ATTEMPT ? '<button class="button button-primary" data-action="submit">Submit quiz</button>' : '<p class="note">Answer each question before submitting your quiz.</p>'}
     ${button('Back to quiz', 'challenge', 'text-button return-link')}
-  </section>`, 'review');
+  </section>`, route);
 }
 
-function results() {
+function results(route) {
   const level = currentLevel();
   const result = gradeAttempt(session.attempt, questions);
   const missed = result.details.filter((item) => !item.correct);
@@ -161,10 +160,10 @@ function results() {
     ${discoveryActivity()}
     <p class="note">Keep discovering with your dictionary. Rotary volunteers support learning in local schools and work together on projects such as clean water and community health around the world.</p>
     ${button('Choose a stage', 'levels', 'text-button return-link')}
-  </section>`, 'results');
+  </section>`, route);
 }
 
-function certificate() {
+function certificate(route) {
   const earned = selectedCertificate();
   const level = levels.find((item) => item.id === earned.levelId);
   return layout(`<section aria-labelledby="certificate-title">
@@ -185,10 +184,10 @@ function certificate() {
       ${button('Choose a stage', 'levels', 'button')}
       ${button('For parents and guardians', 'adult', 'text-button')}
     </div>
-  </section>`, 'certificate');
+  </section>`, route);
 }
 
-function adult() {
+function adult(route) {
   return layout(`<section class="card adult" aria-labelledby="adult-title">
     <button class="text-button" data-route="home">← Back</button>
     <p class="kicker">For grown-ups</p>
@@ -232,7 +231,7 @@ function adult() {
     ${renderSponsors(adultSponsorConfig, { heading: 'Meet the clubs behind the Dictionary Project', linkLabel: 'Learn more • Find a club • Visit a meeting' })}
     <p class="closing-invitation">Come meet some people. Find your place. Make something happen.</p>
     ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
-  </section>`, 'adult', true);
+  </section>`, route, true);
 }
 
 const screens = { home: welcome, intro, levels: levelPicker, challenge, review, results, certificate, adult };
@@ -248,7 +247,7 @@ function navigate(route, push = true, focus = true) {
   const url = safeRoute === 'home' ? './' : `#${safeRoute}`;
   if (push && location.hash !== `#${safeRoute}`) history.pushState({ route: safeRoute }, '', url);
   else if (safeRoute !== route) history.replaceState({ route: safeRoute }, '', url);
-  app.innerHTML = screens[safeRoute]();
+  app.innerHTML = screens[safeRoute](safeRoute);
   if (focus) {
     app.focus();
     window.scrollTo(0, 0);
