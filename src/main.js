@@ -234,10 +234,23 @@ function adult(route) {
   </section>`, route, true);
 }
 
-const screens = { home: welcome, intro, levels: levelPicker, challenge, review, results, certificate, adult };
+const screenRoutes = new Set(['home', 'intro', 'levels', 'challenge', 'review', 'results', 'certificate', 'adult']);
+
+function renderScreen(route) {
+  switch (route) {
+    case 'intro': return intro(route);
+    case 'levels': return levelPicker(route);
+    case 'challenge': return challenge(route);
+    case 'review': return review(route);
+    case 'results': return results(route);
+    case 'certificate': return certificate(route);
+    case 'adult': return adult(route);
+    default: return welcome(route);
+  }
+}
 
 function navigate(route, push = true, focus = true) {
-  let safeRoute = screens[route] ? route : 'home';
+  let safeRoute = screenRoutes.has(route) ? route : 'home';
   if (['challenge', 'review', 'results'].includes(safeRoute)) {
     if (!session.attempt) safeRoute = 'levels';
     else if (session.attempt.submitted) safeRoute = 'results';
@@ -247,7 +260,6 @@ function navigate(route, push = true, focus = true) {
   const url = safeRoute === 'home' ? './' : `#${safeRoute}`;
   if (push && location.hash !== `#${safeRoute}`) history.pushState({ route: safeRoute }, '', url);
   else if (safeRoute !== route) history.replaceState({ route: safeRoute }, '', url);
-  const renderScreen = screens[safeRoute];
   app.innerHTML = renderScreen(safeRoute);
   if (focus) {
     app.focus();
