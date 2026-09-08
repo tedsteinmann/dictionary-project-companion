@@ -10,6 +10,8 @@ export default async function checkQuizBrowser(page) {
   await page.goto(base);
   await page.evaluate(() => sessionStorage.clear());
   await page.reload();
+  assert(await page.getByRole('link', { name: 'Dictionary Challenge home' }).isVisible(), 'Simple project name appears in the header');
+  assert((await page.locator('.primary-nav').count()) === 0, 'Audience choices are not persistent header navigation');
   const bank = await page.evaluate(async () => (await import('/src/content/questions.js')).questions);
   const state = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
   const click = (name) => page.getByRole('button', { name, exact: true }).click();
@@ -35,6 +37,14 @@ export default async function checkQuizBrowser(page) {
   await noOverflow('levels');
   await click('Start Find It');
   const firstIds = (await state()).attempt.questionIds;
+  assert(await page.locator('.game-toolbar').isVisible(), 'Child activity uses a game toolbar');
+  assert((await page.locator('.game-status').innerText()).includes('Find It\nQuestion 1 of 10'), 'Toolbar shows stage and question progress');
+  const stagesControl = page.getByRole('button', { name: '← Stages' });
+  assert(await stagesControl.evaluate((el) => el.getBoundingClientRect().height >= 44), 'Toolbar control has a large target');
+  await stagesControl.focus();
+  await page.keyboard.press('Enter');
+  assert(await page.getByText('You have a quiz in progress.').isVisible(), 'Keyboard returns to an in-progress child flow');
+  await click('Continue your quiz →');
   await noOverflow('question');
   await click('Submit answer →');
   assert((await state()).attempt.index === 0, 'An unanswered choice must not advance');

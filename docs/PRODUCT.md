@@ -2,7 +2,7 @@
 
 ## Working Name
 
-**Dictionary Detective Challenge**
+**Dictionary Challenge**
 
 The name is provisional.
 
