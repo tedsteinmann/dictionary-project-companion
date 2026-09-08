@@ -133,6 +133,11 @@ describe('exact typed answer checking with formatting normalization', () => {
 });
 
 describe('level progression and submission', () => {
+  it('uses capability-based stage names while retaining internal difficulty selection', () => {
+    assert.deepEqual(levels.map(({ name }) => name), ['Find It', 'Figure It Out', 'Discover More']);
+    assert.deepEqual(levels.map(({ difficulty }) => difficulty), ['Easy', 'Medium', 'Hard']);
+  });
+
   it('starts at Level 1, prevents skipping locked levels, and tracks only displayed questions', () => {
     const initial = createSession();
     assert.equal(canStartLevel(initial, 1), true);
@@ -176,6 +181,8 @@ describe('level progression and submission', () => {
   it('7/10 earns a certificate at every level and unlocks the next; submission is idempotent', () => {
     let session = createSession();
     for (const level of levels) {
+      assert.equal(canStartLevel(session, level.id), true, `${level.name} should be unlocked in sequence`);
+      if (level.id < levels.length) assert.equal(canStartLevel(session, level.id + 1), false, `${levels[level.id].name} should still be locked`);
       session = answerAttempt(startAttempt(session, questions, level.id), 7);
       session = submitAttempt(session, questions);
       assert.equal(gradeAttempt(session.attempt, questions).score, 7);
@@ -183,6 +190,7 @@ describe('level progression and submission', () => {
       assert.ok(session.passedLevels.includes(level.id));
       assert.equal(session.attempt.certificate.levelId, level.id);
       assert.equal(session.certificates.length, level.id);
+      if (level.id < levels.length) assert.equal(canStartLevel(session, level.id + 1), true, `${levels[level.id].name} should unlock after passing`);
       assert.strictEqual(submitAttempt(session, questions), session);
       assert.strictEqual(saveAnswer(session, 'changed'), session);
       assert.strictEqual(moveToQuestion(session, 0), session);

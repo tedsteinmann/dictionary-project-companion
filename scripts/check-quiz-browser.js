@@ -23,10 +23,17 @@ export default async function checkQuizBrowser(page) {
   await noOverflow('adult');
   await click('Explore the Kid Challenge');
   assert((await page.locator('main').innerText()).includes('physical book'), 'Dictionary requirement');
-  await click('Choose your level →');
-  assert((await page.locator('[data-level]').count()) === 1, 'Only Level 1 initially available');
+  await click('Choose your stage →');
+  assert((await page.locator('[data-level]').count()) === 1, 'Only Find It initially available');
+  const stagePickerText = await page.locator('main').innerText();
+  assert(stagePickerText.includes('Find It'), 'Initial child screen names Find It');
+  assert(stagePickerText.includes('Figure It Out'), 'Initial child screen names Figure It Out');
+  assert(stagePickerText.includes('Discover More'), 'Initial child screen names Discover More');
+  assert(stagePickerText.includes('Complete Find It to unlock this stage.'), 'Figure It Out starts locked');
+  assert(stagePickerText.includes('Complete Figure It Out to unlock this stage.'), 'Discover More starts locked');
+  assert(!/Codebreaker|Code Cracker|Master Codebreaker/.test(stagePickerText), 'Old stage names are absent');
   await noOverflow('levels');
-  await click('Start Codebreaker');
+  await click('Start Find It');
   const firstIds = (await state()).attempt.questionIds;
   await noOverflow('question');
   await click('Next question →');
@@ -92,12 +99,13 @@ export default async function checkQuizBrowser(page) {
   await finish(6);
   assert((await page.locator('[data-certificate]').count()) === 0, 'No certificate below passing score');
   assert((await state()).passedLevels.length === 0, 'Failed attempt does not unlock');
-  await click('Try Codebreaker again');
+  await click('Try Find It again');
   const retryIds = (await state()).attempt.questionIds;
   assert(JSON.stringify([...firstIds].sort()) !== JSON.stringify([...retryIds].sort()), 'Retake changes question set');
   await finish(7);
   await click('View and print certificate');
-  assert(await page.getByRole('heading', { name: 'Certificate of completion' }).isVisible(), 'Level 1 earns certificate');
+  assert(await page.getByRole('heading', { name: 'Certificate of completion' }).isVisible(), 'Find It earns certificate');
+  assert((await page.locator('.certificate').innerText()).includes('Stage 1 · Find It'), 'Certificate names Find It');
   const firstCode = await page.locator('.completion-code').innerText();
   await page.reload();
   assert(await page.locator('.completion-code').innerText() === firstCode, 'Certificate stable across reload');
@@ -113,20 +121,20 @@ export default async function checkQuizBrowser(page) {
   await page.evaluate(() => { window.print = () => { window.__printCalled = true; }; });
   await click('Print or save certificate');
   assert(await page.evaluate(() => window.__printCalled), 'Print button invokes printing');
-  await click('Continue to Code Cracker →');
+  await click('Continue to Figure It Out →');
   await page.setViewportSize({ width: 390, height: 844 });
   await finish(8);
-  await click('Try Level 3: Master Codebreaker →');
+  await click('Start Discover More →');
   await finish(10);
-  assert((await page.locator('main').innerText()).includes('You completed all three levels'), 'All levels complete');
+  assert((await page.locator('main').innerText()).includes('You completed all three stages'), 'All stages complete');
   await click('View and print certificate');
   assert((await page.locator('[data-level]').count()) === 0, 'No nonexistent fourth level');
-  await click('Choose a level');
+  await click('Choose a stage');
   assert((await page.locator('[data-certificate]').count()) === 3, 'Earlier certificates retained');
-  await click('View Codebreaker certificate');
+  await click('View Find It certificate');
   assert(await page.locator('.completion-code').innerText() === firstCode, 'Earlier certificate remains available');
-  await click('Choose a level');
-  await click('Retake Codebreaker');
+  await click('Choose a stage');
+  await click('Retake Find It');
   await page.goBack();
   await page.goForward();
   await noResults();
@@ -135,9 +143,9 @@ export default async function checkQuizBrowser(page) {
   // A separate page has its own tab session. Direct routes cannot reveal results.
   const isolated = await page.context().newPage();
   await isolated.goto(`${base}/#certificate`);
-  assert(await isolated.getByRole('heading', { name: 'Three levels to crack.' }).isVisible(), 'Direct certificate guarded');
+  assert(await isolated.getByRole('heading', { name: 'Three stages to explore.' }).isVisible(), 'Direct certificate guarded');
   await isolated.goto(`${base}/#results`);
-  assert(await isolated.getByRole('heading', { name: 'Three levels to crack.' }).isVisible(), 'Direct results guarded');
+  assert(await isolated.getByRole('heading', { name: 'Three stages to explore.' }).isVisible(), 'Direct results guarded');
   await isolated.close();
 
   const blockedStorage = await page.context().newPage();
@@ -145,7 +153,7 @@ export default async function checkQuizBrowser(page) {
     Object.defineProperty(window, 'sessionStorage', { get() { throw Error('Storage disabled'); } });
   });
   await blockedStorage.goto(`${base}/#levels`);
-  await blockedStorage.getByRole('button', { name: 'Start Codebreaker', exact: true }).click();
+  await blockedStorage.getByRole('button', { name: 'Start Find It', exact: true }).click();
   for (let index = 0; index < 10; index++) {
     const title = await blockedStorage.locator('#question-title').innerText();
     const question = bank.find((q) => q.question === title);
@@ -164,10 +172,10 @@ export default async function checkQuizBrowser(page) {
   let guideIndex = -1;
   let guideState;
   for (let attempt = 0; attempt < 20 && guideIndex < 0; attempt++) {
-    await guidePage.getByRole('button', { name: 'Start Codebreaker', exact: true }).click();
+    await guidePage.getByRole('button', { name: 'Start Find It', exact: true }).click();
     guideState = await guidePage.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
     guideIndex = guideState.attempt.questionIds.indexOf('community-guide-words');
-    if (guideIndex < 0) await guidePage.getByRole('button', { name: 'Back to levels', exact: true }).click();
+    if (guideIndex < 0) await guidePage.getByRole('button', { name: 'Back to stages', exact: true }).click();
   }
   assert(guideIndex >= 0, 'Guide-word lesson remains in the playable pool');
   for (let index = 0; index < guideIndex; index++) {
@@ -183,5 +191,5 @@ export default async function checkQuizBrowser(page) {
   await guidePage.close();
   assert(formats.size === 3, 'All three input formats exercised');
   assert(errors.length === 0, `Browser errors: ${errors.join(', ')}`);
-  return { passed: true, checks: 'Mixed input formats; original lessons; SVG guide words; teaching tips; child/adult paths; all levels; 6/7/8/10 scoring; answer editing/escaping; retakes; reload/history; certificates; print; route guards; 320–1280px layouts', firstCode };
+  return { passed: true, checks: 'Mixed input formats; original lessons; SVG guide words; teaching tips; child/adult paths; all stages; 6/7/8/10 scoring; answer editing/escaping; retakes; reload/history; certificates; print; route guards; 320–1280px layouts', firstCode };
 }
