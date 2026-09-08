@@ -273,7 +273,11 @@ Avoid patronizing language.
 
 ## Branding
 
-Use the flyer-inspired Dictionary Detective Challenge identity: bold navy and blue headings, yellow accents, colorful book spines, and blue kids/green grown-ups choices. The welcome headline is “Can you crack the dictionary?”
+Use the clean, contemporary Dictionary Detective Challenge identity: native system sans-serif typography, navy headings, blue actions, white surfaces, and a light-gray page background. The welcome headline is “Explore your dictionary.” followed by “Use your book to solve eight short challenges.” Both audience paths remain prominent, with a blue child action and a bordered white grown-up action.
+
+Use modest 8–12px corners, thin borders, minimal shadows, and stationary hover states. Avoid tilted interface decorations, emoji tiles, ribbons, oversized illustrations, and multicolor accents. A restrained photograph of a physical navy dictionary accompanies the landing-page heading: beside the copy on desktop and as a compact image below it on phones. Keep the shared wordmark upright and separate the header and content with a quiet divider.
+
+Activity screens have a maximum width of 680px; welcome and grown-up screens expand to 1040px. Audience choices and adult information stack on phones and use two columns from 700px. Dictionary instructions appear in a blue-tinted inset above the question, with visible progress, clear answer selection, and encouraging feedback. Sponsor recognition uses the same typography and restrained dividers.
 
 A responsive “Made possible by” section recognizes every configured sponsor below the audience choices and on the grown-up page. Each has an optional contained logo (or letter fallback), title, description, and descriptive learn-more link. Sponsor details stay out of the question screens. Prize offers from reference artwork are not product requirements. See [sponsor setup](SPONSORS.md).
 
@@ -334,3 +338,69 @@ At minimum:
 - screen-reader-friendly labels,
 - no timed responses,
 - no autoplay audio.
+
+## Visual refresh feature
+
+### Feature
+
+A consistent, clean presentation across welcome, child introduction, dictionary challenges, feedback, completion, and grown-up information.
+
+### User story
+
+As a child or adult visiting on a phone, I can quickly understand the experience and navigate a site that feels approachable and thoughtfully designed.
+
+### Implementation tasks
+
+- Consolidate the stylesheet around shared color, typography, spacing, and control styles, without adding dependencies or downloading fonts.
+- Simplify the welcome copy, header, and decorative elements; retain the Dictionary Detective Challenge name.
+- Give instructions, questions, answers, feedback, and next actions clear visual hierarchy.
+- Preserve the physical-dictionary requirement, structured question content, quiz mechanics, and sponsor configuration.
+- Check the local sponsor editor for compatibility with the shared stylesheet.
+
+### Acceptance criteria
+
+- All public screens and feedback states fit 320, 390, 768, and 1280px widths without horizontal overflow.
+- Body text is 16–18px at default zoom; controls have at least 44px touch targets and visible keyboard focus.
+- Both audience paths, all eight questions, retry, progress, final acknowledgement, completion, replay, and browser navigation work.
+- Selected answers expose an accessible pressed state and visible marker; feedback retains status/alert semantics and text cues.
+- Text and controls have accessible contrast; layouts remain usable at 200% zoom and with reduced motion.
+- One or multiple sponsors, long text, missing logos, and embedded logos remain readable and contained.
+- Existing tests and the static build pass; representative phone and desktop screenshots are captured for review.
+
+### Out of scope
+
+New quiz content or features, framework adoption, external fonts, backend services, tracking, theme configuration, and redesign of the local sponsor editor.
+
+
+### Validation performed
+
+- All 18 existing tests and the production build pass with the project’s three configured sponsors.
+- An isolated Chromium walkthrough passed 127 checks covering both paths, all question and feedback states at 320/390/768/1280px, replay, browser navigation, keyboard entry, visible focus, reduced motion, and 200% CSS zoom on all public screens.
+- Sponsor checks covered the configured embedded logos, single/multiple sponsors, long text, missing-logo fallbacks, and the local editor at all four widths.
+- Palette contrast checks passed: normal text combinations exceed 4.5:1 and control boundaries meet 3:1. Selected-answer and feedback accessibility semantics were checked in the browser; spoken output with a screen reader was not manually tested.
+- Desktop and phone screenshots were reviewed for welcome, adult information, question feedback, and completion. No runtime dependencies or external font requests were added.
+
+
+## Landing-page dictionary image and sponsor cutouts
+
+### Feature and user story
+
+As a visitor, I see the physical dictionary represented on the landing page, while sponsor logos sit naturally on the page without white background boxes.
+
+### Implementation tasks
+
+- Use a local, optimized WebP dictionary image with descriptive alternative text and explicit dimensions.
+- Place the image beside the headline from 700px and limit its height to 140px on smaller screens so the audience choices remain easy to reach.
+- Keep the Rotary logo’s existing transparency and replace the configured Lions and Elks white-background images with transparent cutouts.
+- Preserve the static build and embedded sponsor configuration; document asset provenance in [ASSETS.md](ASSETS.md).
+
+### Acceptance criteria
+
+- The dictionary image loads on the welcome page in the built site and under a hosting subdirectory.
+- At 320, 390, 768, and 1280px, the image stays contained and both audience choices remain usable without horizontal overflow.
+- Sponsor logos have real alpha transparency, remain readable on welcome and adult pages, and survive sponsor-editor configuration import/export.
+- The dictionary asset is under 100KB; no font, image-hosting, or runtime dependencies are added.
+
+### Out of scope
+
+Automatic background removal in the sponsor editor, new branding, changes to quiz content, and images on question screens.

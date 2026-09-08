@@ -2,7 +2,7 @@
 
 ## Feature
 
-A flyer-inspired Dictionary Detective Challenge with one or more build-configured sponsors. Each sponsor has an optional uploaded logo, a title, a description, and a learn-more link.
+The Dictionary Detective Challenge combines a clean, contemporary interface with recognition for one or more build-configured sponsors. Each sponsor has an optional uploaded logo, a title, a description, and a learn-more link.
 
 ## User story
 
@@ -10,7 +10,7 @@ As a dictionary-project organizer, I can prepare a static site recognizing all p
 
 ## Implementation tasks
 
-- Apply navy, blue, yellow, green, and red branding with a book motif and clear audience choices.
+- Use restrained navy and blue branding with clear audience choices and readable sponsor recognition.
 - Render sponsor recognition on the welcome and grown-up pages, separate from quiz mechanics.
 - Provide a local sponsor setup page with logo upload and JSON download.
 - Validate configuration and produce a self-contained static build.
@@ -62,7 +62,7 @@ The configuration format is:
 }
 ```
 
-The setup page exports logos as embedded data URLs. Hand-edited configuration can instead use a PNG, JPEG, or WebP file path relative to the JSON file. The build embeds those files, so it has no dependency on the original paths or an external image host. Logos are optional; a letter mark is shown when omitted. Each logo is limited to 2 MB. Titles are limited to 120 characters and descriptions to 600. Sponsor links navigate in the same tab and do not send a referrer.
+The setup page exports logos as embedded data URLs. Hand-edited configuration can instead use a PNG, JPEG, or WebP file path relative to the JSON file. The build embeds those files, so it has no dependency on the original paths or an external image host. Logos are optional; a letter mark is shown when omitted. Transparent PNG or WebP files blend into both welcome and grown-up page backgrounds. The current sponsor configuration includes transparent logo assets; the setup tool preserves their alpha when importing and exporting configuration. It does not automatically remove backgrounds from new uploads. Each logo is limited to 2 MB. Titles are limited to 120 characters and descriptions to 600. Sponsor links navigate in the same tab and do not send a referrer.
 
 ## Validation
 

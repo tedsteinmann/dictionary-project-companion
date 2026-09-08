@@ -17,45 +17,39 @@ let quizState = initialQuizState;
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-function layout(content, eyebrow = 'Dictionary Detective Challenge', wide = false) {
-  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand"><a href="./" aria-label="Dictionary Detective Challenge home"><span class="brand-mark" aria-hidden="true">D<span>?</span></span><span>${eyebrow}</span></a><span class="brand-tag">Small book. Big discoveries.</span></header>${content}<footer>A literacy adventure powered by your book.<span class="color-bar" aria-hidden="true"></span></footer></div>`;
+function layout(content, wide = false) {
+  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand"><a href="./" aria-label="Dictionary Detective Challenge home">Dictionary Detective<span>Challenge</span></a><span class="brand-tag">Small book. Big discoveries.</span></header>${content}<footer>Discover more with your dictionary.</footer></div>`;
 }
 
 function welcome() {
   return layout(`<section class="welcome" aria-labelledby="welcome-title">
     <div class="hero">
       <div class="hero-copy">
-        <p class="kicker">Calling all curious minds</p>
-        <h1 id="welcome-title">Can you crack<br /><span>the dictionary?</span></h1>
-        <p class="challenge-ribbon">Take the Dictionary Detective Challenge!</p>
-        <p class="lede">Grab your dictionary. Follow the clues.<br />There’s a whole world of words waiting inside.</p>
+        <p class="kicker">A little curiosity goes a long way</p>
+        <h1 id="welcome-title">Explore your dictionary.</h1>
+        <p class="lede">Use your book to solve eight short challenges.</p>
       </div>
-      <div class="book-scene" aria-hidden="true">
-        <span class="spark spark-one">✦</span><span class="spark spark-two">✦</span>
-        <div class="detective-seal">8 clues.<br /><strong>Endless<br />discoveries.</strong></div>
-        <div class="book-stack"><div class="book book-blue">Explore</div><div class="book book-green">Learn</div><div class="book book-yellow">Discover</div><div class="book book-red">Grow</div><div class="book book-navy">Succeed</div></div>
-      </div>
+      <img class="hero-dictionary" src="./src/assets/dictionary-detective.webp" alt="A cheerful dictionary character exploring words with a magnifying glass." width="1448" height="1086" fetchpriority="high" />
     </div>
     <div class="audience-choices">
-      ${button('<span class="audience-icon" aria-hidden="true">✎</span><span><strong>I’m a Kid</strong><span>Start the dictionary detective challenge!</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'intro', 'button audience-choice kid-choice')}
-      ${button('<span class="audience-icon" aria-hidden="true">☀</span><span><strong>I’m a Grown-up</strong><span>Meet the community groups behind the books.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'adult', 'button audience-choice adult-choice')}
+      ${button('<span><strong>I’m a Kid</strong><span>Grab your book and start exploring.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'intro', 'button audience-choice kid-choice')}
+      ${button('<span><strong>I’m a Grown-up</strong><span>Learn about the project and its sponsors.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'adult', 'button audience-choice adult-choice')}
     </div>
-    <p class="welcome-note">Your book is the key. No timer. Just curiosity.</p>
-  </section>${renderSponsors(sponsorConfig, { compact: true })}`, undefined, true);
+    <p class="welcome-note">Your dictionary is all you need. Take your time.</p>
+  </section>${renderSponsors(sponsorConfig, { compact: true })}`, true);
 }
 
 function intro() {
   return layout(`<section class="card" aria-labelledby="intro-title">
     <button class="text-button" data-route="home">← Back</button>
-    <div class="book-icon" aria-hidden="true">📖</div>
     <p class="kicker">Before you begin</p>
-    <h1 id="intro-title">Grab Your Dictionary!</h1>
+    <h1 id="intro-title">Grab your dictionary.</h1>
     <p class="lede">You’ll need the physical book for the challenge ahead.</p>
-    <ul class="feature-list">
-      <li><span>1</span> Find words faster</li>
-      <li><span>2</span> Understand definitions</li>
-      <li><span>3</span> Discover new ideas</li>
-    </ul>
+    <ol class="feature-list">
+      <li>Find words faster</li>
+      <li>Understand definitions</li>
+      <li>Discover new ideas</li>
+    </ol>
     <p class="note">No timer. No score pressure. Just you and your dictionary.</p>
     ${button('Start the Challenge →', 'challenge', 'button button-primary')}
   </section>`);
@@ -73,7 +67,7 @@ function challenge() {
       : '';
 
   return layout(`<section class="card challenge" aria-labelledby="question-title">
-    <div class="progress-copy"><span>Challenge ${progress.current} of ${progress.total}</span><span>${question.mission}</span></div>
+    <div class="progress-copy"><span>Challenge ${progress.current} of ${progress.total}</span></div>
     <div class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="1" aria-valuemax="${progress.total}" aria-valuenow="${progress.current}"><span style="width: ${progress.percent}%"></span></div>
     <p class="mission">Mission: ${question.mission}</p>
     <p class="find-prompt">${question.prompt}</p>
@@ -81,28 +75,26 @@ function challenge() {
     <div class="answers" ${quizState.status === 'correct' ? 'inert' : ''}>
       ${question.type === 'acknowledgement'
         ? `<button class="button button-primary" data-action="acknowledge">${question.acknowledgementLabel}</button>`
-        : question.answers.map((answer) => `<button class="answer${quizState.answerId === answer.id ? ' selected' : ''}" data-answer="${answer.id}">${answer.text}</button>`).join('')}
+        : question.answers.map((answer) => `<button class="answer${quizState.answerId === answer.id ? ' selected' : ''}" data-answer="${answer.id}" aria-pressed="${quizState.answerId === answer.id}"><span class="answer-marker" aria-hidden="true"></span><span>${answer.text}</span></button>`).join('')}
     </div>
     ${feedback}
-  </section>`, 'Dictionary mission');
+  </section>`);
 }
 
 function complete() {
   return layout(`<section class="card completion" aria-labelledby="complete-title">
-    <div class="celebration" aria-hidden="true">★</div>
     <p class="kicker">Mission complete</p>
-    <h1 id="complete-title">You Did It!</h1>
-    <p class="badge">Dictionary Detective</p>
+    <h1 id="complete-title">You did it!</h1>
     <p class="lede">You used your dictionary to find words, understand meanings, and discover something new.</p>
     <p>You practiced alphabetical order, guide words, definitions, context, parts of speech, and vocabulary discovery.</p>
     <div class="next-challenge"><strong>Keep discovering:</strong><br />What new word will you look up next?</div>
     <button class="button button-primary" data-action="replay">Play Again</button>
-    ${button('Back to Welcome', 'home', 'text-button centered')}
+    ${button('Back to Welcome', 'home', 'text-button return-link')}
   </section>`);
 }
 
 function adult() {
-  return layout(`<section class="card" aria-labelledby="adult-title">
+  return layout(`<section class="card adult" aria-labelledby="adult-title">
     <button class="text-button" data-route="home">← Back</button>
     <p class="kicker">For grown-ups</p>
     <h1 id="adult-title">Why this dictionary?</h1>
@@ -112,7 +104,7 @@ function adult() {
     <h2>Local help, wider possibilities</h2><p>Service starts close to home. Rotary Clubs, for example, support education locally and work with clubs in other countries on projects such as clean water and health.</p>
     ${renderSponsors(sponsorConfig)}
     ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
-  </section>`);
+  </section>`, true);
 }
 
 const screens = { home: welcome, intro, challenge, complete, adult };

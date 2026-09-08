@@ -7,7 +7,7 @@ A generic QR code placed in a dictionary, bookmark, handout, or inside-cover sti
 - **Children** enter a short, fun challenge that teaches them how to use their new dictionary.
 - **Parents and other adults** learn why Rotary supports literacy, what Rotary does locally and internationally, and how to connect with a Rotary Club in their community.
 
-The proof of concept grew from a Rotary literacy project. Its flyer-inspired **Dictionary Detective Challenge** branding now supports one or more community sponsors configured at build time. See [Sponsor builds](docs/SPONSORS.md) for logo upload and configuration instructions.
+The proof of concept grew from a Rotary literacy project. Its clean, contemporary **Dictionary Detective Challenge** interface supports one or more community sponsors configured at build time. See [Sponsor builds](docs/SPONSORS.md) for logo upload and configuration instructions.
 
 The architecture should not unnecessarily prevent future adaptation for other community service organizations that participate in dictionary-distribution or literacy programs, with a simple static sponsor list. Accounts, tenant management, and runtime theme switching remain out of scope.
 
