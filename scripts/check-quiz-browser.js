@@ -10,6 +10,20 @@ export default async function checkQuizBrowser(page) {
   await page.goto(base);
   await page.evaluate(() => sessionStorage.clear());
   await page.reload();
+  const kidNav = page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: 'Kid Challenge' });
+  const adultNav = page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: 'For Grown-ups' });
+  assert(await kidNav.isVisible() && await adultNav.isVisible(), 'Header shows both destinations');
+  assert(await kidNav.evaluate((el) => el.getBoundingClientRect().height >= 44)
+    && await adultNav.evaluate((el) => el.getBoundingClientRect().height >= 44), 'Header navigation has large targets');
+  await kidNav.focus();
+  await page.keyboard.press('Enter');
+  assert(await page.getByRole('heading', { name: 'Grab your dictionary.' }).isVisible(), 'Keyboard opens the child introduction');
+  assert(await page.getByRole('button', { name: 'Kid Challenge' }).getAttribute('aria-current') === 'page', 'Child destination marks the active page');
+  await page.getByRole('button', { name: 'For Grown-ups' }).focus();
+  await page.keyboard.press('Enter');
+  assert(await page.getByRole('heading', { name: 'Want to get more involved?' }).isVisible(), 'Keyboard opens the grown-up page');
+  assert(await page.getByRole('button', { name: 'For Grown-ups' }).getAttribute('aria-current') === 'page', 'Grown-up destination marks the active page');
+  await page.goto(base);
   const bank = await page.evaluate(async () => (await import('/src/content/questions.js')).questions);
   const state = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
   const click = (name) => page.getByRole('button', { name, exact: true }).click();
@@ -35,6 +49,11 @@ export default async function checkQuizBrowser(page) {
   await noOverflow('levels');
   await click('Start Find It');
   const firstIds = (await state()).attempt.questionIds;
+  await page.getByRole('button', { name: 'For Grown-ups' }).click();
+  await page.getByRole('button', { name: 'Kid Challenge' }).focus();
+  await page.keyboard.press('Enter');
+  assert(await page.getByText('You have a quiz in progress.').isVisible(), 'Kid navigation returns to an in-progress child flow');
+  await click('Continue your quiz →');
   await noOverflow('question');
   await click('Submit answer →');
   assert((await state()).attempt.index === 0, 'An unanswered choice must not advance');
