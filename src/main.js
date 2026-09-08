@@ -247,7 +247,8 @@ function navigate(route, push = true, focus = true) {
   const url = safeRoute === 'home' ? './' : `#${safeRoute}`;
   if (push && location.hash !== `#${safeRoute}`) history.pushState({ route: safeRoute }, '', url);
   else if (safeRoute !== route) history.replaceState({ route: safeRoute }, '', url);
-  app.innerHTML = screens[safeRoute](safeRoute);
+  const renderScreen = screens[safeRoute];
+  app.innerHTML = renderScreen(safeRoute);
   if (focus) {
     app.focus();
     window.scrollTo(0, 0);
