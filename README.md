@@ -39,11 +39,21 @@ The core learning loop is:
 
 **Find → Understand → Apply → Discover**
 
-Children start at **Level 1 – Codebreaker** (Easy), then unlock **Level 2 – Code Cracker** (Medium) and **Level 3 – Master Codebreaker** (Hard). The full 99-question source bank is preserved, alongside 16 guided dictionary lessons. Each ten-question attempt balances literacy skills, categories, answer formats, and questions not yet shown in the tab session.
+The child-facing progression is:
 
-Children use the physical book and mostly select answers using large multiple-choice or yes/no controls, with a few short answers to type. Level 1 begins with six guided lessons and includes eight selectable answers and two typed answers. Levels 2 and 3 use six selectable answers and four typed answers. Case, whitespace, accents, and grouped numeric commas are normalized; spelling is checked exactly. They can edit answers, then submit the whole quiz to see “You cracked # out of 10!” and review missed questions with the supplied correct answers.
+**Find It → Figure It Out → Discover More**
 
-A score of **7/10** completes a level, earns a printable challenge certificate with a random reference code, and unlocks the next level. Any level earns a certificate. Retakes use a new question set, with some repeats as pools are exhausted. More demanding source questions have moved from Easy to Medium, and two previously flagged source rows remain preserved pending review.
+- **Find It** teaches children how to navigate the book using alphabetical order, guide words, headwords, spelling, and basic definitions.
+- **Figure It Out** asks them to interpret what they find using context, multiple meanings, parts of speech, word relationships, and reference sections.
+- **Discover More** combines those skills in a broader, more independent set of searches and discoveries.
+
+The progression describes growing capability and independence with the physical dictionary rather than presenting Easy/Medium/Hard as child-facing ranks. Difficulty remains useful as internal question metadata.
+
+The full 99-question source bank is preserved, alongside 16 guided dictionary lessons. Each ten-question attempt balances literacy skills, categories, answer formats, and questions not yet shown in the tab session.
+
+Children use the physical book and mostly select answers using large multiple-choice or yes/no controls, with a few short answers to type. **Find It** begins with six guided lessons and includes eight selectable answers and two typed answers. **Figure It Out** and **Discover More** use six selectable answers and four typed answers. Case, whitespace, accents, and grouped numeric commas are normalized; spelling is checked exactly. They can edit answers, then submit the whole quiz to see their score and review missed questions with the supplied correct answers.
+
+A score of **7/10** completes a stage, earns a printable challenge certificate with a random reference code, and unlocks the next stage. Any stage earns a certificate. Retakes use a new question set, with some repeats as pools are exhausted. More demanding source questions have moved from Easy to Medium internally, and two previously flagged source rows remain preserved pending review.
 
 See [the feature, acceptance criteria, and completion policy](docs/LEVELS.md).
 
@@ -170,7 +180,10 @@ Welcome
    +---- I'm a Kid ------> Dictionary Challenge
    |                           |
    |                           v
-   |                    Dictionary Missions
+   |              Find It → Figure It Out
+   |                           |
+   |                           v
+   |                    Discover More
    |                           |
    |                           v
    |                      Completion
@@ -190,14 +203,14 @@ The POC should demonstrate:
 
 - Mobile-first QR-code entry
 - Parent/child audience selection
-- Three sequential levels, each with ten randomly selected questions
+- Three sequential challenge stages, each with ten randomly selected questions
 - Real use of the physical dictionary
 - Multiple dictionary skills
 - Encouraging results and missed-answer review after submission
 - Literacy-oriented learning outcomes
 - Rotary service themes used as real-world context
 - A clear distinction between local Rotary service and Rotary's broader international capabilities
-- A printable certificate after passing any level
+- A printable certificate after passing any stage
 - A parent/adult Rotary information page
 - Quiz content stored separately from application logic
 
@@ -244,6 +257,8 @@ Avoid:
 > How many countries have Rotary Clubs?
 
 That tests Rotary knowledge rather than dictionary skills.
+
+The child-facing progression should reinforce capability rather than rank: first learn to **Find It**, then **Figure It Out**, then **Discover More**. A resourceful learner does not need to know every answer already; they know how to find and understand information when they need it.
 
 ## Parent Experience Philosophy
 
@@ -308,7 +323,7 @@ The proof of concept is successful when a tester can:
 
 1. Scan/open the site on a phone.
 2. Choose the child or adult path.
-3. Complete a ten-question attempt and progress through three levels.
+3. Complete a ten-question attempt and progress through **Find It**, **Figure It Out**, and **Discover More**.
 4. Physically use the dictionary to answer several questions.
 5. Demonstrate several dictionary-navigation or comprehension skills.
 6. Review results and missed answers after submitting the attempt.
@@ -336,7 +351,7 @@ Build vertically:
 
 ## Run the Proof of Concept
 
-The proof of concept is a client-only application with no backend API. Answers, shown-question history, unlocked levels, and certificates stay in sessionStorage for the current browser tab, with an in-memory fallback if storage is blocked. There are no accounts or requests for personal information. Print or save a certificate before closing the tab. Completion codes are local references, not centrally verified prize claims. Parent/guardian information explains how to contact the organizer about available prizes.
+The proof of concept is a client-only application with no backend API. Answers, shown-question history, unlocked stages, and certificates stay in sessionStorage for the current browser tab, with an in-memory fallback if storage is blocked. There are no accounts or requests for personal information. Print or save a certificate before closing the tab. Completion codes are local references, not centrally verified prize claims. Parent/guardian information explains how to contact the organizer about available prizes.
 
 `npm run dev` builds the site and starts a local preview at `http://localhost:4173` using Python 3's HTTP server. Make sure Python 3 is installed. Both build and dev automatically use `sponsors.json` in the project root when present, falling back to the default Rotary sponsor otherwise. After changing source files or sponsor configuration, run `npm run build` and refresh, or restart `npm run dev`. The sponsor editor remains available at `/tools/sponsors.html` during development.
 
