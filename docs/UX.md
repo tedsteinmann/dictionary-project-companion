@@ -170,7 +170,7 @@ Avoid patronizing language.
 
 ## Branding
 
-Use the clean, contemporary Dictionary Detective Challenge identity: native system sans-serif typography, navy headings, blue actions, white surfaces, and a light-gray page background. The welcome headline is “Explore your dictionary.” followed by copy that introduces the three-stage progression without framing it as Easy/Medium/Hard. Both audience paths remain prominent, with a blue child action and a bordered white grown-up action.
+Use the clean, contemporary Dictionary Challenge identity: native system sans-serif typography, navy headings, blue actions, white surfaces, and a light-gray page background. The welcome headline is “Explore your dictionary.” followed by copy that introduces the three-stage progression without framing it as Easy/Medium/Hard. Both audience paths remain prominent, with a blue child action and a bordered white grown-up action.
 
 Use modest 8–12px corners, thin borders, minimal shadows, and stationary hover states. Avoid tilted interface decorations, emoji tiles, ribbons, oversized illustrations, and multicolor accents. A restrained photograph of a physical navy dictionary accompanies the landing-page heading: beside the copy on desktop and as a compact image below it on phones. Keep the shared wordmark upright and separate the header and content with a quiet divider.
 
@@ -250,7 +250,7 @@ As a child or adult visiting on a phone, I can quickly understand the experience
 ### Implementation tasks
 
 - Consolidate the stylesheet around shared color, typography, spacing, and control styles, without adding dependencies or downloading fonts.
-- Simplify the welcome copy, header, and decorative elements; retain the Dictionary Detective Challenge name.
+- Simplify the welcome copy, header, and decorative elements; retain the Dictionary Challenge name.
 - Give instructions, questions, answers, feedback, and next actions clear visual hierarchy.
 - Preserve the physical-dictionary requirement, structured question content, quiz mechanics, and sponsor configuration.
 - Check the local sponsor editor for compatibility with the shared stylesheet.

@@ -39,10 +39,15 @@ const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
 function layout(content, route, wide = false) {
-  const kidRoute = session.attempt ? 'levels' : 'intro';
-  const kidCurrent = route === kidRoute ? ' aria-current="page"' : '';
-  const adultCurrent = route === 'adult' ? ' aria-current="page"' : '';
-  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand"><a class="wordmark" href="./" aria-label="Dictionary Detective Challenge home">Dictionary Detective<span>Challenge</span></a><span class="brand-tag">Small book. Big discoveries.</span><nav class="primary-nav" aria-label="Primary"><button data-route="${kidRoute}"${kidCurrent}>Kid Challenge</button><button data-route="adult"${adultCurrent}>For Grown-ups</button></nav></header>${content}<footer>Discover more with your dictionary.</footer></div>`;
+  const childRoutes = ['intro', 'levels', 'challenge', 'review', 'results', 'certificate'];
+  const isChildRoute = childRoutes.includes(route);
+  const level = session.attempt && levels.find((item) => item.id === session.attempt.levelId);
+  const status = route === 'challenge' ? `Question ${session.attempt.index + 1} of ${QUESTIONS_PER_ATTEMPT}`
+    : { intro: 'Get ready', levels: 'Choose a stage', review: 'Review answers', results: 'Your results', certificate: 'Certificate' }[route];
+  const stageLabel = level && !['intro', 'levels'].includes(route) ? `<strong>${level.name}</strong>` : '';
+  const stageControl = session.attempt && route !== 'levels'
+    ? '<button class="toolbar-button" data-route="levels">← Stages</button>' : '';
+  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand ${isChildRoute ? 'game-toolbar' : ''}">${isChildRoute ? `${stageControl}<a class="wordmark" href="./" aria-label="Dictionary Challenge home">Dictionary <span>Challenge</span></a><div class="game-status">${stageLabel}<span>${status}</span></div>` : '<a class="wordmark" href="./" aria-label="Dictionary Challenge home">Dictionary <span>Challenge</span></a><span class="brand-tag">Small book. Big discoveries.</span>'}</header>${content}<footer>Discover more with your dictionary.</footer></div>`;
 }
 
 function welcome(route) {
@@ -168,7 +173,7 @@ function certificate(route) {
   const level = levels.find((item) => item.id === earned.levelId);
   return layout(`<section aria-labelledby="certificate-title">
     <div class="card certificate">
-      <p class="kicker">Dictionary Detective Challenge</p>
+      <p class="kicker">Dictionary Challenge</p>
       <h1 id="certificate-title">Certificate of completion</h1>
       <p class="lede">Stage ${level.id} · ${level.name}</p>
       <p>You used your physical dictionary to find answers, explore ideas, and complete the challenge.</p>

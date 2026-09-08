@@ -63,9 +63,12 @@ p { margin: 0 0 var(--space-3); }
 .brand .wordmark { display: flex; flex-direction: column; justify-content: center; min-height: 44px; color: var(--heading); font-size: 1rem; font-weight: 700; line-height: 1.35; letter-spacing: -.02em; text-decoration: none; }
 .brand .wordmark span { color: var(--muted); font-size: var(--small-size); font-weight: 500; letter-spacing: 0; }
 .brand-tag { color: var(--muted); font-size: var(--small-size); }
-.primary-nav { display: flex; align-items: stretch; gap: var(--space-1); margin-left: auto; }
-.primary-nav button { min-height: 44px; border: 0; border-bottom: 2px solid transparent; padding: .55rem .65rem; color: var(--muted); background: transparent; font-weight: 600; cursor: pointer; }
-.primary-nav button[aria-current="page"] { border-bottom-color: var(--blue); color: var(--heading); }
+.game-toolbar { min-height: 68px; margin-bottom: var(--space-4); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius); color: var(--surface); background: var(--heading); }
+.game-toolbar .wordmark, .game-toolbar .wordmark span { color: var(--surface); }
+.game-status { display: flex; flex-direction: column; margin-left: auto; color: #dbe5f4; font-size: var(--small-size); line-height: 1.35; text-align: right; }
+.game-status strong { color: var(--surface); }
+.toolbar-button { min-width: 44px; min-height: 44px; border: 1px solid #ffffff73; border-radius: var(--radius); padding: .5rem .7rem; color: var(--surface); background: transparent; font-weight: 600; cursor: pointer; }
+.game-toolbar .toolbar-button:focus-visible, .game-toolbar .wordmark:focus-visible { outline-color: var(--surface); box-shadow: 0 0 0 4px var(--heading); }
 .card { padding: clamp(1.25rem, 4vw, 2.5rem); border: 1px solid var(--line); border-radius: var(--panel-radius); background: var(--surface); box-shadow: 0 2px 4px #182c4903; }
 .kicker, .mission { margin: 0 0 var(--space-2); color: var(--blue); font-size: var(--small-size); font-weight: 600; }
 .lede { max-width: 40rem; margin-bottom: var(--space-4); font-size: 1.125rem; color: var(--muted); }
@@ -166,11 +169,8 @@ footer { margin-top: auto; padding-top: var(--space-6); color: var(--muted); fon
 }
 @media (max-width: 699px) {
   .brand-tag { display: none; }
-}
-@media (max-width: 499px) {
-  .brand { flex-wrap: wrap; gap: var(--space-2) var(--space-3); margin-bottom: var(--space-4); }
-  .primary-nav { order: 2; width: 100%; margin-left: 0; }
-  .primary-nav button { flex: 1 1 0; padding-inline: .35rem; }
+  .game-toolbar { gap: var(--space-2); }
+  .game-toolbar .wordmark { font-size: var(--small-size); }
   .hero { padding-top: var(--space-3); }
   .card .button { width: 100%; }
 }

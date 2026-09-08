@@ -100,7 +100,7 @@ describe('static sponsor builds', () => {
         assert.ok(port, 'Dev server reports its preview URL');
         const base = `http://localhost:${port}`;
         const page = await fetch(base);
-        assert.match(await page.text(), /Dictionary Detective Challenge/);
+        assert.match(await page.text(), /Dictionary Challenge/);
         const response = await fetch(`${base}/src/content/sponsors.js`);
         assert.equal(await response.text(), output, 'Dev serves configured build, not source defaults');
         assert.equal(response.headers.get('cache-control'), 'no-store');

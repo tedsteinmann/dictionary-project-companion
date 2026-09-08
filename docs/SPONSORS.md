@@ -1,8 +1,8 @@
-# Detective branding and sponsor builds
+# Challenge branding and sponsor builds
 
 ## Feature
 
-The Dictionary Detective Challenge combines a clean, contemporary interface with recognition for one or more build-configured sponsors. Each sponsor has an optional uploaded logo, a title, a description, and a learn-more link.
+The Dictionary Challenge combines a clean, contemporary interface with recognition for one or more build-configured sponsors. Each sponsor has an optional uploaded logo, a title, a description, and a learn-more link.
 
 ## User story
 
