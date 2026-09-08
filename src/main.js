@@ -38,8 +38,12 @@ const adultSponsorConfig = {
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-function layout(content, wide = false) {
-  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand"><a href="./" aria-label="Dictionary Detective Challenge home">Dictionary Detective<span>Challenge</span></a><span class="brand-tag">Small book. Big discoveries.</span></header>${content}<footer>Discover more with your dictionary.</footer></div>`;
+function layout(content, route, wide = false) {
+  const kidRoute = session.attempt ? 'levels' : 'intro';
+  const kidRoutes = ['intro', 'levels', 'challenge', 'review', 'results', 'certificate'];
+  const kidCurrent = kidRoutes.includes(route) ? ' aria-current="page"' : '';
+  const adultCurrent = route === 'adult' ? ' aria-current="page"' : '';
+  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand"><a class="wordmark" href="./" aria-label="Dictionary Detective Challenge home">Dictionary Detective<span>Challenge</span></a><span class="brand-tag">Small book. Big discoveries.</span><nav class="primary-nav" aria-label="Primary"><button data-route="${kidRoute}"${kidCurrent}>Kid Challenge</button><button data-route="adult"${adultCurrent}>For Grown-ups</button></nav></header>${content}<footer>Discover more with your dictionary.</footer></div>`;
 }
 
 function welcome() {
@@ -57,7 +61,7 @@ function welcome() {
       ${button('<span><strong>I’m a Grown-up</strong><span>Learn about the project and its sponsors.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'adult', 'button audience-choice adult-choice')}
     </div>
     <p class="welcome-note">Your dictionary is all you need. Take your time.</p>
-  </section>${renderSponsors(sponsorConfig, { compact: true })}`, true);
+  </section>${renderSponsors(sponsorConfig, { compact: true })}`, 'home', true);
 }
 
 function intro() {
@@ -68,7 +72,7 @@ function intro() {
     <p class="lede">Use your physical book to answer 10 questions. Crack ${PASSING_SCORE} to earn a certificate and unlock the next stage.</p>
     <p class="progress-copy">Take your time—you can change answers before submitting.</p>
     ${button('Choose your stage →', 'levels', 'button button-primary')}
-  </section>`);
+  </section>`, 'intro');
 }
 
 function levelPicker() {
@@ -93,7 +97,7 @@ function levelPicker() {
       </li>`;
     }).join('')}</ol>
     <p class="progress-copy">Retakes bring a new mix of questions. Some discoveries may appear again.</p>
-  </section>`);
+  </section>`, 'levels');
 }
 
 function challenge() {
@@ -116,7 +120,7 @@ function challenge() {
       </div>
     </form>
     ${button('Back to stages', 'levels', 'text-button return-link')}
-  </section>`);
+  </section>`, 'challenge');
 }
 
 function review() {
@@ -132,7 +136,7 @@ function review() {
     }).join('')}</ol>
     ${answered === QUESTIONS_PER_ATTEMPT ? '<button class="button button-primary" data-action="submit">Submit quiz</button>' : '<p class="note">Answer each question before submitting your quiz.</p>'}
     ${button('Back to quiz', 'challenge', 'text-button return-link')}
-  </section>`);
+  </section>`, 'review');
 }
 
 function results() {
@@ -157,7 +161,7 @@ function results() {
     ${discoveryActivity()}
     <p class="note">Keep discovering with your dictionary. Rotary volunteers support learning in local schools and work together on projects such as clean water and community health around the world.</p>
     ${button('Choose a stage', 'levels', 'text-button return-link')}
-  </section>`);
+  </section>`, 'results');
 }
 
 function certificate() {
@@ -181,7 +185,7 @@ function certificate() {
       ${button('Choose a stage', 'levels', 'button')}
       ${button('For parents and guardians', 'adult', 'text-button')}
     </div>
-  </section>`);
+  </section>`, 'certificate');
 }
 
 function adult() {
@@ -228,7 +232,7 @@ function adult() {
     ${renderSponsors(adultSponsorConfig, { heading: 'Meet the clubs behind the Dictionary Project', linkLabel: 'Learn more • Find a club • Visit a meeting' })}
     <p class="closing-invitation">Come meet some people. Find your place. Make something happen.</p>
     ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
-  </section>`, true);
+  </section>`, 'adult', true);
 }
 
 const screens = { home: welcome, intro, levels: levelPicker, challenge, review, results, certificate, adult };
