@@ -47,7 +47,7 @@ function layout(content, route, wide = false) {
   const stageLabel = level && !['intro', 'levels'].includes(route) ? `<strong>${level.name}</strong>` : '';
   const stageControl = session.attempt && route !== 'levels'
     ? '<button class="toolbar-button" data-route="levels">← Stages</button>' : '';
-  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand ${isChildRoute ? 'game-toolbar' : ''}"><a class="wordmark" href="./" aria-label="Dictionary Challenge home">Dictionary <span>Challenge</span></a>${isChildRoute ? `<div class="game-status">${stageLabel}<span>${status}</span></div>${stageControl}` : '<span class="brand-tag">Small book. Big discoveries.</span>'}</header>${content}<footer>Discover more with your dictionary.</footer></div>`;
+  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand ${isChildRoute ? 'game-toolbar' : ''}">${isChildRoute ? `${stageControl}<a class="wordmark" href="./" aria-label="Dictionary Challenge home">Dictionary <span>Challenge</span></a><div class="game-status">${stageLabel}<span>${status}</span></div>` : '<a class="wordmark" href="./" aria-label="Dictionary Challenge home">Dictionary <span>Challenge</span></a><span class="brand-tag">Small book. Big discoveries.</span>'}</header>${content}<footer>Discover more with your dictionary.</footer></div>`;
 }
 
 function welcome(route) {
