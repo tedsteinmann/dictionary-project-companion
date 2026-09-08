@@ -133,6 +133,11 @@ describe('exact typed answer checking with formatting normalization', () => {
 });
 
 describe('level progression and submission', () => {
+  it('uses capability-based stage names while retaining internal difficulty selection', () => {
+    assert.deepEqual(levels.map(({ name }) => name), ['Find It', 'Figure It Out', 'Discover More']);
+    assert.deepEqual(levels.map(({ difficulty }) => difficulty), ['Easy', 'Medium', 'Hard']);
+  });
+
   it('starts at Level 1, prevents skipping locked levels, and tracks only displayed questions', () => {
     const initial = createSession();
     assert.equal(canStartLevel(initial, 1), true);
@@ -175,14 +180,19 @@ describe('level progression and submission', () => {
 
   it('7/10 earns a certificate at every level and unlocks the next; submission is idempotent', () => {
     let session = createSession();
-    for (const level of levels) {
+    const orderedLevels = [...levels].sort((a, b) => a.id - b.id);
+    for (const [index, level] of orderedLevels.entries()) {
+      const nextLevel = orderedLevels[index + 1];
+      assert.equal(canStartLevel(session, level.id), true, `${level.name} should be unlocked in sequence`);
+      if (nextLevel) assert.equal(canStartLevel(session, nextLevel.id), false, `${nextLevel.name} should still be locked`);
       session = answerAttempt(startAttempt(session, questions, level.id), 7);
       session = submitAttempt(session, questions);
       assert.equal(gradeAttempt(session.attempt, questions).score, 7);
       assert.equal(gradeAttempt(session.attempt, questions).details.filter((item) => !item.correct).length, 3);
       assert.ok(session.passedLevels.includes(level.id));
       assert.equal(session.attempt.certificate.levelId, level.id);
-      assert.equal(session.certificates.length, level.id);
+      assert.equal(session.certificates.length, index + 1);
+      if (nextLevel) assert.equal(canStartLevel(session, nextLevel.id), true, `${nextLevel.name} should unlock after passing`);
       assert.strictEqual(submitAttempt(session, questions), session);
       assert.strictEqual(saveAnswer(session, 'changed'), session);
       assert.strictEqual(moveToQuestion(session, 0), session);

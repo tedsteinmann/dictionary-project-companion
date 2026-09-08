@@ -48,7 +48,7 @@ function welcome() {
       <div class="hero-copy">
         <p class="kicker">A little curiosity goes a long way</p>
         <h1 id="welcome-title">Explore your dictionary.</h1>
-        <p class="lede">Use your book to crack three levels, one discovery at a time.</p>
+        <p class="lede">Build your dictionary skills through three stages, one discovery at a time.</p>
       </div>
       <img class="hero-dictionary" src="./src/assets/dictionary-detective.webp" alt="A cheerful dictionary character exploring words with a magnifying glass." width="1448" height="1086" fetchpriority="high" />
     </div>
@@ -67,13 +67,13 @@ function intro() {
     <h1 id="intro-title">Grab your dictionary.</h1>
     <p class="lede">You’ll need the physical book, including its reference sections, for the challenges ahead.</p>
     <ol class="feature-list">
-      <li>Start as a Codebreaker. Learn to use guide words, find entries, and read definitions.</li>
+      <li>Start with Find It. Learn to use guide words, find entries, and read definitions.</li>
       <li>Use your dictionary to answer 10 questions. Most answers are choices to tap; a few are short answers to type.</li>
-      <li>Submit your quiz to see your results. Crack ${PASSING_SCORE} out of 10 to earn a certificate and unlock the next level.</li>
+      <li>Submit your quiz to see your results. Crack ${PASSING_SCORE} out of 10 to earn a certificate and unlock the next stage.</li>
     </ol>
-    <p class="note">Take your time. You can change answers before submitting and try any unlocked level again.</p>
+    <p class="note">Take your time. You can change answers before submitting and try any unlocked stage again.</p>
     <p class="progress-copy">No name or login needed. Your progress stays in this browser tab for this session.</p>
-    ${button('Choose your level →', 'levels', 'button button-primary')}
+    ${button('Choose your stage →', 'levels', 'button button-primary')}
   </section>`);
 }
 
@@ -81,19 +81,20 @@ function levelPicker() {
   return layout(`<section class="card" aria-labelledby="levels-title">
     ${button('← Back', 'intro', 'text-button')}
     <p class="kicker">Your dictionary adventure</p>
-    <h1 id="levels-title">Three levels to crack.</h1>
-    <p>Use your physical dictionary. Each quiz has 10 questions. Score ${PASSING_SCORE} or more to complete a level and earn a certificate.</p>
+    <h1 id="levels-title">Three stages to explore.</h1>
+    <p>Use your physical dictionary. Each challenge has 10 questions. Score ${PASSING_SCORE} or more to complete a stage and earn a certificate.</p>
     ${session.attempt && !session.attempt.submitted ? `<p class="note">You have a quiz in progress.</p>${button('Continue your quiz →', 'challenge', 'button button-primary')}` : ''}
     <ol class="level-list">${levels.map((level) => {
       const unlocked = canStartLevel(session, level.id);
       const passed = session.passedLevels.includes(level.id);
       const certificate = session.certificates.findLast((item) => item.levelId === level.id);
+      const previousLevel = [...levels].filter((item) => item.id < level.id).sort((a, b) => b.id - a.id)[0];
       return `<li class="level-card">
-        <p class="kicker">Level ${level.id} · ${level.difficulty}${passed ? ' · Completed' : ''}</p>
+        <p class="kicker">Stage ${level.id}${passed ? ' · Completed' : ''}</p>
         <h2>${level.name}</h2>
         <p>${level.description}</p>
         ${unlocked ? `<button class="button ${passed ? 'button-secondary' : 'button-primary'}" data-level="${level.id}">${passed ? 'Retake' : 'Start'} ${level.name}</button>`
-          : `<p class="progress-copy">Complete Level ${level.id - 1} to unlock this level.</p>`}
+          : `<p class="progress-copy">Complete ${previousLevel.name} to unlock this stage.</p>`}
         ${certificate ? `<button class="text-button return-link" data-certificate="${certificate.code}">View ${level.name} certificate</button>` : ''}
       </li>`;
     }).join('')}</ol>
@@ -107,7 +108,7 @@ function challenge() {
   const question = questions.find((item) => item.id === attempt.questionIds[attempt.index]);
   const current = attempt.index + 1;
   return layout(`<section class="card challenge" aria-labelledby="question-title">
-    <p class="kicker">Level ${level.id} · ${level.name}</p>
+    <p class="kicker">Stage ${level.id} · ${level.name}</p>
     <div class="progress-copy">Question ${current} of ${QUESTIONS_PER_ATTEMPT}</div>
     <div class="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${current}"><span style="width: ${current * 10}%"></span></div>
     <p class="mission">${escapeHtml(question.category)} · ${escapeHtml(question.subcategory)}</p>
@@ -120,7 +121,7 @@ function challenge() {
         <button type="submit" class="button button-primary">${current === QUESTIONS_PER_ATTEMPT ? 'Review answers →' : 'Next question →'}</button>
       </div>
     </form>
-    ${button('Back to levels', 'levels', 'text-button return-link')}
+    ${button('Back to stages', 'levels', 'text-button return-link')}
   </section>`);
 }
 
@@ -145,15 +146,15 @@ function results() {
   const result = gradeAttempt(session.attempt, questions);
   const missed = result.details.filter((item) => !item.correct);
   return layout(`<section class="card" aria-labelledby="results-title">
-    <p class="kicker">Level ${level.id} · ${level.name}</p>
+    <p class="kicker">Stage ${level.id} · ${level.name}</p>
     <h1 id="results-title">You cracked ${result.score} out of 10!</h1>
-    <p class="lede">${result.passed ? `Level completed! You earned your ${level.name} certificate.` : 'Keep exploring! Crack 7 or more to complete this level. Your dictionary can help you try again.'}</p>
+    <p class="lede">${result.passed ? `Stage completed! You earned your ${level.name} certificate.` : 'Keep exploring! Crack 7 or more to complete this stage. Your dictionary can help you try again.'}</p>
     <div class="quiz-actions">
       ${result.passed ? `<button class="button button-primary" data-certificate="${session.attempt.certificate.code}">View and print certificate</button>` : ''}
-      ${result.passed && level.id < levels.length ? `<button class="button button-primary" data-level="${level.id + 1}">Try Level ${level.id + 1}: ${levels[level.id].name} →</button>` : ''}
+      ${result.passed && level.id < levels.length ? `<button class="button button-primary" data-level="${level.id + 1}">Start ${levels[level.id].name} →</button>` : ''}
       <button class="button button-secondary" data-level="${level.id}">Try ${level.name} again</button>
     </div>
-    ${result.passed && level.id === levels.length ? '<p class="note">You completed all three levels. Master Codebreaker—great detective work!</p>' : ''}
+    ${result.passed && level.id === levels.length ? '<p class="note">You completed all three stages. Great detective work—keep discovering!</p>' : ''}
     <section class="result-review" aria-labelledby="missed-title">
       <h2 id="missed-title">${missed.length ? 'Discover the answers you missed' : 'Great find—all 10 cracked!'}</h2>
       ${missed.length ? `<ol class="review-list">${result.details.map((item, index) => item.correct ? '' : `<li value="${index + 1}"><p>${escapeHtml(item.question.question)}</p><p><strong>Your answer:</strong> ${escapeHtml(item.answer)}</p><p><strong>Correct answer:</strong> ${escapeHtml(item.question.answer)}</p></li>`).join('')}</ol>` : '<p>Keep your dictionary close for your next discovery.</p>'}
@@ -161,7 +162,7 @@ function results() {
     ${learningReview(result.details)}
     ${discoveryActivity()}
     <p class="note">Keep discovering with your dictionary. Rotary volunteers support learning in local schools and work together on projects such as clean water and community health around the world.</p>
-    ${button('Choose a level', 'levels', 'text-button return-link')}
+    ${button('Choose a stage', 'levels', 'text-button return-link')}
   </section>`);
 }
 
@@ -172,7 +173,7 @@ function certificate() {
     <div class="card certificate">
       <p class="kicker">Dictionary Detective Challenge</p>
       <h1 id="certificate-title">Certificate of completion</h1>
-      <p class="lede">Level ${level.id} · ${level.name}</p>
+      <p class="lede">Stage ${level.id} · ${level.name}</p>
       <p>You used your physical dictionary to find answers, explore ideas, and complete the challenge.</p>
       <p class="certificate-score">You cracked ${earned.score} out of 10!</p>
       <p>Completed <time datetime="${earned.date}">${earned.date}</time></p>
@@ -183,7 +184,7 @@ function certificate() {
     <div class="quiz-actions no-print">
       <button class="button button-primary" data-action="print">Print or save certificate</button>
       ${level.id < levels.length ? `<button class="button button-secondary" data-level="${level.id + 1}">Continue to ${levels[level.id].name} →</button>` : ''}
-      ${button('Choose a level', 'levels', 'button')}
+      ${button('Choose a stage', 'levels', 'button')}
       ${button('For parents and guardians', 'adult', 'text-button')}
     </div>
   </section>`);
@@ -199,7 +200,7 @@ function adult() {
 
     <section class="adult-section" aria-labelledby="prize-title">
       <h2 id="prize-title">Certificates and prizes</h2>
-      <p>Children use their physical dictionary to answer 10 questions using a mix of choices and short typed answers. Guided lessons teach children how to use the book. A score of 7 or more at any level earns a printable certificate and unlocks the next level. Answers and learning feedback appear after submission.</p>
+      <p>Children use their physical dictionary to answer 10 questions using a mix of choices and short typed answers. Guided lessons teach children how to use the book. A score of 7 or more at any stage earns a printable certificate and unlocks the next stage. Answers and learning feedback appear after submission.</p>
       <p>Save or print the certificate before closing the quiz tab. Show it to a teacher, librarian, or the dictionary project organizer. A parent or guardian should ask the organizer about prize availability and any fulfillment details; the child’s quiz requests no names or contact information.</p>
       <p>The completion code is a reference for the certificate. It is not an online prize claim or a verified redemption code.</p>
     </section>

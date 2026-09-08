@@ -176,7 +176,7 @@ footer { margin-top: auto; padding-top: var(--space-6); color: var(--muted); fon
   .progress-track span { background: Highlight; forced-color-adjust: none; }
 }
 
-/* Typed dictionary challenges and level progression. */
+/* Typed dictionary challenges and stage progression. */
 input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 #answer-form label { display: block; margin-bottom: var(--space-1); font-weight: 600; }
 #typed-answer { display: block; width: 100%; min-height: 52px; margin-bottom: var(--space-2); border: 1px solid var(--control-border); border-radius: var(--radius); padding: .75rem; color: var(--heading); background: var(--surface); }
