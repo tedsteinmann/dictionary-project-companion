@@ -111,6 +111,16 @@ Other community organizations participate in dictionary-distribution programs.
 
 The POC supports a static list of sponsors, each with an optional logo, title, description, and website. A local setup tool exports configuration for the build. It has no accounts, hosted uploads, or tenant management. See [feature and acceptance criteria](SPONSORS.md).
 
+### 7. Progress Through Capability, Not Rank
+
+The child-facing challenge progression is **Find It → Figure It Out → Discover More**.
+
+These names should describe increasingly independent use of the physical dictionary rather than assigning child-facing labels such as Easy, Medium, Hard, beginner, or master. Difficulty remains useful as internal content metadata.
+
+- **Find It** teaches how to navigate the book.
+- **Figure It Out** teaches how to interpret what the child finds.
+- **Discover More** asks the child to combine those skills independently.
+
 ## Users
 
 ### Primary User: Child
@@ -188,7 +198,7 @@ As a child, I want to understand that I need my dictionary before starting.
 The introduction should communicate:
 
 - Grab your dictionary.
-- You will use it during the game.
+- You will use it during the challenge.
 - You will learn tricks for finding and understanding words.
 - The experience is short and fun.
 
@@ -202,9 +212,10 @@ As a child, I want to solve short challenges using my own dictionary so I become
 
 #### Acceptance Criteria
 
-- Three sequential levels: Codebreaker (Easy), Code Cracker (Medium), Master Codebreaker (Hard).
+- Three sequential stages: **Find It**, **Figure It Out**, and **Discover More**.
 - Each attempt draws ten questions from a bank preserving all 99 source records plus guided dictionary lessons.
-- Level 1 begins with six guided lessons and has eight selectable/two typed answers; Levels 2 and 3 have six selectable/four typed answers.
+- **Find It** begins with six guided lessons and has eight selectable/two typed answers; **Figure It Out** and **Discover More** have six selectable/four typed answers.
+- Internal question difficulty may continue to use Easy/Medium/Hard metadata, but that terminology is not the child-facing progression.
 - Demanding Easy source questions move to Medium, retaining original source metadata.
 - Category/topic limits and tab-session history provide variety; retakes change the question set.
 - Several dictionary skills are represented.
@@ -234,6 +245,8 @@ The overall experience demonstrates multiple benefits such as:
 - choosing the right definition from context,
 - independently solving a language question.
 
+The progression should move from locating information, to interpreting it, to independently applying multiple dictionary skills.
+
 ---
 
 ### Feature: Rotary Service Context
@@ -260,13 +273,14 @@ As a child, I want a clear celebration when I finish.
 
 #### Acceptance Criteria
 
-- A result says “You cracked # out of 10!” and encourages continued dictionary exploration.
-- Seven correct completes a level and unlocks the next. Lower scores allow immediate randomized retry.
-- Passing any level earns a printable challenge certificate showing level, score, date, and a random reference code.
-- Answers, scores, level progress, and certificates remain only in the current browser tab session.
+- A result communicates the score clearly and encourages continued dictionary exploration.
+- Seven correct completes a stage and unlocks the next. Lower scores allow immediate randomized retry.
+- Passing any stage earns a printable challenge certificate showing stage, score, date, and a random reference code.
+- Answers, scores, stage progress, and certificates remain only in the current browser tab session.
 - Children may continue upward, retake, or show their certificate to an adult.
 - Prize fulfillment is arranged by a parent/guardian with the organizer; no child contact details are requested.
 - Replay is possible.
+- Completion language should reinforce resourcefulness: the goal is not to know every answer already, but to know how to find and understand information.
 
 ---
 
@@ -312,7 +326,7 @@ Do not build:
 - multi-tenant support,
 - multi-organization theme switching.
 
-See [three-level implementation scope](LEVELS.md) and [mixed questions and guided lessons](MIXED-QUESTIONS.md).
+See [three-stage implementation scope](LEVELS.md) and [mixed questions and guided lessons](MIXED-QUESTIONS.md).
 
 ## Privacy
 
@@ -353,6 +367,7 @@ A promising POC allows children to:
 - complete the challenge in approximately 5–10 minutes,
 - demonstrate several dictionary skills,
 - identify at least one way a dictionary can help them learn,
+- understand the progression from finding information to figuring it out and discovering independently,
 - understand at a simple level that Rotary helps communities.
 
 ### Adult Testing
