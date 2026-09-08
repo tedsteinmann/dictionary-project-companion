@@ -180,17 +180,19 @@ describe('level progression and submission', () => {
 
   it('7/10 earns a certificate at every level and unlocks the next; submission is idempotent', () => {
     let session = createSession();
-    for (const level of levels) {
+    const orderedLevels = [...levels].sort((a, b) => a.id - b.id);
+    for (const [index, level] of orderedLevels.entries()) {
+      const nextLevel = orderedLevels[index + 1];
       assert.equal(canStartLevel(session, level.id), true, `${level.name} should be unlocked in sequence`);
-      if (level.id < levels.length) assert.equal(canStartLevel(session, level.id + 1), false, `${levels[level.id].name} should still be locked`);
+      if (nextLevel) assert.equal(canStartLevel(session, nextLevel.id), false, `${nextLevel.name} should still be locked`);
       session = answerAttempt(startAttempt(session, questions, level.id), 7);
       session = submitAttempt(session, questions);
       assert.equal(gradeAttempt(session.attempt, questions).score, 7);
       assert.equal(gradeAttempt(session.attempt, questions).details.filter((item) => !item.correct).length, 3);
       assert.ok(session.passedLevels.includes(level.id));
       assert.equal(session.attempt.certificate.levelId, level.id);
-      assert.equal(session.certificates.length, level.id);
-      if (level.id < levels.length) assert.equal(canStartLevel(session, level.id + 1), true, `${levels[level.id].name} should unlock after passing`);
+      assert.equal(session.certificates.length, index + 1);
+      if (nextLevel) assert.equal(canStartLevel(session, nextLevel.id), true, `${nextLevel.name} should unlock after passing`);
       assert.strictEqual(submitAttempt(session, questions), session);
       assert.strictEqual(saveAnswer(session, 'changed'), session);
       assert.strictEqual(moveToQuestion(session, 0), session);

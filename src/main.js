@@ -88,12 +88,13 @@ function levelPicker() {
       const unlocked = canStartLevel(session, level.id);
       const passed = session.passedLevels.includes(level.id);
       const certificate = session.certificates.findLast((item) => item.levelId === level.id);
+      const previousLevel = [...levels].filter((item) => item.id < level.id).sort((a, b) => b.id - a.id)[0];
       return `<li class="level-card">
         <p class="kicker">Stage ${level.id}${passed ? ' · Completed' : ''}</p>
         <h2>${level.name}</h2>
         <p>${level.description}</p>
         ${unlocked ? `<button class="button ${passed ? 'button-secondary' : 'button-primary'}" data-level="${level.id}">${passed ? 'Retake' : 'Start'} ${level.name}</button>`
-          : `<p class="progress-copy">Complete ${levels[level.id - 2].name} to unlock this stage.</p>`}
+          : `<p class="progress-copy">Complete ${previousLevel.name} to unlock this stage.</p>`}
         ${certificate ? `<button class="text-button return-link" data-certificate="${certificate.code}">View ${level.name} certificate</button>` : ''}
       </li>`;
     }).join('')}</ol>
