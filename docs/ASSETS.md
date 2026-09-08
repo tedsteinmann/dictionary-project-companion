@@ -1,4 +1,4 @@
-# Image assets
+# Media assets
 
 These project assets were created or edited with the built-in image-generation tool, then resized and encoded as WebP with alpha preserved. No runtime image service is used.
 
@@ -7,8 +7,11 @@ These project assets were created or edited with the built-in image-generation t
 | Dictionary | `src/assets/dictionary.webp` | Landing-page illustration; 900 × 600, approximately 76KiB |
 | Lions | `assets/sponsors/lions-transparent.webp` | Transparent cutout of supplied sponsor mark |
 | Elks | `assets/sponsors/elks-transparent.webp` | Transparent cutout of supplied sponsor mark |
+| Grown-up benefit icons | `src/assets/material-symbols-grownups.woff2` | Locally served subset of Google Material Symbols Outlined; approximately 3KiB |
 
 The two sponsor cutouts are also embedded in `sponsors.json` so the local editor can import/export the complete configuration. The supplied Rotary asset already had transparency and was retained. The dictionary is a generic illustrative book, not a photograph of a specific distributed edition. Sponsor marks remain the identities of their respective organizations.
+
+The icon font contains only the six symbols used by the grown-up benefit cards and is served locally, so displaying the icons makes no request to Google Fonts.
 
 ## Final prompts
 
@@ -23,4 +26,3 @@ Use case: background-extraction. Edit target: supplied Lions International logo.
 ### Elks
 
 Use case: background-extraction. INPUT IS AN EDIT TARGET, NOT A STYLE REFERENCE. Remove the white background of this supplied Elks script logo, and output an actual RGBA PNG with alpha=0 in the background. This is a file transparency requirement: NEVER draw a checkerboard, never simulate transparency with gray squares, and never use a white or colored backdrop. The original dark charcoal lettering and all its contours must remain exactly as supplied. Preserve the original subtle drop shadow using semitransparent pixels. Change only background alpha, no redesign, no new letters, no new texture. Keep the full mark at its original proportions. Genuine transparent image cutout.
-

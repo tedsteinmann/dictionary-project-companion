@@ -121,7 +121,13 @@ describe('client-only journey', () => {
     assert.match(source, /I’m a Kid/);
     assert.match(source, /physical book/);
     assert.match(source, /I’m a Grown-up/);
-    assert.match(source, /Why this dictionary?/);
-    assert.match(source, /literacy, learning, and independence/);
+    assert.match(source, /Want to get more involved?/);
+    assert.match(source, /Your child’s dictionary is one example/);
+    assert.match(source, /Why get involved?/);
+    assert.equal((source.match(/class="benefit-icon"/g) || []).length, 6);
+    assert.match(source, /More than dictionaries/);
+    assert.match(source, /adultSponsorProjects/);
+    assert.match(source, /Find a club that fits your life/);
+    assert.match(source, /Meet the clubs behind the Dictionary Project/);
   });
 });

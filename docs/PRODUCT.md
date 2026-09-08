@@ -266,22 +266,22 @@ As a child, I want a clear celebration when I finish.
 
 #### User Story
 
-As an adult, I want to understand why Rotary gave this dictionary and what Rotary does.
+As an adult, I want to understand how local service clubs made this dictionary project possible and how I can get involved in my community.
 
 #### Information Architecture
 
-1. Why did my child receive a dictionary?
-2. Why dictionaries and literacy matter
-3. What is Rotary?
-4. What does Rotary do locally?
-5. How can local Rotary Clubs work internationally?
-6. Learn more about the sponsoring club
+1. How does the dictionary connect to local service?
+2. Why might I get involved?
+3. What projects do the participating clubs support?
+4. Can I find a club that fits my schedule and interests?
+5. How can I learn more or visit a participating club?
 
 #### Acceptance Criteria
 
 - Literacy is the entry point.
 - All configured sponsors are clearly identified.
-- Page distinguishes local and broader Rotary service.
+- Page gives locally relevant examples of Rotary, Lions, and Elks service.
+- Page explains that clubs offer different meeting times and welcomes newcomers.
 - Organizers supply sponsor details and links at build time.
 
 ## Non-Goals

@@ -172,7 +172,7 @@ Optional small Rotary footer:
 
 ## Adult Flow
 
-### Page 1: Why This Dictionary?
+### Page 1: The Dictionary as an Invitation
 
 Lead with purpose.
 
@@ -182,57 +182,32 @@ Suggested framing:
 
 Explain that owning a personal dictionary gives a child a resource they can continue using at school and at home.
 
-### Page 2: Learning to Use It
+### Page 2: Why Get Involved?
 
-Explain the intended educational benefit:
+Explain how participating in a service club can help adults:
 
-- vocabulary,
-- spelling,
-- reading comprehension,
-- writing,
-- independent learning,
-- reference skills.
+- meet people from different backgrounds,
+- build friendships,
+- grow personally and professionally,
+- better understand their community,
+- connect ideas with useful knowledge and resources,
+- and contribute to visible local projects.
 
-Explain that the QR challenge is meant to help children start exploring the dictionary immediately.
+Present the six benefits as a responsive card grid that remains easy to scan on a phone. Give each card a distinct, decorative font icon while keeping its visible heading and description as the accessible meaning.
 
-### Page 3: Why Rotary?
+### Page 3: More Than Dictionaries
 
-Introduce Rotary through service rather than organizational history.
+Give concrete local examples from the five Fargo–Moorhead Rotary Clubs, Horace Lions Club, and Fargo Elks Lodge #260.
 
-Suggested framing:
+Combine each project example with its matching sponsor logo, name, and link in the sponsor grid. The cards cover Rotary’s parks, literacy, arts, and international work; Lions’ community giving and children’s vision screening; and Elks’ community events and support for youth, veterans, and neighbors in need.
 
-> Rotary Clubs bring people together to improve their communities.
+### Page 4: Find a Club That Fits Your Life
 
-Then connect literacy:
+Welcome people without prior club connections or leadership experience. Explain that local options include morning, noon, and evening meetings on different days.
 
-> Supporting education and literacy is one of the ways Rotary Clubs invest in long-term community strength.
+### Page 5: Meet the Clubs Behind the Dictionary Project
 
-### Page 4: Local and Beyond
-
-This is a key distinction.
-
-Suggested concept:
-
-```text
-Our Community
-     ↕
-Our Rotary Club
-     ↕
-Rotary Clubs Everywhere
-```
-
-Explain that a Rotary Club can:
-
-- address needs in its own city,
-- partner with schools and nonprofits,
-- support regional projects,
-- and work with Rotary members and clubs in other countries.
-
-This gives parents a sense of scale without centering the experience on one Rotary program.
-
-### Page 5: Our Community Sponsors
-
-The current grown-up screen includes each build-configured sponsor’s logo, title, description, and learn-more link after the literacy explanation.
+The grown-up screen includes each build-configured sponsor’s logo, title, description, and learn-more link, followed by a concise invitation to meet people, find a place, and make something happen.
 
 ## Child Design Principles
 

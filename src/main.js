@@ -14,6 +14,19 @@ import {
 const app = document.querySelector('#app');
 let quizState = initialQuizState;
 
+const adultSponsorProjects = [
+  { matches: /Rotary/i, description: 'Five Fargo–Moorhead Rotary Clubs have joined forces to create major community projects like the Rotary Natural Play Hill and Lindenwood Playground, along with literacy, arts, and international service projects.' },
+  { matches: /Lions/i, description: 'Horace Lions has given hundreds of thousands of dollars back to the community and provides free vision screening for local children.' },
+  { matches: /Elks/i, description: 'Fargo Elks Lodge #260 brings the community together through events like its Summer Car Show Series while raising money and supporting local youth, veterans, and neighbors in need.' }
+];
+
+const adultSponsorConfig = {
+  sponsors: sponsorConfig.sponsors.map((sponsor) => ({
+    ...sponsor,
+    description: adultSponsorProjects.find(({ matches }) => matches.test(sponsor.title))?.description || sponsor.description
+  }))
+};
+
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
@@ -97,12 +110,38 @@ function adult() {
   return layout(`<section class="card adult" aria-labelledby="adult-title">
     <button class="text-button" data-route="home">← Back</button>
     <p class="kicker">For grown-ups</p>
-    <h1 id="adult-title">Why this dictionary?</h1>
-    <p class="lede">Community sponsors help put dictionaries in children’s hands as a tool for literacy, learning, and independence.</p>
-    <div class="adult-grid"><article><h2>A book to keep</h2><p>It can help children build vocabulary, improve spelling, understand what they read, and solve language questions on their own.</p></article><article><h2>Learning through service</h2><p>Community service organizations bring volunteers together to help their neighbors. Supporting literacy gives children tools they can use for a lifetime.</p></article></div>
-    <p class="note">This challenge teaches children to use the physical dictionary—it never replaces it.</p>
-    <h2>Local help, wider possibilities</h2><p>Service starts close to home. Rotary Clubs, for example, support education locally and work with clubs in other countries on projects such as clean water and health.</p>
-    ${renderSponsors(sponsorConfig)}
+    <h1 id="adult-title">Want to get more involved?</h1>
+    <p class="lede">Your child’s dictionary is one example of what local service clubs make possible.</p>
+    <p>The five Fargo–Moorhead Rotary Clubs, Horace Lions Club, and Fargo Elks bring people together to serve our community, build relationships, and make good things happen.</p>
+
+    <section class="adult-section" aria-labelledby="why-involved-title">
+      <h2 id="why-involved-title">Why get involved?</h2>
+      <p>As adults, it can be surprisingly hard to meet new people, make genuine friendships, expand our circles, and find meaningful ways to get involved in our community. Service clubs make that easier.</p>
+      <p>Getting involved can help you:</p>
+      <ul class="benefit-list">
+        <li><span class="benefit-icon" aria-hidden="true">diversity_3</span><strong>Meet new people</strong> from different professions, ages, backgrounds, and walks of life.</li>
+        <li><span class="benefit-icon" aria-hidden="true">celebration</span><strong>Build friendships and have fun</strong> while doing something worthwhile.</li>
+        <li><span class="benefit-icon" aria-hidden="true">trending_up</span><strong>Grow personally and professionally</strong> by learning from others and taking on new challenges.</li>
+        <li><span class="benefit-icon" aria-hidden="true">location_city</span><strong>Get to know your community</strong>—its people, organizations, needs, and opportunities.</li>
+        <li><span class="benefit-icon" aria-hidden="true">emoji_objects</span><strong>Turn ideas into reality</strong> by connecting with people who have the knowledge, resources, and relationships to help.</li>
+        <li><span class="benefit-icon" aria-hidden="true">volunteer_activism</span><strong>Make a difference close to home</strong> through projects you can see and be part of.</li>
+      </ul>
+    </section>
+
+    <section class="adult-section" aria-labelledby="more-than-dictionaries-title">
+      <h2 id="more-than-dictionaries-title">More than dictionaries</h2>
+      <p>The Dictionary Project is just one example of what local service clubs make possible.</p>
+      <p class="note"><strong>Different clubs. Different projects.</strong> One idea: people working together can accomplish a lot.</p>
+    </section>
+
+    <section class="adult-section" aria-labelledby="find-a-club-title">
+      <h2 id="find-a-club-title">Find a club that fits your life</h2>
+      <p>You don’t need to know someone before you come, and you don’t need to be a business executive or longtime community leader. You just need to be interested in meeting people and getting involved.</p>
+      <p>Service clubs aren’t all noon lunch meetings. Local clubs meet on different days, with options at 7:00 a.m., noon, and in the evening. With several clubs to choose from, there’s likely an option that works with your schedule.</p>
+    </section>
+
+    ${renderSponsors(adultSponsorConfig, { heading: 'Meet the clubs behind the Dictionary Project', linkLabel: 'Learn more • Find a club • Visit a meeting' })}
+    <p class="closing-invitation">Come meet some people. Find your place. Make something happen.</p>
     ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
   </section>`, true);
 }

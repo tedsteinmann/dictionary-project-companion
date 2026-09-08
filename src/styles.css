@@ -30,6 +30,14 @@
   --title-size: clamp(1.8rem, 5vw, 2.5rem);
 }
 
+@font-face {
+  font-family: "Material Symbols Outlined";
+  src: url("./assets/material-symbols-grownups.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
 * { box-sizing: border-box; }
 body { margin: 0; font-size: var(--body-size); line-height: 1.6; overflow-wrap: anywhere; }
 button, input, textarea { font: inherit; }
@@ -120,6 +128,13 @@ footer { margin-top: auto; padding-top: var(--space-6); color: var(--muted); fon
 .adult-grid h2 { margin: 0 0 var(--space-2); }
 .adult-grid p { margin: 0; }
 .adult > p { max-width: 44rem; }
+.adult-section { max-width: 52rem; margin-top: var(--space-6); }
+.adult-section > h2 { margin: 0 0 var(--space-3); font-size: 1.5rem; }
+.benefit-list { display: grid; gap: var(--space-3); padding: 0; list-style: none; }
+.benefit-list li { padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); background: var(--page); }
+.benefit-list strong { display: block; margin-bottom: var(--space-1); color: var(--heading); }
+.benefit-icon { display: block; width: fit-content; margin-bottom: var(--space-2); color: var(--blue); font-family: "Material Symbols Outlined"; font-size: 2rem; font-weight: 400; font-style: normal; line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap; word-wrap: normal; direction: ltr; font-feature-settings: "liga"; }
+.closing-invitation { margin: var(--space-5) 0; color: var(--heading); font-size: 1.25rem; font-weight: 600; }
 .sponsors { margin: var(--space-5) 0; padding-top: var(--space-4); border-top: 1px solid var(--line); }
 .sponsors > h2 { margin: 0 0 var(--space-4); color: var(--muted); font-size: var(--small-size); font-weight: 600; }
 .sponsor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-5); }
@@ -129,6 +144,8 @@ footer { margin-top: auto; padding-top: var(--space-6); color: var(--muted); fon
 .sponsor h3 { margin: 0 0 var(--space-1); font-size: 1rem; }
 .sponsor p { max-width: 40rem; margin: 0; color: var(--muted); }
 .sponsor a { display: inline-flex; align-items: center; gap: .3rem; min-height: 44px; font-size: var(--small-size); font-weight: 600; }
+.adult .sponsor { display: flex; flex-direction: column; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); background: var(--page); }
+.adult .sponsor a { width: fit-content; margin-top: auto; padding-top: var(--space-3); }
 .sponsors-compact { margin-top: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 
@@ -138,7 +155,11 @@ footer { margin-top: auto; padding-top: var(--space-6); color: var(--muted); fon
   .hero { grid-template-columns: 1.2fr 1fr; gap: var(--space-5); padding: var(--space-6) 0; }
   .hero-dictionary { width: 100%; max-height: 320px; }
   .audience-choices, .adult-grid { grid-template-columns: 1fr 1fr; }
+  .benefit-list { grid-template-columns: repeat(2, 1fr); }
   .audience-choice { padding: var(--space-5); }
+}
+@media (min-width: 960px) {
+  .benefit-list { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 499px) {
   .brand-tag { display: none; }
