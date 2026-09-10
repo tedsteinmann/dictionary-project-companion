@@ -10,14 +10,34 @@ export default async function checkQuizBrowser(page) {
   await page.goto(base);
   await page.evaluate(() => sessionStorage.clear());
   await page.reload();
-  assert(await page.getByRole('link', { name: 'Dictionary Challenge home' }).isVisible(), 'Simple project name appears in the header');
-  assert((await page.locator('.primary-nav').count()) === 0, 'Audience choices are not persistent header navigation');
+  await page.setViewportSize({ width: 1024, height: 800 });
+  const primary = page.getByRole('navigation', { name: 'Primary' });
+  for (const destination of ['About', 'Sponsors', 'Redeem', 'Contact']) {
+    assert(await primary.getByRole('link', { name: destination, exact: true }).isVisible(), `${destination} appears in public navigation`);
+  }
+  assert(await primary.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), 'Challenge action appears in public navigation');
+  assert(await page.getByRole('link', { name: 'Dictionary Challenge home' }).getAttribute('aria-current') === 'page', 'Public home identifies the active page');
+  await page.getByRole('link', { name: 'Dictionary Challenge home' }).focus();
+  await page.keyboard.press('Tab');
+  assert(await primary.getByRole('link', { name: 'About', exact: true }).evaluate((element) => element === document.activeElement), 'Public links follow the wordmark in keyboard order');
+  for (const destination of ['About', 'Sponsors', 'Redeem', 'Contact']) {
+    await primary.getByRole('link', { name: destination, exact: true }).click();
+    assert(await page.getByRole('link', { name: destination, exact: true }).getAttribute('aria-current') === 'page', `${destination} identifies the active page`);
+  }
+  await page.getByRole('link', { name: 'Dictionary Challenge home' }).click();
   const bank = await page.evaluate(async () => (await import('/src/content/questions.js')).questions);
   const state = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
   const click = (name) => page.getByRole('button', { name, exact: true }).click();
   const noOverflow = async (label) => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${label}: horizontal overflow`);
   const noResults = async () => assert(!/Correct answer:|You cracked \d/.test(await page.locator('main').innerText()), 'Premature answer feedback');
   await page.setViewportSize({ width: 320, height: 720 });
+  const menu = page.getByRole('button', { name: 'Menu', exact: true });
+  assert(await menu.isVisible() && await menu.getAttribute('aria-expanded') === 'false', 'Phone navigation uses a collapsed button disclosure');
+  await menu.focus();
+  await page.keyboard.press('Enter');
+  assert(await menu.getAttribute('aria-expanded') === 'true' && await page.getByRole('link', { name: 'About', exact: true }).isVisible(), 'Phone menu opens from the keyboard');
+  await page.keyboard.press('Escape');
+  assert(await menu.getAttribute('aria-expanded') === 'false', 'Escape closes the phone menu');
   await noOverflow('welcome');
   await page.getByRole('button', { name: 'I’m a Grown-up' }).click();
   assert(await page.getByRole('heading', { name: 'Certificates and prizes' }).isVisible(), 'Adult prize guidance');
@@ -39,6 +59,17 @@ export default async function checkQuizBrowser(page) {
   const firstIds = (await state()).attempt.questionIds;
   assert(await page.locator('.game-toolbar').isVisible(), 'Child activity uses a game toolbar');
   assert((await page.locator('.game-status').innerText()).includes('Find It\nQuestion 1 of 10'), 'Toolbar shows stage and question progress');
+  assert((await page.locator('.game-toolbar .public-nav').count()) === 0, 'Question toolbar omits distracting public links');
+  const homeControl = page.getByRole('link', { name: 'Return to public home', exact: true });
+  assert(await homeControl.evaluate((element) => element.getBoundingClientRect().height >= 44), 'Toolbar home link has a large target');
+  await homeControl.focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  assert(await page.getByRole('link', { name: 'Return to Challenge', exact: true }).isVisible(), 'Public header offers a return to the active attempt');
+  await page.getByRole('link', { name: 'Return to Challenge', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  assert(await page.getByText('You have a quiz in progress.').isVisible(), 'Challenge return opens the active attempt stage screen');
+  await click('Continue your quiz →');
   const stagesControl = page.getByRole('button', { name: '← Stages' });
   assert(await stagesControl.evaluate((el) => el.getBoundingClientRect().height >= 44), 'Toolbar control has a large target');
   await stagesControl.focus();

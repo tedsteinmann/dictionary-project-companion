@@ -38,16 +38,40 @@ const adultSponsorConfig = {
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-function layout(content, route, wide = false) {
-  const childRoutes = ['intro', 'levels', 'challenge', 'review', 'results', 'certificate'];
-  const isChildRoute = childRoutes.includes(route);
+const publicRoutes = ['home', 'about', 'sponsors', 'redeem', 'contact'];
+
+function publicHeader(route) {
+  const resumableAttempt = session.attempt && !session.attempt.submitted;
+  const challengeRoute = resumableAttempt ? 'levels' : 'intro';
+  const link = (label, destination) =>
+    `<a href="#${destination}" data-route="${destination}"${route === destination ? ' aria-current="page"' : ''}>${label}</a>`;
+  return `<header class="brand public-header">
+    <a class="wordmark" href="./" data-route="home" aria-label="Dictionary Challenge home"${route === 'home' ? ' aria-current="page"' : ''}>Dictionary <span>Challenge</span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-action="menu">Menu</button>
+    <nav class="public-nav" id="public-navigation" aria-label="Primary">
+      ${link('About', 'about')}${link('Sponsors', 'sponsors')}${link('Redeem', 'redeem')}${link('Contact', 'contact')}
+      <a class="start-challenge" href="#${challengeRoute}" data-route="${challengeRoute}">${resumableAttempt ? 'Return to Challenge' : 'Start Challenge'}</a>
+    </nav>
+  </header>`;
+}
+
+function gameToolbar(route) {
   const level = session.attempt && levels.find((item) => item.id === session.attempt.levelId);
   const status = route === 'challenge' ? `Question ${session.attempt.index + 1} of ${QUESTIONS_PER_ATTEMPT}`
     : { intro: 'Get ready', levels: 'Choose a stage', review: 'Review answers', results: 'Your results', certificate: 'Certificate' }[route];
   const stageLabel = level && !['intro', 'levels'].includes(route) ? `<strong>${level.name}</strong>` : '';
   const stageControl = session.attempt && route !== 'levels'
     ? '<button class="toolbar-button" data-route="levels">← Stages</button>' : '';
-  return `<div class="shell ${wide ? 'shell-wide' : ''}"><header class="brand ${isChildRoute ? 'game-toolbar' : ''}">${isChildRoute ? `${stageControl}<a class="wordmark" href="./" aria-label="Dictionary Challenge home">Dictionary <span>Challenge</span></a><div class="game-status">${stageLabel}<span>${status}</span></div>` : '<a class="wordmark" href="./" aria-label="Dictionary Challenge home">Dictionary <span>Challenge</span></a><span class="brand-tag">Small book. Big discoveries.</span>'}</header>${content}<footer>Discover more with your dictionary.</footer></div>`;
+  return `<header class="brand game-toolbar">
+    <a class="toolbar-home" href="./" data-route="home" aria-label="Return to public home">Home</a>
+    ${stageControl}<span class="toolbar-title" aria-hidden="true">Dictionary Challenge</span>
+    <div class="game-status">${stageLabel}<span>${status}</span></div>
+  </header>`;
+}
+
+function layout(content, route, wide = false) {
+  const header = publicRoutes.includes(route) ? publicHeader(route) : gameToolbar(route);
+  return `<div class="shell ${wide ? 'shell-wide' : ''}">${header}${content}<footer>Discover more with your dictionary.</footer></div>`;
 }
 
 function welcome(route) {
@@ -62,7 +86,7 @@ function welcome(route) {
     </div>
     <div class="audience-choices">
       ${button('<span><strong>I’m a Kid</strong><span>Grab your book and start exploring.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'intro', 'button audience-choice kid-choice')}
-      ${button('<span><strong>I’m a Grown-up</strong><span>Learn about the project and its sponsors.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'adult', 'button audience-choice adult-choice')}
+      ${button('<span><strong>I’m a Grown-up</strong><span>Learn about the project and its sponsors.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'about', 'button audience-choice adult-choice')}
     </div>
     <p class="welcome-note">Your dictionary is all you need. Take your time.</p>
   </section>${renderSponsors(sponsorConfig, { compact: true })}`, route, true);
@@ -187,14 +211,13 @@ function certificate(route) {
       <button class="button button-primary" data-action="print">Print or save certificate</button>
       ${level.id < levels.length ? `<button class="button button-secondary" data-level="${level.id + 1}">Continue to ${levels[level.id].name} →</button>` : ''}
       ${button('Choose a stage', 'levels', 'button')}
-      ${button('For parents and guardians', 'adult', 'text-button')}
+      ${button('For parents and guardians', 'about', 'text-button')}
     </div>
   </section>`, route);
 }
 
-function adult(route) {
+function about(route) {
   return layout(`<section class="card adult" aria-labelledby="adult-title">
-    <button class="text-button" data-route="home">← Back</button>
     <p class="kicker">For grown-ups</p>
     <h1 id="adult-title">Want to get more involved?</h1>
     <p class="lede">Your child’s dictionary is one example of what local service clubs make possible.</p>
@@ -239,7 +262,37 @@ function adult(route) {
   </section>`, route, true);
 }
 
-const screenRoutes = new Set(['home', 'intro', 'levels', 'challenge', 'review', 'results', 'certificate', 'adult']);
+function sponsorsPage(route) {
+  return layout(`<section class="card adult" aria-labelledby="sponsors-page-title">
+    <p class="kicker">Community support</p>
+    <h1 id="sponsors-page-title">Meet the project sponsors.</h1>
+    <p class="lede">Local service clubs make dictionary distribution and this literacy companion possible.</p>
+    ${renderSponsors(adultSponsorConfig, { heading: 'Organizations supporting the Dictionary Project', linkLabel: 'Visit organization website' })}
+  </section>`, route, true);
+}
+
+function redeem(route) {
+  return layout(`<section class="card adult" aria-labelledby="redeem-title">
+    <p class="kicker">For parents and guardians</p>
+    <h1 id="redeem-title">Certificates and prizes</h1>
+    <p class="lede">A child earns a printable certificate by scoring ${PASSING_SCORE} or more in a challenge stage.</p>
+    <p>Save or print the certificate before closing the quiz tab, then show it to a teacher, librarian, or dictionary project organizer.</p>
+    <p>A parent or guardian should ask the organizer whether a prize is available and how to claim it. The completion code is a certificate reference, not an online redemption code.</p>
+    <p class="note">The challenge collects no names or contact information.</p>
+  </section>`, route, true);
+}
+
+function contact(route) {
+  return layout(`<section class="card adult" aria-labelledby="contact-title">
+    <p class="kicker">Get involved</p>
+    <h1 id="contact-title">Connect with a local club.</h1>
+    <p class="lede">Questions about the Dictionary Project, volunteering, or local prize availability are best answered by a participating organization.</p>
+    <p>Use the organization links on the Sponsors page to find official contact and meeting information.</p>
+    <a class="button button-primary inline-action" href="#sponsors" data-route="sponsors">View sponsor contacts</a>
+  </section>`, route, true);
+}
+
+const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', 'review', 'results', 'certificate', 'adult']);
 
 function renderScreen(route) {
   switch (route) {
@@ -249,13 +302,17 @@ function renderScreen(route) {
     case 'review': return review(route);
     case 'results': return results(route);
     case 'certificate': return certificate(route);
-    case 'adult': return adult(route);
+    case 'about':
+    case 'adult': return about('about');
+    case 'sponsors': return sponsorsPage(route);
+    case 'redeem': return redeem(route);
+    case 'contact': return contact(route);
     default: return welcome(route);
   }
 }
 
 function navigate(route, push = true, focus = true) {
-  let safeRoute = screenRoutes.has(route) ? route : 'home';
+  let safeRoute = route === 'adult' ? 'about' : (screenRoutes.has(route) ? route : 'home');
   if (['challenge', 'review', 'results'].includes(safeRoute)) {
     if (!session.attempt) safeRoute = 'levels';
     else if (session.attempt.submitted) safeRoute = 'results';
@@ -296,8 +353,18 @@ app.addEventListener('submit', (event) => {
 });
 
 app.addEventListener('click', (event) => {
+  const menuToggle = event.target.closest('[data-action="menu"]');
+  if (menuToggle) {
+    const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
+    menuToggle.setAttribute('aria-expanded', String(!expanded));
+    menuToggle.closest('.public-header').classList.toggle('menu-open', !expanded);
+    return;
+  }
   const routeTarget = event.target.closest('[data-route]');
-  if (routeTarget) return navigate(routeTarget.dataset.route);
+  if (routeTarget) {
+    event.preventDefault();
+    return navigate(routeTarget.dataset.route);
+  }
   const levelTarget = event.target.closest('[data-level]');
   if (levelTarget) {
     const next = startAttempt(session, questions, Number(levelTarget.dataset.level));
@@ -325,6 +392,15 @@ app.addEventListener('click', (event) => {
     return navigate('results');
   }
   if (event.target.closest('[data-action="print"]')) window.print();
+});
+
+app.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  const menuToggle = app.querySelector('[data-action="menu"][aria-expanded="true"]');
+  if (!menuToggle) return;
+  menuToggle.setAttribute('aria-expanded', 'false');
+  menuToggle.closest('.public-header').classList.remove('menu-open');
+  menuToggle.focus();
 });
 
 window.addEventListener('popstate', () => {

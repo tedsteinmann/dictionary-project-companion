@@ -208,6 +208,12 @@ Do not build a full theming system merely to enforce it.
 
 ```text
 Home
+ ├── Public pages
+ │    ├── About
+ │    ├── Sponsors
+ │    ├── Redeem
+ │    └── Contact
+ │
  ├── Kid
  │    ├── Intro
  │    ├── Find It / Figure It Out / Discover More
@@ -215,13 +221,12 @@ Home
  │    └── Certificate
  │
  └── Grown-up
-      ├── Why This Dictionary
-      ├── Literacy
-      ├── About Rotary
-      └── Local Club
+      └── About
 ```
 
 Browser navigation must not corrupt quiz state.
+
+Public pages use a full header with primary navigation links and a phone-friendly menu disclosure. Quiz routes use a compact toolbar with status and a Home action so the question flow stays focused on the dictionary activity.
 
 ## Accessibility
 
