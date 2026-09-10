@@ -288,23 +288,25 @@ As a child, I want a clear celebration when I finish.
 
 #### User Story
 
-As an adult, I want to understand how local service clubs made this dictionary project possible and how I can get involved in my community.
+As an adult, I want to understand how the physical dictionary builds literacy, how to support a child, and who made the local project possible.
 
 #### Information Architecture
 
-1. How does the dictionary connect to local service?
-2. Why might I get involved?
-3. What projects do the participating clubs support?
-4. Can I find a club that fits my schedule and interests?
-5. How can I learn more or visit a participating club?
+1. **About:** physical-dictionary purpose, the Find → Understand → Apply → Discover model, child privacy, and ways to help without supplying answers.
+2. **Sponsors:** every participating organization and its build-configured description and website, following literacy-first introductory copy.
+3. **Contact:** the build-configured organizer details and a list of official sponsor website links, with no contact form.
+4. **Certificates and prizes:** static guidance for parents and guardians.
+
+The former `#adult` URL remains a compatibility alias for `#about`.
 
 #### Acceptance Criteria
 
 - Literacy is the entry point.
 - All configured sponsors are clearly identified.
-- Page gives locally relevant examples of Rotary, Lions, and Elks service.
-- Page explains that clubs offer different meeting times and welcomes newcomers.
-- Organizers supply sponsor details and links at build time.
+- Sponsor descriptions are supplied directly by configuration; the renderer never guesses content from an organization name.
+- Organizers supply public contact details, sponsor descriptions, and links at build time.
+- These pages are static build outputs, not accounts, a CMS, or runtime administration.
+- No page requests a visitor's personal information.
 
 ## Non-Goals
 

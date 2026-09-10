@@ -4,7 +4,7 @@ export function validateSponsorConfig(config) {
   if (!config || !Array.isArray(config.sponsors) || config.sponsors.length === 0) {
     throw new Error('Add at least one sponsor.');
   }
-  return { sponsors: config.sponsors.map((sponsor, index) => {
+  const sponsors = config.sponsors.map((sponsor, index) => {
     const label = `Sponsor ${index + 1}`;
     const text = (key, limit) => {
       if (typeof sponsor?.[key] !== 'string' || !sponsor[key].trim() || sponsor[key].trim().length > limit) {
@@ -32,7 +32,32 @@ export function validateSponsorConfig(config) {
       }
     }
     return { title, description, url: website.href, logo };
-  }) };
+  });
+  let organizer = null;
+  if (config.organizer != null) {
+    if (typeof config.organizer !== 'object' || Array.isArray(config.organizer)) {
+      throw new Error('Organizer details must be an object.');
+    }
+    const optionalText = (key, limit) => {
+      const value = config.organizer[key];
+      if (value == null || value === '') return null;
+      if (typeof value !== 'string' || !value.trim() || value.trim().length > limit) {
+        throw new Error(`Organizer: ${key} must be at most ${limit} characters.`);
+      }
+      return value.trim();
+    };
+    organizer = {
+      name: optionalText('name', 120),
+      address: optionalText('address', 300),
+      phone: optionalText('phone', 50),
+      email: optionalText('email', 254)
+    };
+    if (!Object.values(organizer).some(Boolean)) throw new Error('Organizer: add at least one contact detail.');
+    if (organizer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(organizer.email)) {
+      throw new Error('Organizer: enter a valid email address.');
+    }
+  }
+  return { sponsors, organizer };
 }
 
 export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({

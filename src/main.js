@@ -22,19 +22,6 @@ const currentLevel = () => levels.find((level) => level.id === session.attempt.l
 const selectedCertificate = () => session.certificates.find((item) => item.code === session.certificateCode)
   || session.attempt?.certificate || session.certificates.at(-1);
 
-const adultSponsorProjects = [
-  { matches: /Rotary/i, description: 'Five Fargo–Moorhead Rotary Clubs have joined forces to create major community projects like the Rotary Natural Play Hill and Lindenwood Playground, along with literacy, arts, and international service projects.' },
-  { matches: /Lions/i, description: 'Horace Lions has given hundreds of thousands of dollars back to the community and provides free vision screening for local children.' },
-  { matches: /Elks/i, description: 'Fargo Elks Lodge #260 brings the community together through events like its Summer Car Show Series while raising money and supporting local youth, veterans, and neighbors in need.' }
-];
-
-const adultSponsorConfig = {
-  sponsors: sponsorConfig.sponsors.map((sponsor) => ({
-    ...sponsor,
-    description: adultSponsorProjects.find(({ matches }) => matches.test(sponsor.title))?.description || sponsor.description
-  }))
-};
-
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
@@ -219,45 +206,25 @@ function certificate(route) {
 function about(route) {
   return layout(`<section class="card adult" aria-labelledby="adult-title">
     <p class="kicker">For grown-ups</p>
-    <h1 id="adult-title">Want to get more involved?</h1>
-    <p class="lede">Your child’s dictionary is one example of what local service clubs make possible.</p>
-    <p>The five Fargo–Moorhead Rotary Clubs, Horace Lions Club, and Fargo Elks bring people together to serve our community, build relationships, and make good things happen.</p>
+    <h1 id="adult-title">Why a physical dictionary?</h1>
+    <p class="lede">The Dictionary Challenge helps a child learn to use the book they received—it does not replace that book with an online lookup.</p>
 
-    <section class="adult-section" aria-labelledby="prize-title">
-      <h2 id="prize-title">Certificates and prizes</h2>
-      <p>Children use their physical dictionary to answer 10 questions using a mix of choices and short typed answers. Guided lessons teach children how to use the book. A score of 7 or more at any stage earns a printable certificate and unlocks the next stage. Answers and learning feedback appear after submission.</p>
-      <p>Save or print the certificate before closing the quiz tab. Show it to a teacher, librarian, or the dictionary project organizer. A parent or guardian should ask the organizer about prize availability and any fulfillment details; the child’s quiz requests no names or contact information.</p>
-      <p>The completion code is a reference for the certificate. It is not an online prize claim or a verified redemption code.</p>
+    <section class="adult-section" aria-labelledby="learning-title">
+      <h2 id="learning-title">Find → Understand → Apply → Discover</h2>
+      <p>Children first find information in their physical dictionary, understand the entry, apply what it means, and discover how independent reading and writing can open new ideas.</p>
+      <p>The short challenges build practical skills such as alphabetical order, guide words, definitions, parts of speech, and choosing a meaning from context.</p>
     </section>
 
-    <section class="adult-section" aria-labelledby="why-involved-title">
-      <h2 id="why-involved-title">Why get involved?</h2>
-      <p>As adults, it can be surprisingly hard to meet new people, make genuine friendships, expand our circles, and find meaningful ways to get involved in our community. Service clubs make that easier.</p>
-      <p>Getting involved can help you:</p>
-      <ul class="benefit-list">
-        <li><span class="benefit-icon" aria-hidden="true">diversity_3</span><strong>Meet new people</strong> from different professions, ages, backgrounds, and walks of life.</li>
-        <li><span class="benefit-icon" aria-hidden="true">celebration</span><strong>Build friendships and have fun</strong> while doing something worthwhile.</li>
-        <li><span class="benefit-icon" aria-hidden="true">trending_up</span><strong>Grow personally and professionally</strong> by learning from others and taking on new challenges.</li>
-        <li><span class="benefit-icon" aria-hidden="true">location_city</span><strong>Get to know your community</strong>—its people, organizations, needs, and opportunities.</li>
-        <li><span class="benefit-icon" aria-hidden="true">emoji_objects</span><strong>Turn ideas into reality</strong> by connecting with people who have the knowledge, resources, and relationships to help.</li>
-        <li><span class="benefit-icon" aria-hidden="true">volunteer_activism</span><strong>Make a difference close to home</strong> through projects you can see and be part of.</li>
-      </ul>
+    <section class="adult-section" aria-labelledby="support-title">
+      <h2 id="support-title">How adults can help</h2>
+      <p>Put the physical dictionary within reach, invite the child to read the instructions aloud, and ask questions such as “Which guide words could help?” or “Which meaning fits the sentence?” Give them time to search instead of giving the answer.</p>
+      <p>Celebrate the search strategy and persistence, whether or not the first answer is correct. The goal is confidence in finding and understanding information.</p>
     </section>
 
-    <section class="adult-section" aria-labelledby="more-than-dictionaries-title">
-      <h2 id="more-than-dictionaries-title">More than dictionaries</h2>
-      <p>The Dictionary Project is just one example of what local service clubs make possible.</p>
-      <p class="note"><strong>Different clubs. Different projects.</strong> One idea: people working together can accomplish a lot.</p>
+    <section class="adult-section" aria-labelledby="privacy-title">
+      <h2 id="privacy-title">A private, child-friendly activity</h2>
+      <p>The challenge asks for no name, email address, birthday, school, address, or location. Quiz progress is temporary to this browser tab; there are no child accounts or public scores.</p>
     </section>
-
-    <section class="adult-section" aria-labelledby="find-a-club-title">
-      <h2 id="find-a-club-title">Find a club that fits your life</h2>
-      <p>You don’t need to know someone before you come, and you don’t need to be a business executive or longtime community leader. You just need to be interested in meeting people and getting involved.</p>
-      <p>Service clubs aren’t all noon lunch meetings. Local clubs meet on different days, with options at 7:00 a.m., noon, and in the evening. With several clubs to choose from, there’s likely an option that works with your schedule.</p>
-    </section>
-
-    ${renderSponsors(adultSponsorConfig, { heading: 'Meet the clubs behind the Dictionary Project', linkLabel: 'Learn more • Find a club • Visit a meeting' })}
-    <p class="closing-invitation">Come meet some people. Find your place. Make something happen.</p>
     ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
   </section>`, route, true);
 }
@@ -266,8 +233,9 @@ function sponsorsPage(route) {
   return layout(`<section class="card adult" aria-labelledby="sponsors-page-title">
     <p class="kicker">Community support</p>
     <h1 id="sponsors-page-title">Meet the project sponsors.</h1>
-    <p class="lede">Local service clubs make dictionary distribution and this literacy companion possible.</p>
-    ${renderSponsors(adultSponsorConfig, { heading: 'Organizations supporting the Dictionary Project', linkLabel: 'Visit organization website' })}
+    <p class="lede">Participating organizations made this local dictionary project possible by supporting children, books, and literacy.</p>
+    <p>The physical dictionary and the child’s learning come first. Sponsor information is provided here so families can recognize the community partners behind the project.</p>
+    ${renderSponsors(sponsorConfig, { heading: 'Participating organizations', linkLabel: 'Visit organization website' })}
   </section>`, route, true);
 }
 
@@ -283,32 +251,34 @@ function redeem(route) {
 }
 
 function contact(route) {
+  const { organizer, sponsors } = sponsorConfig;
+  const organizerDetails = organizer ? `<address>
+    ${organizer.name ? `<strong>${escapeHtml(organizer.name)}</strong><br />` : ''}
+    ${organizer.address ? `${escapeHtml(organizer.address).replace(/\n/g, '<br />')}<br />` : ''}
+    ${organizer.phone ? `<a href="tel:${escapeHtml(organizer.phone.replace(/[^+\d]/g, ''))}">${escapeHtml(organizer.phone)}</a><br />` : ''}
+    ${organizer.email ? `<a href="mailto:${escapeHtml(organizer.email)}">Email ${escapeHtml(organizer.name || 'the project organizer')}</a>` : ''}
+  </address>` : '<p>Organizer contact details are not included in this build.</p>';
   return layout(`<section class="card adult" aria-labelledby="contact-title">
-    <p class="kicker">Get involved</p>
-    <h1 id="contact-title">Connect with a local club.</h1>
-    <p class="lede">Questions about the Dictionary Project, volunteering, or local prize availability are best answered by a participating organization.</p>
-    <p>Use the organization links on the Sponsors page to find official contact and meeting information.</p>
-    <a class="button button-primary inline-action" href="#sponsors" data-route="sponsors">View sponsor contacts</a>
+    <p class="kicker">Project information</p>
+    <h1 id="contact-title">Contact the project.</h1>
+    <p class="lede">For questions about the local dictionary project or prize availability, contact the configured organizer. This site does not use a contact form or collect visitor details.</p>
+    <section class="adult-section" aria-labelledby="organizer-title"><h2 id="organizer-title">Project organizer</h2>${organizerDetails}</section>
+    <section class="adult-section" aria-labelledby="website-title"><h2 id="website-title">Sponsor websites</h2>
+      <ul>${sponsors.map((sponsor) => `<li><a href="${escapeHtml(sponsor.url)}" rel="noreferrer">Visit the ${escapeHtml(sponsor.title)} website <span aria-hidden="true">↗</span></a></li>`).join('')}</ul>
+    </section>
   </section>`, route, true);
 }
 
 const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', 'review', 'results', 'certificate', 'adult']);
 
+const screens = {
+  home: welcome, intro, levels: levelPicker, challenge, review, results, certificate,
+  about, sponsors: sponsorsPage, redeem, contact,
+  adult: () => about('about')
+};
+
 function renderScreen(route) {
-  switch (route) {
-    case 'intro': return intro(route);
-    case 'levels': return levelPicker(route);
-    case 'challenge': return challenge(route);
-    case 'review': return review(route);
-    case 'results': return results(route);
-    case 'certificate': return certificate(route);
-    case 'about':
-    case 'adult': return about('about');
-    case 'sponsors': return sponsorsPage(route);
-    case 'redeem': return redeem(route);
-    case 'contact': return contact(route);
-    default: return welcome(route);
-  }
+  return (screens[route] || screens.home)(route);
 }
 
 function navigate(route, push = true, focus = true) {

@@ -29,6 +29,14 @@
       <p class="note">Files stay in your browser. Download your configuration, then build the site with it. This setup page is not included in the published site.</p>
       <label>Open an existing configuration <input id="import-config" type="file" accept=".json,application/json" /></label>
       <form id="sponsor-form">
+        <fieldset>
+          <legend>Public organizer contact (optional)</legend>
+          <p class="note">These details are printed on the static Contact page. They are not a contact form.</p>
+          <label for="organizer-name">Organizer name<input id="organizer-name" name="organizer-name" maxlength="120" /></label>
+          <label for="organizer-address">Postal address or service area<textarea id="organizer-address" name="organizer-address" maxlength="300"></textarea></label>
+          <label for="organizer-phone">Phone<input id="organizer-phone" name="organizer-phone" type="tel" maxlength="50" /></label>
+          <label for="organizer-email">Email<input id="organizer-email" name="organizer-email" type="email" maxlength="254" /></label>
+        </fieldset>
         <div id="sponsor-editors"></div>
         <div class="setup-actions">
           <button class="button button-secondary" type="button" id="add-sponsor">+ Add sponsor</button>
