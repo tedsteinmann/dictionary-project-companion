@@ -41,7 +41,8 @@ const button = (label, route, className = 'button') =>
 const publicRoutes = ['home', 'about', 'sponsors', 'redeem', 'contact'];
 
 function publicHeader(route) {
-  const challengeRoute = session.attempt ? 'levels' : 'intro';
+  const resumableAttempt = session.attempt && !session.attempt.submitted;
+  const challengeRoute = resumableAttempt ? 'levels' : 'intro';
   const link = (label, destination) =>
     `<a href="#${destination}" data-route="${destination}"${route === destination ? ' aria-current="page"' : ''}>${label}</a>`;
   return `<header class="brand public-header">
@@ -49,7 +50,7 @@ function publicHeader(route) {
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-action="menu">Menu</button>
     <nav class="public-nav" id="public-navigation" aria-label="Primary">
       ${link('About', 'about')}${link('Sponsors', 'sponsors')}${link('Redeem', 'redeem')}${link('Contact', 'contact')}
-      <a class="start-challenge" href="#${challengeRoute}" data-route="${challengeRoute}">${session.attempt ? 'Return to Challenge' : 'Start Challenge'}</a>
+      <a class="start-challenge" href="#${challengeRoute}" data-route="${challengeRoute}">${resumableAttempt ? 'Return to Challenge' : 'Start Challenge'}</a>
     </nav>
   </header>`;
 }
@@ -262,9 +263,9 @@ function about(route) {
 }
 
 function sponsorsPage(route) {
-  return layout(`<section class="card adult" aria-labelledby="sponsors-title">
+  return layout(`<section class="card adult" aria-labelledby="sponsors-page-title">
     <p class="kicker">Community support</p>
-    <h1 id="sponsors-title">Meet the project sponsors.</h1>
+    <h1 id="sponsors-page-title">Meet the project sponsors.</h1>
     <p class="lede">Local service clubs make dictionary distribution and this literacy companion possible.</p>
     ${renderSponsors(adultSponsorConfig, { heading: 'Organizations supporting the Dictionary Project', linkLabel: 'Visit organization website' })}
   </section>`, route, true);
