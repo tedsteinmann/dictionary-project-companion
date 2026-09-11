@@ -15,7 +15,7 @@ export default async function checkQuizBrowser(page) {
   const publicPages = {
     About: ['Why a physical dictionary?', 'Find → Understand → Apply → Discover'],
     Sponsors: ['Meet the project sponsors.', 'Participating organizations'],
-    Redeem: ['Certificates and prizes', 'completion code is a certificate reference'],
+    Redeem: ['Certificates and prizes', 'completion code is a reference only'],
     Contact: ['Contact the project.', 'does not use a contact form']
   };
   for (const destination of Object.keys(publicPages)) {
@@ -32,6 +32,23 @@ export default async function checkQuizBrowser(page) {
     assert(await page.getByRole('heading', { name: heading, exact: true }).isVisible(), `${destination} heading`);
     assert((await page.locator('main').innerText()).includes(text), `${destination} content`);
   }
+  const config = await page.evaluate(async () => (await import('/src/content/site-config.js')).siteConfig);
+  await page.goto(`${base}/#redeem`);
+  assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
+  assert((await page.locator('main').innerText()).includes('not online verification or a guaranteed prize claim'), 'Redemption explains the local reference code limitation');
+  if (config.redemption.enabled && config.redemption.locations.length) {
+    assert((await page.locator('.redemption-location').count()) === config.redemption.locations.length, 'Every configured library is rendered');
+    assert((await page.locator('main').innerText()).includes('parent or guardian should handle'), 'Redemption is directed to a parent or guardian');
+    assert((await page.locator('main').innerText()).includes('printed certificate or a saved copy'), 'Redemption says what to bring');
+  } else {
+    assert((await page.locator('.redemption-grid').count()) === 0, 'Disabled or location-free configuration has no empty location grid');
+    assert((await page.locator('main').innerText()).includes('No certificate redemption program is available'), 'Unavailable redemption has a neutral message');
+  }
+  await page.getByRole('link', { name: 'About', exact: true }).click();
+  await page.goBack();
+  assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Browser Back restores redemption');
+  await page.goForward();
+  assert(await page.getByRole('heading', { name: 'Why a physical dictionary?', exact: true }).isVisible(), 'Browser Forward restores the following public screen');
   await page.getByRole('link', { name: 'Dictionary Challenge home' }).click();
   const bank = await page.evaluate(async () => (await import('/src/content/questions.js')).questions);
   const state = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
@@ -147,14 +164,28 @@ export default async function checkQuizBrowser(page) {
   };
   await finish(6);
   assert((await page.locator('[data-certificate]').count()) === 0, 'No certificate below passing score');
+  assert((await page.getByRole('button', { name: /redeem/i }).count()) === 0, 'Failed results do not expose redemption messaging');
   assert((await state()).passedLevels.length === 0, 'Failed attempt does not unlock');
   await click('Try Find It again');
   const retryIds = (await state()).attempt.questionIds;
   assert(JSON.stringify([...firstIds].sort()) !== JSON.stringify([...retryIds].sort()), 'Retake changes question set');
   await finish(7);
+  if (config.redemption.enabled) {
+    const resultsRedeem = page.getByRole('button', { name: 'How to redeem your certificate', exact: true });
+    assert(await resultsRedeem.isVisible(), 'Passing results offer redemption only after the certificate is earned');
+  }
   await click('View and print certificate');
   assert(await page.getByRole('heading', { name: 'Certificate of completion' }).isVisible(), 'Find It earns certificate');
   assert((await page.locator('.certificate').innerText()).includes('Stage 1 · Find It'), 'Certificate names Find It');
+  if (config.redemption.enabled) {
+    const redeemAction = page.getByRole('button', { name: 'How to redeem this certificate', exact: true });
+    assert(await redeemAction.isVisible(), 'Certificate provides a no-print redemption action');
+    await redeemAction.focus();
+    assert(await redeemAction.evaluate((element) => getComputedStyle(element).outlineStyle !== 'none'), 'Redemption action has visible keyboard focus');
+    await redeemAction.press('Enter');
+    assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Certificate action navigates to redemption');
+    await page.goBack();
+  }
   const firstCode = await page.locator('.completion-code').innerText();
   await page.reload();
   assert(await page.locator('.completion-code').innerText() === firstCode, 'Certificate stable across reload');
@@ -166,6 +197,7 @@ export default async function checkQuizBrowser(page) {
   assert(!(await page.locator('.no-print').isVisible()), 'Print hides controls');
   assert(!(await page.locator('.brand').isVisible()), 'Print hides navigation');
   assert(await page.locator('.certificate').isVisible(), 'Print includes certificate');
+  assert(!(await page.getByRole('button', { name: 'How to redeem this certificate', exact: true }).isVisible().catch(() => false)), 'Print excludes the redemption action');
   await page.emulateMedia({ media: 'screen' });
   await page.evaluate(() => { window.print = () => { window.__printCalled = true; }; });
   await click('Print or save certificate');

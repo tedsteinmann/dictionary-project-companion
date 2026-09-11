@@ -143,6 +143,12 @@ footer { margin-top: auto; padding-top: var(--space-6); color: var(--muted); fon
 .adult > p { max-width: 44rem; }
 .adult-section { max-width: 52rem; margin-top: var(--space-6); }
 .adult-section > h2 { margin: 0 0 var(--space-3); font-size: 1.5rem; }
+.redemption-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: var(--space-3); margin: var(--space-4) 0; }
+.redemption-location { min-width: 0; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); background: var(--page); overflow-wrap: anywhere; }
+.redemption-location h2 { margin: 0 0 var(--space-2); font-size: 1.25rem; }
+.redemption-location address, .organizer-contact { margin-bottom: var(--space-3); font-style: normal; }
+.redemption-location p:last-child { margin-bottom: 0; }
+.redemption-deadline { width: fit-content; padding: var(--space-2) var(--space-3); border-left: 4px solid var(--retry); background: var(--retry-tint); color: var(--heading); }
 .benefit-list { display: grid; gap: var(--space-3); padding: 0; list-style: none; }
 .benefit-list li { padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); background: var(--page); }
 .benefit-list strong { display: block; margin-bottom: var(--space-1); color: var(--heading); }
@@ -213,6 +219,7 @@ input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .certificate { border: 3px double var(--blue); text-align: center; }
 .certificate .lede { color: var(--blue); font-weight: 600; }
 .certificate-score { font-size: 1.25rem; font-weight: 700; }
+.certificate-redemption { margin: var(--space-4) auto 0; padding-top: var(--space-3); border-top: 1px solid var(--line); font-size: var(--small-size); }
 .certificate-sponsors { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line); }
 .certificate-sponsors h2 { margin: 0 0 var(--space-3); color: var(--muted); font-size: var(--small-size); font-weight: 600; }
 .certificate-sponsor-grid { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: var(--space-4) var(--space-5); }
@@ -233,6 +240,9 @@ input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
   .certificate { break-inside: avoid; box-shadow: none; border-color: #000; padding: 12mm; }
   .certificate h1 { font-size: 26pt; }
   .certificate p, .certificate strong, .certificate .lede { color: #000; }
+  .certificate-redemption { border-color: #777; }
+  .redemption-grid { grid-template-columns: repeat(2, 1fr); }
+  .redemption-location { break-inside: avoid; border-color: #777; background: #fff; }
 }
 
 /* Answer and teaching components use native controls, with touch-sized labels. */
