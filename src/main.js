@@ -26,6 +26,20 @@ const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
 const publicRoutes = ['home', 'about', 'sponsors', 'redeem', 'contact'];
+const SHORT_PRINT_REDEMPTION_LENGTH = 180;
+
+function organizerContact() {
+  const { site } = siteConfig;
+  const hasDetails = site.organizerName || site.addressLines.length || site.telephone || site.email || site.website;
+  if (!hasDetails) return '';
+  return `<address class="organizer-contact">
+    ${site.organizerName ? `<strong>${escapeHtml(site.organizerName)}</strong><br />` : ''}
+    ${site.addressLines.length ? `${site.addressLines.map(escapeHtml).join('<br />')}<br />` : ''}
+    ${site.telephone ? `<a href="tel:${escapeHtml(site.telephone.replace(/[^+\d]/g, ''))}">${escapeHtml(site.telephone)}</a><br />` : ''}
+    ${site.email ? `<a href="mailto:${escapeHtml(site.email)}">Email ${escapeHtml(site.organizerName || 'the project organizer')}</a><br />` : ''}
+    ${site.website ? `<a href="${escapeHtml(site.website)}" rel="noreferrer">Visit organizer website <span aria-hidden="true">↗</span></a>` : ''}
+  </address>`;
+}
 
 function publicHeader(route) {
   const resumableAttempt = session.attempt && !session.attempt.submitted;
@@ -164,6 +178,7 @@ function results(route) {
     <p class="lede">${result.passed ? `Stage completed! You earned your ${level.name} certificate.` : 'Keep exploring! Crack 7 or more to complete this stage. Your dictionary can help you try again.'}</p>
     <div class="quiz-actions">
       ${result.passed ? `<button class="button button-primary" data-certificate="${session.attempt.certificate.code}">View and print certificate</button>` : ''}
+      ${result.passed && siteConfig.redemption.enabled ? button('How to redeem your certificate', 'redeem', 'button button-secondary') : ''}
       ${result.passed && level.id < levels.length ? `<button class="button button-primary" data-level="${level.id + 1}">Start ${levels[level.id].name} →</button>` : ''}
       <button class="button button-secondary" data-level="${level.id}">Try ${level.name} again</button>
     </div>
@@ -192,15 +207,30 @@ function certificate(route) {
       <p>Completed <time datetime="${earned.date}">${earned.date}</time></p>
       <p>Completion code<br /><strong class="completion-code">${earned.code}</strong></p>
       <p>Show this certificate to a parent, guardian, teacher, or librarian. A parent or guardian can ask the organizer about any available prize and how to claim it.</p>
+      ${certificateRedemptionGuidance()}
       ${renderSponsorNames(siteConfig)}
     </div>
     <div class="quiz-actions no-print">
       <button class="button button-primary" data-action="print">Print or save certificate</button>
+      ${siteConfig.redemption.enabled ? button('How to redeem this certificate', 'redeem', 'button button-secondary') : ''}
       ${level.id < levels.length ? `<button class="button button-secondary" data-level="${level.id + 1}">Continue to ${levels[level.id].name} →</button>` : ''}
       ${button('Choose a stage', 'levels', 'button')}
       ${button('For parents and guardians', 'about', 'text-button')}
     </div>
   </section>`, route);
+}
+
+function certificateRedemptionGuidance() {
+  const { redemption, site } = siteConfig;
+  if (!redemption.enabled) return '';
+  const shortEnough = redemption.instructions.length <= SHORT_PRINT_REDEMPTION_LENGTH;
+  if (shortEnough) {
+    return `<p class="certificate-redemption"><strong>Redemption:</strong> ${escapeHtml(redemption.instructions)}${redemption.deadline ? ` Deadline: ${escapeHtml(redemption.deadline)}.` : ''}</p>`;
+  }
+  const contactDirection = site.telephone ? `contact the project organizer at ${escapeHtml(site.telephone)}`
+    : site.email ? `email ${escapeHtml(site.email)}`
+      : 'open “How to redeem this certificate” in the Dictionary Challenge';
+  return `<p class="certificate-redemption">For redemption details, have a parent or guardian ${contactDirection}.</p>`;
 }
 
 function about(route) {
@@ -242,38 +272,39 @@ function sponsorsPage(route) {
 function redeem(route) {
   const { redemption } = siteConfig;
   const telHref = (telephone) => telephone.replace(/[^+\d]/g, '');
-  const locations = redemption.locations.map((location) => `<article class="adult-section redemption-location">
+  const organizerDetails = organizerContact();
+  const locations = redemption.locations.map((location) => `<article class="redemption-location">
     <h2>${escapeHtml(location.name)}</h2>
-    <p>${escapeHtml(location.instructions)}</p>
     ${location.addressLines.length ? `<address>${location.addressLines.map(escapeHtml).join('<br />')}</address>` : ''}
+    <p>${escapeHtml(location.instructions)}</p>
     ${location.telephone ? `<p><a href="tel:${escapeHtml(telHref(location.telephone))}">${escapeHtml(location.telephone)}</a></p>` : ''}
     ${location.website ? `<p><a href="${escapeHtml(location.website)}" rel="noreferrer">Visit location website <span aria-hidden="true">↗</span></a></p>` : ''}
   </article>`).join('');
-  const redemptionDetails = redemption.enabled ? `
-    <p class="lede">${escapeHtml(redemption.instructions)}</p>
-    ${redemption.deadline ? `<p><strong>Deadline:</strong> ${escapeHtml(redemption.deadline)}</p>` : ''}
-    ${locations || '<p>Ask the project organizer for the participating location.</p>'}` : `
-    <p class="lede">This build does not include a certificate redemption offer.</p>
-    <p>Families can still save or print a child’s certificate as a record of their dictionary challenge.</p>`;
+  const available = redemption.enabled;
+  const redemptionDetails = available ? `
+    <p class="lede">A parent or guardian should handle certificate redemption.</p>
+    <p><strong>What to bring:</strong> Bring the printed certificate or a saved copy that shows the completion code.</p>
+    <p>${escapeHtml(redemption.instructions)}</p>
+    ${redemption.deadline ? `<p class="redemption-deadline"><strong>Redemption deadline:</strong> ${escapeHtml(redemption.deadline)}</p>` : ''}
+    ${redemption.locations.length ? `<div class="redemption-grid" aria-label="Participating libraries">${locations}</div>
+    <p class="note"><strong>Before traveling:</strong> Confirm the library’s hours and prize availability by phone or on its website.</p>` : ''}
+    ${organizerDetails ? `<section class="adult-section" aria-labelledby="redemption-contact-title"><h2 id="redemption-contact-title">Project organizer</h2>${organizerDetails}</section>` : ''}` : `
+    <p class="lede">No certificate redemption program is available for this build.</p>
+    <p>Families can still save or print a child’s certificate as a record of their dictionary challenge.</p>
+    ${organizerDetails ? `<section class="adult-section" aria-labelledby="redemption-contact-title"><h2 id="redemption-contact-title">Project organizer</h2>${organizerDetails}</section>` : ''}`;
   return layout(`<section class="card adult" aria-labelledby="redeem-title">
     <p class="kicker">For parents and guardians</p>
     <h1 id="redeem-title">Certificates and prizes</h1>
     ${redemptionDetails}
-    <p>A child earns a printable certificate by scoring ${PASSING_SCORE} or more in a challenge stage. The completion code is a certificate reference, not an online redemption code.</p>
+    <p>A child earns a printable certificate by scoring ${PASSING_SCORE} or more in a challenge stage.</p>
+    <p><strong>The locally generated completion code is a reference only. It is not online verification or a guaranteed prize claim.</strong></p>
     <p class="note">The challenge collects no names or contact information.</p>
   </section>`, route, true);
 }
 
 function contact(route) {
-  const { site, sponsors } = siteConfig;
-  const hasDetails = site.organizerName || site.addressLines.length || site.telephone || site.email || site.website;
-  const organizerDetails = hasDetails ? `<address>
-    ${site.organizerName ? `<strong>${escapeHtml(site.organizerName)}</strong><br />` : ''}
-    ${site.addressLines.length ? `${site.addressLines.map(escapeHtml).join('<br />')}<br />` : ''}
-    ${site.telephone ? `<a href="tel:${escapeHtml(site.telephone.replace(/[^+\d]/g, ''))}">${escapeHtml(site.telephone)}</a><br />` : ''}
-    ${site.email ? `<a href="mailto:${escapeHtml(site.email)}">Email ${escapeHtml(site.organizerName || 'the project organizer')}</a><br />` : ''}
-    ${site.website ? `<a href="${escapeHtml(site.website)}" rel="noreferrer">Visit organizer website <span aria-hidden="true">↗</span></a>` : ''}
-  </address>` : '<p>Organizer contact details are not included in this build.</p>';
+  const { sponsors } = siteConfig;
+  const organizerDetails = organizerContact() || '<p>Organizer contact details are not included in this build.</p>';
   return layout(`<section class="card adult" aria-labelledby="contact-title">
     <p class="kicker">Project information</p>
     <h1 id="contact-title">Contact the project.</h1>
