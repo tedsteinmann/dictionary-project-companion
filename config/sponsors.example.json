@@ -1,7 +1,28 @@
 {
   "sponsors": [
-    { "title": "FM Rotary Foundation", "description": "Five Fargo-Moorhead Rotary Clubs", "url": "https://example.org/rotary", "logo": null },
-    { "title": "Horace Lions", "description": "Horace Lions Club", "url": "https://example.org/lions", "logo": null },
-    { "title": "Fargo Elks", "description": "Community service and learning", "url": "https://example.org/elks", "logo": null }
-  ]
+    {
+      "title": "FM Rotary Foundation",
+      "description": "Five Fargo–Moorhead Rotary Clubs have joined forces to create major community projects like the Rotary Natural Play Hill and Lindenwood Playground, along with literacy, arts, and international service projects.",
+      "url": "https://example.org/rotary",
+      "logo": null
+    },
+    {
+      "title": "Horace Lions",
+      "description": "Horace Lions has given hundreds of thousands of dollars back to the community and provides free vision screening for local children.",
+      "url": "https://example.org/lions",
+      "logo": null
+    },
+    {
+      "title": "Fargo Elks",
+      "description": "Fargo Elks Lodge #260 brings the community together through events like its Summer Car Show Series while raising money and supporting local youth, veterans, and neighbors in need.",
+      "url": "https://example.org/elks",
+      "logo": null
+    }
+  ],
+  "organizer": {
+    "name": "Your dictionary project organizer",
+    "address": "Community name",
+    "phone": "(555) 555-0100",
+    "email": "dictionary@example.org"
+  }
 }

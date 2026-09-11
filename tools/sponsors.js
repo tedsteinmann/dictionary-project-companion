@@ -5,6 +5,18 @@ const editors = document.querySelector('#sponsor-editors');
 const status = document.querySelector('#setup-status');
 let nextId = 0;
 let pendingUploads = 0;
+const organizerFields = ['name', 'address', 'phone', 'email'];
+
+function setOrganizer(organizer = {}) {
+  organizerFields.forEach((key) => {
+    document.querySelector(`[name=organizer-${key}]`).value = organizer?.[key] || '';
+  });
+}
+
+function readOrganizer() {
+  const organizer = Object.fromEntries(organizerFields.map((key) => [key, document.querySelector(`[name=organizer-${key}]`).value]));
+  return Object.values(organizer).some((value) => value.trim()) ? organizer : null;
+}
 
 function addSponsor(sponsor = { title: '', description: '', url: '', logo: null }) {
   const id = ++nextId;
@@ -80,6 +92,7 @@ function addSponsor(sponsor = { title: '', description: '', url: '', logo: null 
 }
 
 sponsorConfig.sponsors.forEach(addSponsor);
+setOrganizer(sponsorConfig.organizer);
 document.querySelector('#add-sponsor').addEventListener('click', () => addSponsor().querySelector('input').focus());
 document.querySelector('#import-config').addEventListener('change', async (event) => {
   const file = event.target.files[0];
@@ -88,6 +101,7 @@ document.querySelector('#import-config').addEventListener('change', async (event
     const config = validateSponsorConfig(JSON.parse(await file.text()));
     editors.replaceChildren();
     config.sponsors.forEach(addSponsor);
+    setOrganizer(config.organizer);
     status.textContent = 'Configuration loaded.';
   } catch (error) {
     status.textContent = `Could not load configuration: ${error.message}`;
@@ -98,7 +112,10 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
   event.preventDefault();
   try {
     if (pendingUploads) throw new Error('Please wait for the logo to finish loading.');
-    const config = validateSponsorConfig({ sponsors: [...editors.children].map((editor) => editor.readSponsor()) });
+    const config = validateSponsorConfig({
+      organizer: readOrganizer(),
+      sponsors: [...editors.children].map((editor) => editor.readSponsor())
+    });
     const url = URL.createObjectURL(new Blob([JSON.stringify(config, null, 2) + '\n'], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = url;

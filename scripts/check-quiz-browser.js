@@ -12,7 +12,13 @@ export default async function checkQuizBrowser(page) {
   await page.reload();
   await page.setViewportSize({ width: 1024, height: 800 });
   const primary = page.getByRole('navigation', { name: 'Primary' });
-  for (const destination of ['About', 'Sponsors', 'Redeem', 'Contact']) {
+  const publicPages = {
+    About: ['Why a physical dictionary?', 'Find → Understand → Apply → Discover'],
+    Sponsors: ['Meet the project sponsors.', 'Participating organizations'],
+    Redeem: ['Certificates and prizes', 'completion code is a certificate reference'],
+    Contact: ['Contact the project.', 'does not use a contact form']
+  };
+  for (const destination of Object.keys(publicPages)) {
     assert(await primary.getByRole('link', { name: destination, exact: true }).isVisible(), `${destination} appears in public navigation`);
   }
   assert(await primary.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), 'Challenge action appears in public navigation');
@@ -20,9 +26,11 @@ export default async function checkQuizBrowser(page) {
   await page.getByRole('link', { name: 'Dictionary Challenge home' }).focus();
   await page.keyboard.press('Tab');
   assert(await primary.getByRole('link', { name: 'About', exact: true }).evaluate((element) => element === document.activeElement), 'Public links follow the wordmark in keyboard order');
-  for (const destination of ['About', 'Sponsors', 'Redeem', 'Contact']) {
+  for (const [destination, [heading, text]] of Object.entries(publicPages)) {
     await primary.getByRole('link', { name: destination, exact: true }).click();
     assert(await page.getByRole('link', { name: destination, exact: true }).getAttribute('aria-current') === 'page', `${destination} identifies the active page`);
+    assert(await page.getByRole('heading', { name: heading, exact: true }).isVisible(), `${destination} heading`);
+    assert((await page.locator('main').innerText()).includes(text), `${destination} content`);
   }
   await page.getByRole('link', { name: 'Dictionary Challenge home' }).click();
   const bank = await page.evaluate(async () => (await import('/src/content/questions.js')).questions);
@@ -40,8 +48,8 @@ export default async function checkQuizBrowser(page) {
   assert(await menu.getAttribute('aria-expanded') === 'false', 'Escape closes the phone menu');
   await noOverflow('welcome');
   await page.getByRole('button', { name: 'I’m a Grown-up' }).click();
-  assert(await page.getByRole('heading', { name: 'Certificates and prizes' }).isVisible(), 'Adult prize guidance');
-  assert((await page.locator('.benefit-icon').count()) === 6, 'Adult service information retained');
+  assert(await page.getByRole('heading', { name: 'Why a physical dictionary?' }).isVisible(), 'Adult path opens About');
+  assert((await page.locator('main').innerText()).includes('Find → Understand → Apply → Discover'), 'Adult literacy guidance retained');
   await noOverflow('adult');
   await click('Explore the Kid Challenge');
   assert((await page.locator('main').innerText()).includes('physical book'), 'Dictionary requirement');

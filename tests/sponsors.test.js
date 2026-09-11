@@ -22,6 +22,17 @@ describe('sponsor configuration and rendering', () => {
     assert.match(html, /Learn more/);
   });
 
+  it('normalizes optional static organizer contact details', () => {
+    const config = validateSponsorConfig({ sponsors: [sponsor], organizer: {
+      name: ' Project coordinator ', address: '123 Main St', phone: '(555) 555-0100', email: 'hello@example.org'
+    } });
+    assert.equal(config.organizer.name, 'Project coordinator');
+    assert.equal(config.organizer.email, 'hello@example.org');
+    assert.equal(validateSponsorConfig({ sponsors: [sponsor] }).organizer, null);
+    assert.throws(() => validateSponsorConfig({ sponsors: [sponsor], organizer: {} }), /at least one/);
+    assert.throws(() => validateSponsorConfig({ sponsors: [sponsor], organizer: { email: 'not-an-email' } }), /valid email/);
+  });
+
   it('escapes sponsor content and link attributes', () => {
     const html = renderSponsors({ sponsors: [{ ...sponsor, title: '<img src=x onerror=alert(1)>', description: '<script>alert(1)</script>', url: 'https://example.org/?x="onclick="bad' }] });
     assert.doesNotMatch(html, /<script>|<img src=x/);

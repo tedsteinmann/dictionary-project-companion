@@ -91,42 +91,23 @@ Questions already displayed, the current attempt, completed stages, and earned c
 
 ## Adult Flow
 
-### Page 1: The Dictionary as an Invitation
+### About: The Dictionary as an Invitation
 
 Lead with purpose.
 
-Suggested framing:
+Explain that the challenge is a companion to the child's physical book, then describe **Find → Understand → Apply → Discover**. Give adults concrete prompts that encourage searching and reasoning without revealing answers. State clearly that the activity requests no child name, email, school, address, location, or account and keeps quiz state within the tab session.
 
-> A local Rotary Club gave this dictionary as a literacy and learning resource for your child.
+### Sponsors: Community Support
 
-Explain that owning a personal dictionary gives a child a resource they can continue using at school and at home.
+Lead with the literacy project, then recognize every configured organization with its logo or fallback, title, local description, and descriptive website link. The description is configuration content; the interface must not infer projects or identity from sponsor names. Promotional messaging remains secondary to the dictionary and literacy purpose.
 
-### Page 2: Why Get Involved?
+### Contact: Published Details
 
-Explain how participating in a service club can help adults:
+Show the configured organizer details in a semantic address and list each sponsor website with descriptive link text. Do not embed a form or request a visitor's name, email address, location, or other personal information. If organizer details are omitted from a build, say so and retain the sponsor links.
 
-- meet people from different backgrounds,
-- build friendships,
-- grow personally and professionally,
-- better understand their community,
-- connect ideas with useful knowledge and resources,
-- and contribute to visible local projects.
+### Static Routing and Publication
 
-Present the six benefits as a responsive card grid that remains easy to scan on a phone. Give each card a distinct, decorative font icon while keeping its visible heading and description as the accessible meaning.
-
-### Page 3: More Than Dictionaries
-
-Give concrete local examples from the five Fargo–Moorhead Rotary Clubs, Horace Lions Club, and Fargo Elks Lodge #260.
-
-Combine each project example with its matching sponsor logo, name, and link in the sponsor grid. The cards cover Rotary’s parks, literacy, arts, and international work; Lions’ community giving and children’s vision screening; and Elks’ community events and support for youth, veterans, and neighbors in need.
-
-### Page 4: Find a Club That Fits Your Life
-
-Welcome people without prior club connections or leadership experience. Explain that local options include morning, noon, and evening meetings on different days.
-
-### Page 5: Meet the Clubs Behind the Dictionary Project
-
-The grown-up screen includes each build-configured sponsor’s logo, title, description, and learn-more link, followed by a concise invitation to meet people, find a place, and make something happen.
+About, Sponsors, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` as an alias to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
 
 ## Child Design Principles
 
@@ -176,7 +157,7 @@ Use modest 8–12px corners, thin borders, minimal shadows, and stationary hover
 
 Activity screens have a maximum width of 680px; welcome and grown-up screens expand to 1040px. Audience choices and adult information stack on phones and use two columns from 700px. Dictionary instructions appear in a blue-tinted inset above the question, with visible progress, labeled answer choices or a short typed answer, and encouraging results after submission. Sponsor recognition uses the same typography and restrained dividers.
 
-A responsive “Made possible by” section recognizes every configured sponsor below the audience choices and on the grown-up page. Each has an optional contained logo (or letter fallback), title, description, and descriptive learn-more link. Sponsor details stay out of the question screens. Certificates connect to organizer-managed prize arrangements through the grown-up path. See [sponsor setup](SPONSORS.md).
+A responsive “Made possible by” section recognizes every configured sponsor below the audience choices and on the Sponsors page. Each has an optional contained logo (or letter fallback), title, description, and descriptive learn-more link. Sponsor details stay out of the question screens. Certificates connect to organizer-managed prize arrangements through the grown-up path. See [sponsor setup](SPONSORS.md).
 
 However, the quiz UI should keep focus on:
 
@@ -276,7 +257,7 @@ Framework adoption, external fonts, backend services, tracking, theme configurat
 
 ### Historical visual-refresh validation
 
-- All 18 existing tests and the production build pass with the project’s three configured sponsors.
+- All automated tests and the production build pass with the project’s three configured sponsors.
 - An isolated Chromium walkthrough passed 127 checks covering both paths, all question and feedback states at 320/390/768/1280px, replay, browser navigation, keyboard entry, visible focus, reduced motion, and 200% CSS zoom on all public screens.
 - Sponsor checks covered the configured embedded logos, single/multiple sponsors, long text, missing-logo fallbacks, and the local editor at all four widths.
 - Palette contrast checks passed: normal text combinations exceed 4.5:1 and control boundaries meet 3:1. Selected-answer and feedback accessibility semantics were checked in the browser; spoken output with a screen reader was not manually tested.
