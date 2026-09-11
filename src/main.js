@@ -272,6 +272,7 @@ function sponsorsPage(route) {
 function redeem(route) {
   const { redemption } = siteConfig;
   const telHref = (telephone) => telephone.replace(/[^+\d]/g, '');
+  const organizerDetails = organizerContact();
   const locations = redemption.locations.map((location) => `<article class="redemption-location">
     <h2>${escapeHtml(location.name)}</h2>
     ${location.addressLines.length ? `<address>${location.addressLines.map(escapeHtml).join('<br />')}</address>` : ''}
@@ -279,17 +280,18 @@ function redeem(route) {
     ${location.telephone ? `<p><a href="tel:${escapeHtml(telHref(location.telephone))}">${escapeHtml(location.telephone)}</a></p>` : ''}
     ${location.website ? `<p><a href="${escapeHtml(location.website)}" rel="noreferrer">Visit location website <span aria-hidden="true">↗</span></a></p>` : ''}
   </article>`).join('');
-  const available = redemption.enabled && redemption.locations.length > 0;
+  const available = redemption.enabled;
   const redemptionDetails = available ? `
     <p class="lede">A parent or guardian should handle certificate redemption.</p>
     <p><strong>What to bring:</strong> Bring the printed certificate or a saved copy that shows the completion code.</p>
     <p>${escapeHtml(redemption.instructions)}</p>
     ${redemption.deadline ? `<p class="redemption-deadline"><strong>Redemption deadline:</strong> ${escapeHtml(redemption.deadline)}</p>` : ''}
-    <div class="redemption-grid" aria-label="Participating libraries">${locations}</div>
-    <p class="note"><strong>Before traveling:</strong> Confirm the library’s hours and prize availability by phone or on its website.</p>` : `
+    ${redemption.locations.length ? `<div class="redemption-grid" aria-label="Participating libraries">${locations}</div>
+    <p class="note"><strong>Before traveling:</strong> Confirm the library’s hours and prize availability by phone or on its website.</p>` : ''}
+    ${organizerDetails ? `<section class="adult-section" aria-labelledby="redemption-contact-title"><h2 id="redemption-contact-title">Project organizer</h2>${organizerDetails}</section>` : ''}` : `
     <p class="lede">No certificate redemption program is available for this build.</p>
     <p>Families can still save or print a child’s certificate as a record of their dictionary challenge.</p>
-    ${organizerContact() ? `<section class="adult-section" aria-labelledby="redemption-contact-title"><h2 id="redemption-contact-title">Project organizer</h2>${organizerContact()}</section>` : ''}`;
+    ${organizerDetails ? `<section class="adult-section" aria-labelledby="redemption-contact-title"><h2 id="redemption-contact-title">Project organizer</h2>${organizerDetails}</section>` : ''}`;
   return layout(`<section class="card adult" aria-labelledby="redeem-title">
     <p class="kicker">For parents and guardians</p>
     <h1 id="redeem-title">Certificates and prizes</h1>
