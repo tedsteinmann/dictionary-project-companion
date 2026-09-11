@@ -1,8 +1,8 @@
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { sponsorConfig } from '../src/content/sponsors.js';
-import { MAX_LOGO_BYTES, validateSponsorConfig } from '../src/sponsors.js';
+import { siteConfig as defaultSiteConfig } from '../src/content/site-config.js';
+import { MAX_LOGO_BYTES, validateSiteConfig } from '../src/site-config.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const args = process.argv.slice(2);
@@ -11,7 +11,7 @@ try {
   if (args.length && (args.length !== 2 || args[0] !== '--config')) {
     throw new Error('Usage: npm run build -- --config /path/to/sponsors.json');
   }
-  let config = sponsorConfig;
+  let config = defaultSiteConfig;
   const configPath = args.length ? resolve(args[1]) : resolve(root, 'sponsors.json');
   let configText;
   try {
@@ -34,7 +34,7 @@ try {
     }
   }
   // Validate before replacing a previous successful build.
-  config = validateSponsorConfig(config);
+  config = validateSiteConfig(config);
   const dist = resolve(root, 'dist');
   await rm(dist, { recursive: true, force: true });
   await mkdir(dist);
@@ -42,7 +42,7 @@ try {
     cp(resolve(root, 'index.html'), resolve(dist, 'index.html')),
     cp(resolve(root, 'src'), resolve(dist, 'src'), { recursive: true })
   ]);
-  await writeFile(resolve(dist, 'src/content/sponsors.js'), `export const sponsorConfig = ${JSON.stringify(config, null, 2)};\n`);
+  await writeFile(resolve(dist, 'src/content/site-config.js'), `export const siteConfig = ${JSON.stringify(config, null, 2)};\n`);
   console.log(`Built static site in dist/ with ${config.sponsors.length} sponsor(s) from ${configText === undefined ? 'the default configuration' : configPath}.`);
 } catch (error) {
   console.error(`Build failed: ${error.message}`);

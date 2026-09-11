@@ -1,21 +1,62 @@
-import { sponsorConfig } from '../src/content/sponsors.js';
-import { escapeHtml, MAX_LOGO_BYTES, validateSponsorConfig } from '../src/sponsors.js';
+import { siteConfig } from '../src/content/site-config.js';
+import { escapeHtml } from '../src/sponsors.js';
+import { MAX_LOGO_BYTES, validateSiteConfig } from '../src/site-config.js';
 
 const editors = document.querySelector('#sponsor-editors');
 const status = document.querySelector('#setup-status');
+const locationEditors = document.querySelector('#location-editors');
 let nextId = 0;
 let pendingUploads = 0;
-const organizerFields = ['name', 'address', 'phone', 'email'];
 
-function setOrganizer(organizer = {}) {
-  organizerFields.forEach((key) => {
-    document.querySelector(`[name=organizer-${key}]`).value = organizer?.[key] || '';
-  });
+function setSite(site = {}) {
+  document.querySelector('[name=organizer-name]').value = site.organizerName || '';
+  document.querySelector('[name=organizer-address]').value = (site.addressLines || []).join('\n');
+  document.querySelector('[name=organizer-phone]').value = site.telephone || '';
+  document.querySelector('[name=organizer-email]').value = site.email || '';
+  document.querySelector('[name=organizer-website]').value = site.website || '';
 }
 
-function readOrganizer() {
-  const organizer = Object.fromEntries(organizerFields.map((key) => [key, document.querySelector(`[name=organizer-${key}]`).value]));
-  return Object.values(organizer).some((value) => value.trim()) ? organizer : null;
+function readSite() {
+  return {
+    organizerName: document.querySelector('[name=organizer-name]').value,
+    addressLines: document.querySelector('[name=organizer-address]').value.split(/\r?\n/).filter((line) => line.trim()),
+    telephone: document.querySelector('[name=organizer-phone]').value,
+    email: document.querySelector('[name=organizer-email]').value,
+    website: document.querySelector('[name=organizer-website]').value
+  };
+}
+
+function addLocation(location = { name: '', instructions: '', addressLines: [], website: '', telephone: '' }) {
+  const id = ++nextId;
+  const fieldset = document.createElement('fieldset');
+  fieldset.innerHTML = `<legend>Redemption location</legend>
+    <label for="location-name-${id}">Display name<input id="location-name-${id}" name="name" required maxlength="160" value="${escapeHtml(location.name)}" /></label>
+    <label for="location-instructions-${id}">Instructions<textarea id="location-instructions-${id}" name="instructions" required maxlength="600">${escapeHtml(location.instructions)}</textarea></label>
+    <label for="location-address-${id}">Address (optional, one line per row)<textarea id="location-address-${id}" name="address" maxlength="804">${escapeHtml((location.addressLines || []).join('\n'))}</textarea></label>
+    <label for="location-website-${id}">Website (optional)<input id="location-website-${id}" name="website" type="url" maxlength="2048" value="${escapeHtml(location.website || '')}" /></label>
+    <label for="location-phone-${id}">Telephone (optional)<input id="location-phone-${id}" name="telephone" type="tel" maxlength="50" value="${escapeHtml(location.telephone || '')}" /></label>
+    <button class="text-button" type="button" data-remove>Remove location</button>`;
+  fieldset.readLocation = () => ({
+    name: fieldset.querySelector('[name=name]').value,
+    instructions: fieldset.querySelector('[name=instructions]').value,
+    addressLines: fieldset.querySelector('[name=address]').value.split(/\r?\n/).filter((line) => line.trim()),
+    website: fieldset.querySelector('[name=website]').value,
+    telephone: fieldset.querySelector('[name=telephone]').value
+  });
+  fieldset.querySelector('[data-remove]').addEventListener('click', () => {
+    fieldset.remove();
+    document.querySelector('#add-location').focus();
+  });
+  locationEditors.append(fieldset);
+  return fieldset;
+}
+
+function setRedemption(redemption = {}) {
+  document.querySelector('[name=redemption-enabled]').checked = redemption.enabled || false;
+  document.querySelector('[name=redemption-instructions]').value = redemption.instructions || '';
+  document.querySelector('[name=redemption-deadline]').value = redemption.deadline || '';
+  locationEditors.replaceChildren();
+  (redemption.locations || []).forEach(addLocation);
 }
 
 function addSponsor(sponsor = { title: '', description: '', url: '', logo: null }) {
@@ -91,17 +132,20 @@ function addSponsor(sponsor = { title: '', description: '', url: '', logo: null 
   return fieldset;
 }
 
-sponsorConfig.sponsors.forEach(addSponsor);
-setOrganizer(sponsorConfig.organizer);
+siteConfig.sponsors.forEach(addSponsor);
+setSite(siteConfig.site);
+setRedemption(siteConfig.redemption);
 document.querySelector('#add-sponsor').addEventListener('click', () => addSponsor().querySelector('input').focus());
+document.querySelector('#add-location').addEventListener('click', () => addLocation().querySelector('input').focus());
 document.querySelector('#import-config').addEventListener('change', async (event) => {
   const file = event.target.files[0];
   if (!file) return;
   try {
-    const config = validateSponsorConfig(JSON.parse(await file.text()));
+    const config = validateSiteConfig(JSON.parse(await file.text()));
     editors.replaceChildren();
     config.sponsors.forEach(addSponsor);
-    setOrganizer(config.organizer);
+    setSite(config.site);
+    setRedemption(config.redemption);
     status.textContent = 'Configuration loaded.';
   } catch (error) {
     status.textContent = `Could not load configuration: ${error.message}`;
@@ -112,14 +156,20 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
   event.preventDefault();
   try {
     if (pendingUploads) throw new Error('Please wait for the logo to finish loading.');
-    const config = validateSponsorConfig({
-      organizer: readOrganizer(),
-      sponsors: [...editors.children].map((editor) => editor.readSponsor())
+    const config = validateSiteConfig({
+      site: readSite(),
+      sponsors: [...editors.children].map((editor) => editor.readSponsor()),
+      redemption: {
+        enabled: document.querySelector('[name=redemption-enabled]').checked,
+        instructions: document.querySelector('[name=redemption-instructions]').value,
+        deadline: document.querySelector('[name=redemption-deadline]').value,
+        locations: [...locationEditors.children].map((editor) => editor.readLocation())
+      }
     });
     const url = URL.createObjectURL(new Blob([JSON.stringify(config, null, 2) + '\n'], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'sponsors.json';
+    link.download = 'site-config.json';
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     status.textContent = 'Configuration downloaded. Use it with the build command below.';

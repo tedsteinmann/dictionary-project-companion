@@ -1,4 +1,13 @@
 {
+  "site": {
+    "organizerName": "Your dictionary project organizer",
+    "addressLines": [
+      "Community name"
+    ],
+    "telephone": "(555) 555-0100",
+    "email": "dictionary@example.org",
+    "website": null
+  },
   "sponsors": [
     {
       "title": "FM Rotary Foundation",
@@ -19,10 +28,10 @@
       "logo": null
     }
   ],
-  "organizer": {
-    "name": "Your dictionary project organizer",
-    "address": "Community name",
-    "phone": "(555) 555-0100",
-    "email": "dictionary@example.org"
+  "redemption": {
+    "enabled": false,
+    "instructions": null,
+    "deadline": null,
+    "locations": []
   }
 }

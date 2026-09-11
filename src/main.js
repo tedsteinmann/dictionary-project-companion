@@ -1,4 +1,4 @@
-import { sponsorConfig } from './content/sponsors.js';
+import { siteConfig } from './content/site-config.js';
 import { escapeHtml, renderSponsorNames, renderSponsors } from './sponsors.js';
 import { questions } from './content/questions.js';
 import { renderAnswerInput, readAnswer } from './components/answer-input.js';
@@ -76,7 +76,7 @@ function welcome(route) {
       ${button('<span><strong>I’m a Grown-up</strong><span>Learn about the project and its sponsors.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'about', 'button audience-choice adult-choice')}
     </div>
     <p class="welcome-note">Your dictionary is all you need. Take your time.</p>
-  </section>${renderSponsors(sponsorConfig, { compact: true })}`, route, true);
+  </section>${renderSponsors(siteConfig, { compact: true })}`, route, true);
 }
 
 function intro(route) {
@@ -192,7 +192,7 @@ function certificate(route) {
       <p>Completed <time datetime="${earned.date}">${earned.date}</time></p>
       <p>Completion code<br /><strong class="completion-code">${earned.code}</strong></p>
       <p>Show this certificate to a parent, guardian, teacher, or librarian. A parent or guardian can ask the organizer about any available prize and how to claim it.</p>
-      ${renderSponsorNames(sponsorConfig)}
+      ${renderSponsorNames(siteConfig)}
     </div>
     <div class="quiz-actions no-print">
       <button class="button button-primary" data-action="print">Print or save certificate</button>
@@ -235,28 +235,44 @@ function sponsorsPage(route) {
     <h1 id="sponsors-page-title">Meet the project sponsors.</h1>
     <p class="lede">Participating organizations made this local dictionary project possible by supporting children, books, and literacy.</p>
     <p>The physical dictionary and the child’s learning come first. Sponsor information is provided here so families can recognize the community partners behind the project.</p>
-    ${renderSponsors(sponsorConfig, { heading: 'Participating organizations', linkLabel: 'Visit organization website' })}
+    ${renderSponsors(siteConfig, { heading: 'Participating organizations', linkLabel: 'Visit organization website' })}
   </section>`, route, true);
 }
 
 function redeem(route) {
+  const { redemption } = siteConfig;
+  const telHref = (telephone) => telephone.replace(/[^+\d]/g, '');
+  const locations = redemption.locations.map((location) => `<article class="adult-section redemption-location">
+    <h2>${escapeHtml(location.name)}</h2>
+    <p>${escapeHtml(location.instructions)}</p>
+    ${location.addressLines.length ? `<address>${location.addressLines.map(escapeHtml).join('<br />')}</address>` : ''}
+    ${location.telephone ? `<p><a href="tel:${escapeHtml(telHref(location.telephone))}">${escapeHtml(location.telephone)}</a></p>` : ''}
+    ${location.website ? `<p><a href="${escapeHtml(location.website)}" rel="noreferrer">Visit location website <span aria-hidden="true">↗</span></a></p>` : ''}
+  </article>`).join('');
+  const redemptionDetails = redemption.enabled ? `
+    <p class="lede">${escapeHtml(redemption.instructions)}</p>
+    ${redemption.deadline ? `<p><strong>Deadline:</strong> ${escapeHtml(redemption.deadline)}</p>` : ''}
+    ${locations || '<p>Ask the project organizer for the participating location.</p>'}` : `
+    <p class="lede">This build does not include a certificate redemption offer.</p>
+    <p>Families can still save or print a child’s certificate as a record of their dictionary challenge.</p>`;
   return layout(`<section class="card adult" aria-labelledby="redeem-title">
     <p class="kicker">For parents and guardians</p>
     <h1 id="redeem-title">Certificates and prizes</h1>
-    <p class="lede">A child earns a printable certificate by scoring ${PASSING_SCORE} or more in a challenge stage.</p>
-    <p>Save or print the certificate before closing the quiz tab, then show it to a teacher, librarian, or dictionary project organizer.</p>
-    <p>A parent or guardian should ask the organizer whether a prize is available and how to claim it. The completion code is a certificate reference, not an online redemption code.</p>
+    ${redemptionDetails}
+    <p>A child earns a printable certificate by scoring ${PASSING_SCORE} or more in a challenge stage. The completion code is a certificate reference, not an online redemption code.</p>
     <p class="note">The challenge collects no names or contact information.</p>
   </section>`, route, true);
 }
 
 function contact(route) {
-  const { organizer, sponsors } = sponsorConfig;
-  const organizerDetails = organizer ? `<address>
-    ${organizer.name ? `<strong>${escapeHtml(organizer.name)}</strong><br />` : ''}
-    ${organizer.address ? `${escapeHtml(organizer.address).replace(/\n/g, '<br />')}<br />` : ''}
-    ${organizer.phone ? `<a href="tel:${escapeHtml(organizer.phone.replace(/[^+\d]/g, ''))}">${escapeHtml(organizer.phone)}</a><br />` : ''}
-    ${organizer.email ? `<a href="mailto:${escapeHtml(organizer.email)}">Email ${escapeHtml(organizer.name || 'the project organizer')}</a>` : ''}
+  const { site, sponsors } = siteConfig;
+  const hasDetails = site.organizerName || site.addressLines.length || site.telephone || site.email || site.website;
+  const organizerDetails = hasDetails ? `<address>
+    ${site.organizerName ? `<strong>${escapeHtml(site.organizerName)}</strong><br />` : ''}
+    ${site.addressLines.length ? `${site.addressLines.map(escapeHtml).join('<br />')}<br />` : ''}
+    ${site.telephone ? `<a href="tel:${escapeHtml(site.telephone.replace(/[^+\d]/g, ''))}">${escapeHtml(site.telephone)}</a><br />` : ''}
+    ${site.email ? `<a href="mailto:${escapeHtml(site.email)}">Email ${escapeHtml(site.organizerName || 'the project organizer')}</a><br />` : ''}
+    ${site.website ? `<a href="${escapeHtml(site.website)}" rel="noreferrer">Visit organizer website <span aria-hidden="true">↗</span></a>` : ''}
   </address>` : '<p>Organizer contact details are not included in this build.</p>';
   return layout(`<section class="card adult" aria-labelledby="contact-title">
     <p class="kicker">Project information</p>
