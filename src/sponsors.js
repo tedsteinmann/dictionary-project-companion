@@ -1,71 +1,11 @@
-export const MAX_LOGO_BYTES = 2 * 1024 * 1024;
-
-export function validateSponsorConfig(config) {
-  if (!config || !Array.isArray(config.sponsors) || config.sponsors.length === 0) {
-    throw new Error('Add at least one sponsor.');
-  }
-  const sponsors = config.sponsors.map((sponsor, index) => {
-    const label = `Sponsor ${index + 1}`;
-    const text = (key, limit) => {
-      if (typeof sponsor?.[key] !== 'string' || !sponsor[key].trim() || sponsor[key].trim().length > limit) {
-        throw new Error(`${label}: ${key} is required and must be at most ${limit} characters.`);
-      }
-      return sponsor[key].trim();
-    };
-    const title = text('title', 120);
-    const description = text('description', 600);
-    const url = text('url', 2048);
-    let website;
-    try { website = new URL(url); } catch { throw new Error(`${label}: enter a full HTTP or HTTPS website URL.`); }
-    if (!['https:', 'http:'].includes(website.protocol) || website.username || website.password) {
-      throw new Error(`${label}: enter a full HTTP or HTTPS website URL without credentials.`);
-    }
-    const logo = sponsor.logo || null;
-    if (logo !== null) {
-      if (typeof logo !== 'string' || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(logo)) {
-        throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
-      }
-      const base64 = logo.slice(logo.indexOf(',') + 1);
-      const size = base64.length * 3 / 4 - (base64.match(/=+$/)?.[0].length || 0);
-      if (base64.length % 4 !== 0 || size > MAX_LOGO_BYTES) {
-        throw new Error(`${label}: logo must be valid base64 and no larger than 2 MB.`);
-      }
-    }
-    return { title, description, url: website.href, logo };
-  });
-  let organizer = null;
-  if (config.organizer != null) {
-    if (typeof config.organizer !== 'object' || Array.isArray(config.organizer)) {
-      throw new Error('Organizer details must be an object.');
-    }
-    const optionalText = (key, limit) => {
-      const value = config.organizer[key];
-      if (value == null || value === '') return null;
-      if (typeof value !== 'string' || !value.trim() || value.trim().length > limit) {
-        throw new Error(`Organizer: ${key} must be at most ${limit} characters.`);
-      }
-      return value.trim();
-    };
-    organizer = {
-      name: optionalText('name', 120),
-      address: optionalText('address', 300),
-      phone: optionalText('phone', 50),
-      email: optionalText('email', 254)
-    };
-    if (!Object.values(organizer).some(Boolean)) throw new Error('Organizer: add at least one contact detail.');
-    if (organizer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(organizer.email)) {
-      throw new Error('Organizer: enter a valid email address.');
-    }
-  }
-  return { sponsors, organizer };
-}
+import { validateSiteConfig } from './site-config.js';
 
 export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 })[character]);
 
 export function renderSponsors(config, { compact = false, heading = 'Made possible by', linkLabel = 'Learn more' } = {}) {
-  const { sponsors } = validateSponsorConfig(config);
+  const { sponsors } = validateSiteConfig(config);
   return `<section class="sponsors ${compact ? 'sponsors-compact' : ''}" aria-labelledby="sponsors-title">
     <h2 id="sponsors-title">${escapeHtml(heading)}</h2>
     <div class="sponsor-grid">${sponsors.map((sponsor) => `<article class="sponsor">
@@ -80,7 +20,7 @@ export function renderSponsors(config, { compact = false, heading = 'Made possib
 }
 
 export function renderSponsorNames(config, { heading = 'Made possible by' } = {}) {
-  const { sponsors } = validateSponsorConfig(config);
+  const { sponsors } = validateSiteConfig(config);
   return `<section class="certificate-sponsors" aria-labelledby="certificate-sponsors-title">
     <h2 id="certificate-sponsors-title">${escapeHtml(heading)}</h2>
     <div class="certificate-sponsor-grid">${sponsors.map((sponsor) => `<div class="certificate-sponsor">
