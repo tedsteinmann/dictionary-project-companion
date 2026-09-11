@@ -8,6 +8,7 @@ import { once } from 'node:events';
 import { renderSponsorNames, renderSponsors } from '../src/sponsors.js';
 import { validateSiteConfig } from '../src/site-config.js';
 import { siteConfig } from '../src/content/site-config.js';
+import { renderContactContent } from '../src/components/contact-details.js';
 
 const sponsor = { title: 'Local club', description: 'Helping readers.', url: 'https://example.org', logo: null };
 const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aV1sAAAAASUVORK5CYII=';
@@ -38,6 +39,53 @@ describe('sponsor configuration and rendering', () => {
     assert.throws(() => validateSiteConfig({ sponsors: [sponsor], site: { email: 'not-an-email' } }), /valid email/);
     assert.throws(() => validateSiteConfig({ sponsors: [sponsor], site: { organizerName: 'Organizer', website: 'file:///secret' } }), /HTTP or HTTPS/);
     assert.throws(() => validateSiteConfig({ sponsors: [sponsor], site: { organizerName: 'Organizer', website: 'https://user:pass@example.org' } }), /without credentials/);
+    assert.throws(() => validateSiteConfig({ sponsors: [sponsor], site: { organizerName: 'Organizer', telephone: 'javascript:alert(1)' } }), /valid telephone/);
+  });
+
+  it('requires a public organizer contact for location-free redemption', () => {
+    const redemption = { enabled: true, instructions: 'Ask an adult to contact us.', locations: [] };
+    assert.throws(() => validateSiteConfig({ sponsors: [sponsor], redemption }), /public organizer/);
+    for (const contact of [
+      { telephone: '(555) 555-0100' },
+      { email: 'dictionary@example.org' },
+      { website: 'https://example.org/project' }
+    ]) {
+      assert.equal(validateSiteConfig({ sponsors: [sponsor], site: { organizerName: 'Organizer', ...contact }, redemption }).redemption.enabled, true);
+    }
+  });
+
+  it('renders safe contact methods, child guidance, and no personal-information form controls', () => {
+    const config = validateSiteConfig({
+      site: {
+        organizerName: '<img src=x onerror=alert(1)>',
+        addressLines: ['<script>bad()</script>'],
+        telephone: '+1 (555) 555-0100',
+        email: 'dictionary@example.org',
+        website: 'https://example.org/project?value=%22bad'
+      },
+      sponsors: [{ ...sponsor, title: '<b>Readers</b>' }]
+    });
+    const html = renderContactContent(config);
+    assert.match(html, /parent, guardian, teacher, or librarian/);
+    assert.match(html, /href="tel:\+15555550100"/);
+    assert.match(html, /href="mailto:dictionary@example\.org"/);
+    assert.match(html, /href="https:\/\/example\.org\/project\?value=%22bad"/);
+    assert.doesNotMatch(html, /<img|<script>|<b>Readers/);
+    assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/);
+    assert.doesNotMatch(html, /<(form|input|textarea|select|button)\b/i);
+  });
+
+  it('omits absent methods and rejects unsafe contact links', () => {
+    const html = renderContactContent(validateSiteConfig({
+      site: { organizerName: 'Project organizer' }, sponsors: [sponsor]
+    }));
+    assert.match(html, /Project organizer/);
+    assert.doesNotMatch(html, /mailto:|tel:|Visit organizer website/);
+    for (const site of [
+      { organizerName: 'Organizer', email: 'bad\"@example.org' },
+      { organizerName: 'Organizer', telephone: '+1;ext=alert' },
+      { organizerName: 'Organizer', website: 'javascript:alert(1)' }
+    ]) assert.throws(() => validateSiteConfig({ site, sponsors: [sponsor] }));
   });
 
   it('supplies safe defaults for old sponsor-only configuration files', () => {

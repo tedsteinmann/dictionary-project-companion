@@ -55,6 +55,15 @@ function webUrl(value, label, { required = false } = {}) {
   return url.href;
 }
 
+function telephone(value, label) {
+  const normalized = text(value, { label, limit: SITE_CONFIG_LIMITS.telephone });
+  if (normalized) {
+    const compact = normalized.replace(/[().\-\s]/g, '');
+    if (!/^\+?\d{3,15}$/.test(compact)) throw new Error(`${label}: enter a valid telephone number.`);
+  }
+  return normalized;
+}
+
 function addressLines(value, label) {
   if (value == null) return [];
   if (!Array.isArray(value) || value.length > SITE_CONFIG_LIMITS.addressLines) {
@@ -85,11 +94,12 @@ function validateSite(value) {
   if (value == null) return { organizerName: null, addressLines: [], telephone: null, email: null, website: null };
   const site = object(value, 'Site details');
   const email = text(site.email, { label: 'Site: email', limit: SITE_CONFIG_LIMITS.email });
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Site: enter a valid email address.');
+  if (email && !/^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/.test(email)) throw new Error('Site: enter a valid email address.');
+  const phone = telephone(site.telephone, 'Site: telephone');
   return {
     organizerName: text(site.organizerName, { label: 'Site: organizerName', limit: SITE_CONFIG_LIMITS.organizerName, required: true }),
     addressLines: addressLines(site.addressLines, 'Site: addressLines'),
-    telephone: text(site.telephone, { label: 'Site: telephone', limit: SITE_CONFIG_LIMITS.telephone }),
+    telephone: phone,
     email,
     website: webUrl(site.website, 'Site: website')
   };
@@ -141,7 +151,7 @@ function validateRedemption(value) {
       instructions: text(location.instructions, { label: `${label}: instructions`, limit: SITE_CONFIG_LIMITS.locationInstructions, required: true }),
       addressLines: addressLines(location.addressLines, `${label}: addressLines`),
       website: webUrl(location.website, `${label}: website`),
-      telephone: text(location.telephone, { label: `${label}: telephone`, limit: SITE_CONFIG_LIMITS.telephone })
+      telephone: telephone(location.telephone, `${label}: telephone`)
     };
   });
   return {
@@ -154,9 +164,14 @@ function validateRedemption(value) {
 
 export function validateSiteConfig(config) {
   object(config, 'Site configuration');
+  const site = validateSite(legacySite(config));
+  const redemption = validateRedemption(config.redemption);
+  if (redemption.enabled && redemption.locations.length === 0 && !site.telephone && !site.email && !site.website) {
+    throw new Error('Redemption: add at least one public organizer telephone, email, or website when no locations are supplied.');
+  }
   return freeze({
-    site: validateSite(legacySite(config)),
+    site,
     sponsors: validateSponsors(config.sponsors),
-    redemption: validateRedemption(config.redemption)
+    redemption
   });
 }
