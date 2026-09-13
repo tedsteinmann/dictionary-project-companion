@@ -4,6 +4,7 @@ import { questions } from './content/questions.js';
 import { renderAnswerInput, readAnswer } from './components/answer-input.js';
 import { dictionaryHelp } from './components/dictionary-help.js';
 import { learningReview, discoveryActivity } from './components/learning-review.js';
+import { renderContactContent, renderOrganizerContact, telephoneHref } from './components/contact-details.js';
 import { levels, PASSING_SCORE, QUESTIONS_PER_ATTEMPT } from './content/levels.js';
 import {
   canStartLevel, choicesFor, gradeAttempt, moveToQuestion, persistSession, restoreSession,
@@ -29,16 +30,7 @@ const publicRoutes = ['home', 'about', 'sponsors', 'redeem', 'contact'];
 const SHORT_PRINT_REDEMPTION_LENGTH = 180;
 
 function organizerContact() {
-  const { site } = siteConfig;
-  const hasDetails = site.organizerName || site.addressLines.length || site.telephone || site.email || site.website;
-  if (!hasDetails) return '';
-  return `<address class="organizer-contact">
-    ${site.organizerName ? `<strong>${escapeHtml(site.organizerName)}</strong><br />` : ''}
-    ${site.addressLines.length ? `${site.addressLines.map(escapeHtml).join('<br />')}<br />` : ''}
-    ${site.telephone ? `<a href="tel:${escapeHtml(site.telephone.replace(/[^+\d]/g, ''))}">${escapeHtml(site.telephone)}</a><br />` : ''}
-    ${site.email ? `<a href="mailto:${escapeHtml(site.email)}">Email ${escapeHtml(site.organizerName || 'the project organizer')}</a><br />` : ''}
-    ${site.website ? `<a href="${escapeHtml(site.website)}" rel="noreferrer">Visit organizer website <span aria-hidden="true">↗</span></a>` : ''}
-  </address>`;
+  return renderOrganizerContact(siteConfig.site);
 }
 
 function publicHeader(route) {
@@ -271,13 +263,12 @@ function sponsorsPage(route) {
 
 function redeem(route) {
   const { redemption } = siteConfig;
-  const telHref = (telephone) => telephone.replace(/[^+\d]/g, '');
   const organizerDetails = organizerContact();
   const locations = redemption.locations.map((location) => `<article class="redemption-location">
     <h2>${escapeHtml(location.name)}</h2>
     ${location.addressLines.length ? `<address>${location.addressLines.map(escapeHtml).join('<br />')}</address>` : ''}
     <p>${escapeHtml(location.instructions)}</p>
-    ${location.telephone ? `<p><a href="tel:${escapeHtml(telHref(location.telephone))}">${escapeHtml(location.telephone)}</a></p>` : ''}
+    ${location.telephone ? `<p><a href="${escapeHtml(telephoneHref(location.telephone))}">${escapeHtml(location.telephone)}</a></p>` : ''}
     ${location.website ? `<p><a href="${escapeHtml(location.website)}" rel="noreferrer">Visit location website <span aria-hidden="true">↗</span></a></p>` : ''}
   </article>`).join('');
   const available = redemption.enabled;
@@ -303,17 +294,7 @@ function redeem(route) {
 }
 
 function contact(route) {
-  const { sponsors } = siteConfig;
-  const organizerDetails = organizerContact() || '<p>Organizer contact details are not included in this build.</p>';
-  return layout(`<section class="card adult" aria-labelledby="contact-title">
-    <p class="kicker">Project information</p>
-    <h1 id="contact-title">Contact the project.</h1>
-    <p class="lede">For questions about the local dictionary project or prize availability, contact the configured organizer. This site does not use a contact form or collect visitor details.</p>
-    <section class="adult-section" aria-labelledby="organizer-title"><h2 id="organizer-title">Project organizer</h2>${organizerDetails}</section>
-    <section class="adult-section" aria-labelledby="website-title"><h2 id="website-title">Sponsor websites</h2>
-      <ul>${sponsors.map((sponsor) => `<li><a href="${escapeHtml(sponsor.url)}" rel="noreferrer">Visit the ${escapeHtml(sponsor.title)} website <span aria-hidden="true">↗</span></a></li>`).join('')}</ul>
-    </section>
-  </section>`, route, true);
+  return layout(renderContactContent(siteConfig), route, true);
 }
 
 const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', 'review', 'results', 'certificate', 'adult']);
