@@ -75,6 +75,14 @@ describe('sponsor configuration and rendering', () => {
     assert.doesNotMatch(html, /<(form|input|textarea|select|button)\b/i);
   });
 
+  it('percent-encodes special characters in mailto local parts', () => {
+    const html = renderContactContent(validateSiteConfig({
+      site: { organizerName: 'Project organizer', email: "alerts#ops?queue@example.org" },
+      sponsors: [sponsor]
+    }));
+    assert.match(html, /href="mailto:alerts%23ops%3Fqueue@example\.org"/);
+  });
+
   it('omits absent methods and rejects unsafe contact links', () => {
     const html = renderContactContent(validateSiteConfig({
       site: { organizerName: 'Project organizer' }, sponsors: [sponsor]

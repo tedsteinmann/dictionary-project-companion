@@ -8,7 +8,8 @@ export function telephoneHref(telephone) {
 
 export function emailHref(email) {
   if (!email || !/^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/.test(email)) return null;
-  return `mailto:${email}`;
+  const [localPart, domain] = email.split('@');
+  return `mailto:${encodeURIComponent(localPart)}@${domain}`;
 }
 
 export function websiteHref(website) {
