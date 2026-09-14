@@ -192,7 +192,7 @@ Home
  ├── Public pages
  │    ├── About
  │    ├── Sponsors
- │    ├── Redeem
+ │    ├── Certificates and prizes (`#redeem`)
  │    └── Contact
  │
  ├── Kid
