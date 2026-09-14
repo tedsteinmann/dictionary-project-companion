@@ -56,9 +56,30 @@ function gameToolbar(route) {
   </header>`;
 }
 
+function siteFooter(route) {
+  const closingLine = '<p class="site-footer-closing">Discover more with your dictionary.</p>';
+  if (!publicRoutes.includes(route)) {
+    return `<footer class="site-footer site-footer-activity">${closingLine}</footer>`;
+  }
+
+  const links = [
+    ['about', 'About'],
+    ['sponsors', 'Sponsors'],
+    ['contact', 'Contact'],
+    ['redeem', 'Certificates and prizes']
+  ];
+  return `<footer class="site-footer site-footer-public">
+    <p class="site-footer-statement">Helping children use their physical dictionaries to become confident readers and independent learners.</p>
+    <nav class="site-footer-nav" aria-label="Project information">
+      ${links.map(([linkRoute, label]) => `<a href="#${linkRoute}" data-route="${linkRoute}"${route === linkRoute ? ' aria-current="page"' : ''}>${label}</a>`).join('')}
+    </nav>
+    ${closingLine}
+  </footer>`;
+}
+
 function layout(content, route, wide = false) {
   const header = publicRoutes.includes(route) ? publicHeader(route) : gameToolbar(route);
-  return `<div class="shell ${wide ? 'shell-wide' : ''}">${header}${content}<footer>Discover more with your dictionary.</footer></div>`;
+  return `<div class="shell ${wide ? 'shell-wide' : ''}">${header}${content}${siteFooter(route)}</div>`;
 }
 
 function welcome(route) {

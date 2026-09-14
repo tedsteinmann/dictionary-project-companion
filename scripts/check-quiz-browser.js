@@ -23,6 +23,11 @@ export default async function checkQuizBrowser(page) {
   assert(await publicHeader().isVisible(), 'Public routes render the compact public header');
   assert(await challengeAction().isVisible(), 'Public header exposes a single challenge action');
   assert(await wordmark().getAttribute('aria-current') === 'page', 'Public home identifies the active page');
+  const footer = page.locator('.site-footer-public');
+  assert(await footer.getByText('Helping children use their physical dictionaries').isVisible(), 'Public footer leads with literacy');
+  assert(await footer.getByRole('navigation', { name: 'Project information' }).isVisible(), 'Public footer labels its information navigation');
+  assert(await footer.getByRole('link', { name: 'Certificates and prizes', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
+  assert((await footer.locator('.sponsor-logo').count()) === 0, 'Public footer does not duplicate sponsor logos');
   await wordmark().focus();
   await page.keyboard.press('Tab');
   assert(await challengeAction().evaluate((element) => element === document.activeElement), 'Challenge action follows the wordmark in keyboard order');
@@ -32,6 +37,7 @@ export default async function checkQuizBrowser(page) {
     assert(await page.getByRole('heading', { name: heading, exact: true }).isVisible(), `${destination} heading`);
     assert((await page.locator('main').innerText()).includes(text), `${destination} content`);
     assert(await page.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), `${destination} keeps the single challenge action`);
+    assert(await page.locator(`.site-footer-nav [data-route="${route}"]`).getAttribute('aria-current') === 'page', `${destination} footer link identifies the active page`);
   }
   await page.getByRole('link', { name: 'Start Challenge', exact: true }).click();
   assert(page.url().endsWith('#intro'), 'Public header action navigates to the new-challenge route');
@@ -121,6 +127,8 @@ export default async function checkQuizBrowser(page) {
   assert(await page.locator('.game-toolbar').isVisible(), 'Child activity uses a game toolbar');
   assert((await page.locator('.game-status').innerText()).includes('Find It\nQuestion 1 of 10'), 'Toolbar shows stage and question progress');
   assert((await page.locator('.game-toolbar .public-nav').count()) === 0, 'Question toolbar omits distracting public links');
+  assert((await page.locator('.site-footer-activity .site-footer-nav').count()) === 0, 'Question footer omits the public information directory');
+  assert((await page.locator('.site-footer-activity').innerText()).includes('Discover more with your dictionary.'), 'Question footer preserves the dictionary closing line');
   const homeControl = page.getByRole('link', { name: 'Return to public home', exact: true });
   assert(await homeControl.evaluate((element) => element.getBoundingClientRect().height >= 44), 'Toolbar home link has a large target');
   await homeControl.focus();
