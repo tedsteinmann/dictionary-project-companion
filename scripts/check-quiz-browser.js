@@ -126,6 +126,7 @@ export default async function checkQuizBrowser(page) {
   await page.keyboard.press('Enter');
   const returnAction = page.getByRole('link', { name: 'Return to Challenge', exact: true });
   assert(await returnAction.isVisible(), 'Public header offers a return to the active attempt');
+  assert(await returnAction.getAttribute('href') === '#levels', 'Public header retargets the action to the resumable challenge route');
   await wordmark().focus();
   await page.keyboard.press('Tab');
   assert(await returnAction.evaluate((element) => element === document.activeElement), 'Return action follows the wordmark in keyboard order');
