@@ -15,10 +15,10 @@ export default async function checkQuizBrowser(page) {
   const wordmark = page.getByRole('link', { name: 'Dictionary Challenge home' });
   const challengeAction = page.getByRole('link', { name: 'Start Challenge', exact: true });
   const publicPages = {
-    About: ['Why a physical dictionary?', 'Find → Understand → Apply → Discover'],
-    Sponsors: ['Meet the project sponsors.', 'Participating organizations'],
-    Redeem: ['Certificates and prizes', 'completion code is a reference only'],
-    Contact: ['Contact the project.', 'does not use a contact form']
+    About: { route: 'about', heading: 'Why a physical dictionary?', text: 'Find → Understand → Apply → Discover' },
+    Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
+    Redeem: { route: 'redeem', heading: 'Certificates and prizes', text: 'completion code is a reference only' },
+    Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }
   };
   assert(await publicHeader.isVisible(), 'Public routes render the compact public header');
   assert(await challengeAction.isVisible(), 'Public header exposes a single challenge action');
@@ -27,8 +27,8 @@ export default async function checkQuizBrowser(page) {
   await page.keyboard.press('Tab');
   assert(await challengeAction.evaluate((element) => element === document.activeElement), 'Challenge action follows the wordmark in keyboard order');
   assert(await challengeAction.getAttribute('href') === '#intro', 'Challenge action starts a new challenge without a resumable attempt');
-  for (const [destination, [heading, text]] of Object.entries(publicPages)) {
-    await page.goto(`${base}/#${destination.toLowerCase()}`);
+  for (const [destination, { route, heading, text }] of Object.entries(publicPages)) {
+    await page.goto(`${base}/#${route}`);
     assert(await page.getByRole('heading', { name: heading, exact: true }).isVisible(), `${destination} heading`);
     assert((await page.locator('main').innerText()).includes(text), `${destination} content`);
     assert(await page.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), `${destination} keeps the single challenge action`);
