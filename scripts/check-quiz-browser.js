@@ -34,6 +34,7 @@ export default async function checkQuizBrowser(page) {
     assert(await page.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), `${destination} keeps the single challenge action`);
   }
   await page.getByRole('link', { name: 'Start Challenge', exact: true }).click();
+  assert(page.url().endsWith('#intro'), 'Public header action navigates to the new-challenge route');
   assert(await page.getByRole('heading', { name: 'Grab your dictionary.', exact: true }).isVisible(), 'Public header action opens the child intro');
   await page.getByRole('link', { name: 'Return to public home', exact: true }).click();
   assert(await wordmark().getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
