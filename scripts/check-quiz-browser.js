@@ -33,6 +33,10 @@ export default async function checkQuizBrowser(page) {
     assert((await page.locator('main').innerText()).includes(text), `${destination} content`);
     assert(await page.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), `${destination} keeps the single challenge action`);
   }
+  await challengeAction.click();
+  assert(await page.getByRole('heading', { name: 'Grab your dictionary.', exact: true }).isVisible(), 'Public header action opens the child intro');
+  await page.getByRole('link', { name: 'Return to public home', exact: true }).click();
+  assert(await wordmark.getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
   const config = await page.evaluate(async () => (await import('/src/content/site-config.js')).siteConfig);
   await page.goto(`${base}/#redeem`);
   assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
