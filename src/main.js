@@ -36,15 +36,9 @@ function organizerContact() {
 function publicHeader(route) {
   const resumableAttempt = session.attempt && !session.attempt.submitted;
   const challengeRoute = resumableAttempt ? 'levels' : 'intro';
-  const link = (label, destination) =>
-    `<a href="#${destination}" data-route="${destination}"${route === destination ? ' aria-current="page"' : ''}>${label}</a>`;
   return `<header class="brand public-header">
     <a class="wordmark" href="./" data-route="home" aria-label="Dictionary Challenge home"${route === 'home' ? ' aria-current="page"' : ''}>Dictionary <span>Challenge</span></a>
-    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" data-action="menu">Menu</button>
-    <nav class="public-nav" id="public-navigation" aria-label="Primary">
-      ${link('About', 'about')}${link('Sponsors', 'sponsors')}${link('Redeem', 'redeem')}${link('Contact', 'contact')}
-      <a class="start-challenge" href="#${challengeRoute}" data-route="${challengeRoute}">${resumableAttempt ? 'Return to Challenge' : 'Start Challenge'}</a>
-    </nav>
+    <a class="header-challenge-action" href="#${challengeRoute}" data-route="${challengeRoute}">${resumableAttempt ? 'Return to Challenge' : 'Start Challenge'}</a>
   </header>`;
 }
 
@@ -351,13 +345,6 @@ app.addEventListener('submit', (event) => {
 });
 
 app.addEventListener('click', (event) => {
-  const menuToggle = event.target.closest('[data-action="menu"]');
-  if (menuToggle) {
-    const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
-    menuToggle.setAttribute('aria-expanded', String(!expanded));
-    menuToggle.closest('.public-header').classList.toggle('menu-open', !expanded);
-    return;
-  }
   const routeTarget = event.target.closest('[data-route]');
   if (routeTarget) {
     event.preventDefault();
@@ -390,15 +377,6 @@ app.addEventListener('click', (event) => {
     return navigate('results');
   }
   if (event.target.closest('[data-action="print"]')) window.print();
-});
-
-app.addEventListener('keydown', (event) => {
-  if (event.key !== 'Escape') return;
-  const menuToggle = app.querySelector('[data-action="menu"][aria-expanded="true"]');
-  if (!menuToggle) return;
-  menuToggle.setAttribute('aria-expanded', 'false');
-  menuToggle.closest('.public-header').classList.remove('menu-open');
-  menuToggle.focus();
 });
 
 window.addEventListener('popstate', () => {
