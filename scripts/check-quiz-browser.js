@@ -33,7 +33,7 @@ export default async function checkQuizBrowser(page) {
     assert((await page.locator('main').innerText()).includes(text), `${destination} content`);
     assert(await page.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), `${destination} keeps the single challenge action`);
   }
-  await challengeAction.click();
+  await page.getByRole('link', { name: 'Start Challenge', exact: true }).click();
   assert(await page.getByRole('heading', { name: 'Grab your dictionary.', exact: true }).isVisible(), 'Public header action opens the child intro');
   await page.getByRole('link', { name: 'Return to public home', exact: true }).click();
   assert(await wordmark.getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
@@ -87,7 +87,7 @@ export default async function checkQuizBrowser(page) {
   assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Browser Back restores redemption');
   await page.goForward();
   assert(await page.getByRole('heading', { name: 'Why a physical dictionary?', exact: true }).isVisible(), 'Browser Forward restores the following public screen');
-  await wordmark.click();
+  await page.getByRole('link', { name: 'Dictionary Challenge home' }).click();
   const bank = await page.evaluate(async () => (await import('/src/content/questions.js')).questions);
   const state = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
   const click = (name) => page.getByRole('button', { name, exact: true }).click();
