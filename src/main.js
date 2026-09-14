@@ -12,6 +12,7 @@ import {
 } from './quiz.js';
 
 const app = document.querySelector('#app');
+const footerRoot = document.querySelector('#site-footer');
 let storage;
 try { storage = window.sessionStorage; } catch { /* Storage may be disabled. */ }
 let session = restoreSession(storage, questions);
@@ -79,7 +80,7 @@ function siteFooter(route) {
 
 function layout(content, route, wide = false) {
   const header = publicRoutes.includes(route) ? publicHeader(route) : gameToolbar(route);
-  return `<div class="shell ${wide ? 'shell-wide' : ''}">${header}${content}${siteFooter(route)}</div>`;
+  return `<div class="shell ${wide ? 'shell-wide' : ''}">${header}${content}</div>`;
 }
 
 function welcome(route) {
@@ -336,6 +337,7 @@ function navigate(route, push = true, focus = true) {
   if (push && location.hash !== `#${safeRoute}`) history.pushState({ route: safeRoute }, '', url);
   else if (safeRoute !== route) history.replaceState({ route: safeRoute }, '', url);
   app.innerHTML = renderScreen(safeRoute);
+  if (footerRoot) footerRoot.innerHTML = siteFooter(safeRoute);
   if (focus) {
     app.focus();
     window.scrollTo(0, 0);

@@ -24,6 +24,8 @@ export default async function checkQuizBrowser(page) {
   assert(await challengeAction().isVisible(), 'Public header exposes a single challenge action');
   assert(await wordmark().getAttribute('aria-current') === 'page', 'Public home identifies the active page');
   const footer = page.locator('.site-footer-public');
+  assert((await page.locator('main .site-footer-public').count()) === 0, 'Public footer is outside the main landmark');
+  assert(await page.getByRole('contentinfo').isVisible(), 'Page-level contentinfo landmark is rendered');
   assert(await footer.getByText('Helping children use their physical dictionaries').isVisible(), 'Public footer leads with literacy');
   assert(await footer.getByRole('navigation', { name: 'Project information' }).isVisible(), 'Public footer labels its information navigation');
   assert(await footer.getByRole('link', { name: 'Certificates and prizes', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
