@@ -12,6 +12,7 @@ import {
 } from './quiz.js';
 
 const app = document.querySelector('#app');
+const footerRoot = document.querySelector('#site-footer');
 let storage;
 try { storage = window.sessionStorage; } catch { /* Storage may be disabled. */ }
 let session = restoreSession(storage, questions);
@@ -56,9 +57,30 @@ function gameToolbar(route) {
   </header>`;
 }
 
+function siteFooter(route) {
+  const closingLine = '<p class="site-footer-closing">Discover more with your dictionary.</p>';
+  if (!publicRoutes.includes(route)) {
+    return `<footer class="site-footer site-footer-activity">${closingLine}</footer>`;
+  }
+
+  const links = [
+    ['about', 'About'],
+    ['sponsors', 'Sponsors'],
+    ['contact', 'Contact'],
+    ['redeem', 'Certificates and prizes']
+  ];
+  return `<footer class="site-footer site-footer-public">
+    <p class="site-footer-statement">Helping children use their physical dictionaries to become confident readers and independent learners.</p>
+    <nav class="site-footer-nav" aria-label="Project information">
+      ${links.map(([linkRoute, label]) => `<a href="#${linkRoute}" data-route="${linkRoute}"${route === linkRoute ? ' aria-current="page"' : ''}>${label}</a>`).join('')}
+    </nav>
+    ${closingLine}
+  </footer>`;
+}
+
 function layout(content, route, wide = false) {
   const header = publicRoutes.includes(route) ? publicHeader(route) : gameToolbar(route);
-  return `<div class="shell ${wide ? 'shell-wide' : ''}">${header}${content}<footer>Discover more with your dictionary.</footer></div>`;
+  return `<div class="shell ${wide ? 'shell-wide' : ''}">${header}${content}</div>`;
 }
 
 function welcome(route) {
@@ -315,6 +337,7 @@ function navigate(route, push = true, focus = true) {
   if (push && location.hash !== `#${safeRoute}`) history.pushState({ route: safeRoute }, '', url);
   else if (safeRoute !== route) history.replaceState({ route: safeRoute }, '', url);
   app.innerHTML = renderScreen(safeRoute);
+  if (footerRoot) footerRoot.innerHTML = siteFooter(safeRoute);
   if (focus) {
     app.focus();
     window.scrollTo(0, 0);
