@@ -207,7 +207,7 @@ Home
 
 Browser navigation must not corrupt quiz state.
 
-Public pages use a full header with primary navigation links and a phone-friendly menu disclosure. Quiz routes use a compact toolbar with status and a Home action so the question flow stays focused on the dictionary activity.
+Public pages use a compact brand header with the Dictionary Challenge wordmark linking home and one primary challenge action that starts or resumes the child flow. Quiz routes use a compact toolbar with status and a Home action so the question flow stays focused on the dictionary activity.
 
 ## Accessibility
 
