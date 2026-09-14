@@ -11,22 +11,22 @@ export default async function checkQuizBrowser(page) {
   await page.evaluate(() => sessionStorage.clear());
   await page.reload();
   await page.setViewportSize({ width: 1024, height: 800 });
-  const publicHeader = page.locator('.public-header');
-  const wordmark = page.getByRole('link', { name: 'Dictionary Challenge home' });
-  const challengeAction = page.getByRole('link', { name: 'Start Challenge', exact: true });
+  const publicHeader = () => page.locator('.public-header');
+  const wordmark = () => page.getByRole('link', { name: 'Dictionary Challenge home' });
+  const challengeAction = () => page.getByRole('link', { name: 'Start Challenge', exact: true });
   const publicPages = {
     About: { route: 'about', heading: 'Why a physical dictionary?', text: 'Find → Understand → Apply → Discover' },
     Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
     Redeem: { route: 'redeem', heading: 'Certificates and prizes', text: 'completion code is a reference only' },
     Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }
   };
-  assert(await publicHeader.isVisible(), 'Public routes render the compact public header');
-  assert(await challengeAction.isVisible(), 'Public header exposes a single challenge action');
-  assert(await wordmark.getAttribute('aria-current') === 'page', 'Public home identifies the active page');
-  await wordmark.focus();
+  assert(await publicHeader().isVisible(), 'Public routes render the compact public header');
+  assert(await challengeAction().isVisible(), 'Public header exposes a single challenge action');
+  assert(await wordmark().getAttribute('aria-current') === 'page', 'Public home identifies the active page');
+  await wordmark().focus();
   await page.keyboard.press('Tab');
-  assert(await challengeAction.evaluate((element) => element === document.activeElement), 'Challenge action follows the wordmark in keyboard order');
-  assert(await challengeAction.getAttribute('href') === '#intro', 'Challenge action starts a new challenge without a resumable attempt');
+  assert(await challengeAction().evaluate((element) => element === document.activeElement), 'Challenge action follows the wordmark in keyboard order');
+  assert(await challengeAction().getAttribute('href') === '#intro', 'Challenge action starts a new challenge without a resumable attempt');
   for (const [destination, { route, heading, text }] of Object.entries(publicPages)) {
     await page.goto(`${base}/#${route}`);
     assert(await page.getByRole('heading', { name: heading, exact: true }).isVisible(), `${destination} heading`);
@@ -36,7 +36,7 @@ export default async function checkQuizBrowser(page) {
   await page.getByRole('link', { name: 'Start Challenge', exact: true }).click();
   assert(await page.getByRole('heading', { name: 'Grab your dictionary.', exact: true }).isVisible(), 'Public header action opens the child intro');
   await page.getByRole('link', { name: 'Return to public home', exact: true }).click();
-  assert(await wordmark.getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
+  assert(await wordmark().getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
   const config = await page.evaluate(async () => (await import('/src/content/site-config.js')).siteConfig);
   await page.goto(`${base}/#redeem`);
   assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
@@ -94,10 +94,10 @@ export default async function checkQuizBrowser(page) {
   const noOverflow = async (label) => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${label}: horizontal overflow`);
   const noResults = async () => assert(!/Correct answer:|You cracked \d/.test(await page.locator('main').innerText()), 'Premature answer feedback');
   await page.setViewportSize({ width: 320, height: 720 });
-  assert(await challengeAction.evaluate((element) => element.getBoundingClientRect().height >= 44), 'Phone header keeps a large challenge target');
-  await wordmark.focus();
+  assert(await challengeAction().evaluate((element) => element.getBoundingClientRect().height >= 44), 'Phone header keeps a large challenge target');
+  await wordmark().focus();
   await page.keyboard.press('Tab');
-  assert(await challengeAction.evaluate((element) => element === document.activeElement), 'Phone header keeps wordmark before the challenge action');
+  assert(await challengeAction().evaluate((element) => element === document.activeElement), 'Phone header keeps wordmark before the challenge action');
   await noOverflow('welcome');
   await page.getByRole('button', { name: 'I’m a Grown-up' }).click();
   assert(await page.getByRole('heading', { name: 'Why a physical dictionary?' }).isVisible(), 'Adult path opens About');
@@ -126,7 +126,7 @@ export default async function checkQuizBrowser(page) {
   await page.keyboard.press('Enter');
   const returnAction = page.getByRole('link', { name: 'Return to Challenge', exact: true });
   assert(await returnAction.isVisible(), 'Public header offers a return to the active attempt');
-  await wordmark.focus();
+  await wordmark().focus();
   await page.keyboard.press('Tab');
   assert(await returnAction.evaluate((element) => element === document.activeElement), 'Return action follows the wordmark in keyboard order');
   await returnAction.focus();
