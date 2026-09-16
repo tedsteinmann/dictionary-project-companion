@@ -159,6 +159,7 @@ describe('sponsor configuration and rendering', () => {
 
   it('renders embedded logos with contained dimensions and adjacent sponsor name', () => {
     const html = renderSponsors({ sponsors: [{ ...sponsor, logo: `data:image/png;base64,${png}` }] });
+    assert.match(html, /class="sponsor-logo-frame"/);
     assert.match(html, /class="sponsor-logo"/);
     assert.match(html, /alt="" width="160" height="80"/);
     assert.match(html, /<h3>Local club<\/h3>/);
@@ -167,6 +168,7 @@ describe('sponsor configuration and rendering', () => {
   it('renders certificate sponsor names and logos without descriptions or links', () => {
     const html = renderSponsorNames({ sponsors: [{ ...sponsor, logo: `data:image/png;base64,${png}` }] });
     assert.match(html, /class="certificate-sponsors"/);
+    assert.match(html, /class="sponsor-logo-frame"/);
     assert.match(html, /class="sponsor-logo"/);
     assert.match(html, />Local club</);
     assert.doesNotMatch(html, /Helping readers|<a /);

@@ -10,7 +10,7 @@ export function renderSponsors(config, { compact = false, heading = 'Made possib
     <h2 id="sponsors-title">${escapeHtml(heading)}</h2>
     <div class="sponsor-grid">${sponsors.map((sponsor) => `<article class="sponsor">
       ${sponsor.logo
-        ? `<img class="sponsor-logo" src="${escapeHtml(sponsor.logo)}" alt="" width="160" height="80" />`
+        ? `<span class="sponsor-logo-frame"><img class="sponsor-logo" src="${escapeHtml(sponsor.logo)}" alt="" width="160" height="80" /></span>`
         : `<span class="sponsor-letter" aria-hidden="true">${escapeHtml(Array.from(sponsor.title)[0])}</span>`}
       <h3>${escapeHtml(sponsor.title)}</h3>
       <p>${escapeHtml(sponsor.description)}</p>
@@ -25,7 +25,7 @@ export function renderSponsorNames(config, { heading = 'Made possible by' } = {}
     <h2 id="certificate-sponsors-title">${escapeHtml(heading)}</h2>
     <div class="certificate-sponsor-grid">${sponsors.map((sponsor) => `<div class="certificate-sponsor">
       ${sponsor.logo
-        ? `<img class="sponsor-logo" src="${escapeHtml(sponsor.logo)}" alt="" width="160" height="80" />`
+        ? `<span class="sponsor-logo-frame"><img class="sponsor-logo" src="${escapeHtml(sponsor.logo)}" alt="" width="160" height="80" /></span>`
         : `<span class="sponsor-letter" aria-hidden="true">${escapeHtml(Array.from(sponsor.title)[0])}</span>`}
       <strong>${escapeHtml(sponsor.title)}</strong>
     </div>`).join('')}</div>

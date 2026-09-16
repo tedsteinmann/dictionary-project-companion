@@ -5,6 +5,7 @@
   background: var(--page);
   --page: #f5f6f8;
   --surface: #ffffff;
+  --on-accent: #ffffff;
   --heading: #182c49;
   --text: #304158;
   --muted: #596779;
@@ -13,6 +14,8 @@
   --blue-tint: #eef3fc;
   --line: #dce1e8;
   --control-border: #8290a3;
+  --logo-frame-border: #aab3c0;
+  --logo-frame-shadow: #182c4924;
   --success: #276347;
   --success-tint: #f0f7f2;
   --retry: #79551a;
@@ -63,7 +66,7 @@ p { margin: 0 0 var(--space-3); }
 .brand .wordmark { display: flex; flex-direction: column; justify-content: center; min-height: 44px; color: var(--heading); font-size: 1rem; font-weight: 700; line-height: 1.35; letter-spacing: -.02em; text-decoration: none; }
 .brand .wordmark span { color: var(--muted); font-size: var(--small-size); font-weight: 500; letter-spacing: 0; }
 .brand-tag { color: var(--muted); font-size: var(--small-size); }
-.header-challenge-action { display: inline-flex; align-items: center; min-height: 44px; margin-left: auto; border: 1px solid var(--blue); border-radius: var(--radius); padding: .5rem .75rem; color: var(--surface); background: var(--blue); font-weight: 600; line-height: 1.25; text-decoration: none; white-space: nowrap; }
+.header-challenge-action { display: inline-flex; align-items: center; min-height: 44px; margin-left: auto; border: 1px solid var(--blue); border-radius: var(--radius); padding: .5rem .75rem; color: var(--on-accent); background: var(--blue); font-weight: 600; line-height: 1.25; text-decoration: none; white-space: nowrap; }
 .game-toolbar { min-height: 68px; margin-bottom: var(--space-4); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius); color: var(--surface); background: var(--heading); }
 .toolbar-home { display: inline-flex; align-items: center; min-height: 44px; color: var(--surface); font-weight: 600; }
 .toolbar-title { color: var(--surface); font-weight: 700; white-space: nowrap; }
@@ -86,7 +89,7 @@ p { margin: 0 0 var(--space-3); }
 
 /* Controls share dimensions and predictable, stationary interaction states. */
 .button, .answer { min-height: 52px; border: 1px solid var(--control-border); border-radius: var(--radius); padding: .8rem 1rem; color: var(--heading); background: var(--surface); font-weight: 600; line-height: 1.5; cursor: pointer; transition: background-color .15s, border-color .15s; }
-.button-primary { color: var(--surface); border-color: var(--blue); background: var(--blue); }
+.button-primary { color: var(--on-accent); border-color: var(--blue); background: var(--blue); }
 .button-secondary { color: var(--blue); border-color: var(--blue); background: var(--surface); }
 .text-button { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; border: 0; padding: .5rem .25rem; color: var(--blue); background: transparent; font-weight: 600; cursor: pointer; text-align: left; }
 .card > .text-button:first-child { margin: -.5rem 0 var(--space-4) -.25rem; }
@@ -109,7 +112,7 @@ p { margin: 0 0 var(--space-3); }
 .audience-choice > span:first-child { min-width: 0; }
 .audience-choice strong { display: block; margin-bottom: .4rem; font-size: 1.375rem; letter-spacing: -.02em; }
 .audience-choice span span { display: block; font-weight: 400; }
-.kid-choice { color: var(--surface); background: var(--blue); border-color: var(--blue); }
+.kid-choice { color: var(--on-accent); background: var(--blue); border-color: var(--blue); }
 .choice-arrow { flex-shrink: 0; font-size: 1.5rem; font-weight: 400; }
 .welcome-note { margin: var(--space-3) 0 var(--space-6); color: var(--muted); font-size: var(--small-size); }
 
@@ -161,7 +164,8 @@ p { margin: 0 0 var(--space-3); }
 .sponsors > h2 { margin: 0 0 var(--space-4); color: var(--muted); font-size: var(--small-size); font-weight: 600; }
 .sponsor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-5); }
 .sponsor { min-width: 0; overflow-wrap: anywhere; }
-.sponsor-logo { display: block; width: 160px; max-width: 100%; height: 80px; object-fit: contain; object-position: left center; margin-bottom: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-1); background: #fff; }
+.sponsor-logo-frame { display: grid; place-items: center; width: 176px; max-width: 100%; height: 96px; margin-bottom: var(--space-3); border: 1px solid var(--logo-frame-border); border-radius: var(--radius); padding: var(--space-1); color-scheme: only light; background: #fff; box-shadow: 0 1px 3px var(--logo-frame-shadow); }
+.sponsor-logo { display: block; width: 160px; max-width: 100%; height: 80px; object-fit: contain; object-position: center; }
 .sponsor-letter { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); color: var(--heading); background: var(--surface); font-size: 1.25rem; font-weight: 600; }
 .sponsor h3 { margin: 0 0 var(--space-1); font-size: 1rem; }
 .sponsor p { max-width: 40rem; margin: 0; color: var(--muted); }
@@ -222,7 +226,7 @@ input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .certificate-sponsors h2 { margin: 0 0 var(--space-3); color: var(--muted); font-size: var(--small-size); font-weight: 600; }
 .certificate-sponsor-grid { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: var(--space-4) var(--space-5); }
 .certificate-sponsor { display: grid; justify-items: center; max-width: 180px; color: var(--heading); font-size: var(--small-size); line-height: 1.35; }
-.certificate-sponsor .sponsor-logo { object-position: center; margin-bottom: var(--space-2); }
+.certificate-sponsor .sponsor-logo-frame { margin-bottom: var(--space-2); }
 .certificate-sponsor .sponsor-letter { margin-bottom: var(--space-2); }
 .completion-code { display: inline-block; margin: var(--space-2) 0; color: var(--heading); font-family: ui-monospace, monospace; font-size: clamp(1rem, 4vw, 1.4rem); letter-spacing: .04em; }
 @media (max-width: 499px) {

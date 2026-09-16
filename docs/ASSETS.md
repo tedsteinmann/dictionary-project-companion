@@ -11,6 +11,14 @@ These project assets were created or edited with the built-in image-generation t
 
 The two sponsor cutouts are also embedded in `sponsors.json` so the local editor can import/export the complete configuration. The supplied Rotary asset already had transparency and was retained. The dictionary is a generic illustrative book, not a photograph of a specific distributed edition. Sponsor marks remain the identities of their respective organizations.
 
+## Sponsor-logo display guidance
+
+Use current, organization-approved artwork supplied by the sponsoring club or downloaded from the organization's official brand center. Confirm permission and the correct local-club lockup before publishing. In particular, do not redraw, recolor, invert, crop, stretch, add effects to, or assemble a new lockup from any of the Elks, Rotary, or Lions marks.
+
+The three marks have very different silhouettes and color behavior: the Elks script is nearly black, while the Rotary and Lions artwork uses fixed brand colors. The site therefore displays every sponsor asset unchanged on the same opaque white holding field in both light and dark environments. A visible neutral border, subtle shadow, and inset clear space distinguish that field from either page background without placing a dark box behind the artwork. This also avoids CSS filters or automatic dark-mode color transformations that could alter a brand color or make the Elks mark disappear.
+
+Before release, the project organizer should replace any proof-of-concept asset with the latest official production file, preserve its aspect ratio, and compare the rendered clear space and minimum size with that organization's current brand guide. Organization-specific minimum sizes and exclusion zones take precedence over the site's default frame. The adjacent sponsor title remains visible text; the decorative image intentionally has an empty alternative text to avoid announcing the same organization twice.
+
 The icon font contains only the six symbols used by the grown-up benefit cards and is served locally, so displaying the icons makes no request to Google Fonts.
 
 ## Final prompts
