@@ -113,6 +113,7 @@ export default async function checkQuizBrowser(page) {
     const mod = await import('/src/content/site-config.js');
     mod.siteConfig.site = nextConfig.site;
     mod.siteConfig.sponsors = nextConfig.sponsors;
+    mod.siteConfig.prize = nextConfig.prize;
     mod.siteConfig.redemption = nextConfig.redemption;
     mod.siteConfig.participants = nextConfig.participants;
   }, enabledConfig);
