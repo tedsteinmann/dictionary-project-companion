@@ -284,8 +284,8 @@ function participantsPage(route) {
   return layout(`<section class="card adult" aria-labelledby="participants-title">
     <p class="kicker">Prize-book partners</p>
     <h1 id="participants-title">Participants</h1>
-    <p class="lede">The Fargo, West Fargo, and Moorhead public library systems are participating in the prize-book program.</p>
-    <p>These libraries help families redeem an earned Dictionary Challenge certificate for a prize book. Their participation in fulfillment does not identify them as financial or project sponsors.</p>
+    <p class="lede">Participant locations help families redeem an earned Dictionary Challenge certificate for a prize book.</p>
+    <p>Participation in certificate fulfillment does not identify an organization as a financial or project sponsor.</p>
     <section class="adult-section" aria-labelledby="redemption-locations-title">
       <h2 id="redemption-locations-title">Certificate redemption locations</h2>
       ${locations.length ? `<div class="redemption-grid">${renderParticipantLocations(locations)}</div>` : '<p>No participant locations are published for this build.</p>'}
