@@ -27,12 +27,5 @@
       "url": "https://example.org/elks",
       "logo": null
     }
-  ],
-  "redemption": {
-    "enabled": false,
-    "instructions": null,
-    "availabilityDate": "November 1",
-    "limitedSupplyNotice": "Prize books are available while supplies last.",
-    "deadline": null
-  }
+  ]
 }

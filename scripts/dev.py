@@ -30,7 +30,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     with ThreadingHTTPServer(("", args.port), DevHandler) as server:
         print(f"Preview: http://localhost:{server.server_port}", flush=True)
-        print("After editing source or sponsors.json, run npm run build and refresh.", flush=True)
+        print("After editing source or project JSON configuration, run npm run build and refresh.", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

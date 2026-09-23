@@ -33,6 +33,20 @@ try {
       }
     }
   }
+  const prizePath = resolve(root, 'prize.json');
+  let prizeText;
+  try {
+    prizeText = await readFile(prizePath, 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  if (prizeText !== undefined) {
+    const prizeConfig = JSON.parse(prizeText);
+    if (!prizeConfig || typeof prizeConfig.redemption !== 'object' || Array.isArray(prizeConfig.redemption)) {
+      throw new Error('prize.json must contain a redemption object.');
+    }
+    config = { ...config, redemption: prizeConfig.redemption };
+  }
   const participantsPath = resolve(root, 'participants.json');
   let participantsText;
   try {

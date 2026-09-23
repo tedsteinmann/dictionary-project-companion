@@ -353,7 +353,7 @@ Build vertically:
 
 The proof of concept is a client-only application with no backend API. Answers, shown-question history, unlocked stages, and certificates stay in sessionStorage for the current browser tab, with an in-memory fallback if storage is blocked. There are no accounts or requests for personal information. Print or save a certificate before closing the tab. Completion codes are local references, not centrally verified prize claims. Parent/guardian information explains how to contact the organizer about available prizes.
 
-`npm run dev` builds the site and starts a local preview at `http://localhost:4173` using Python 3's HTTP server. Make sure Python 3 is installed. Both build and dev automatically use `sponsors.json` and the separate `participants.json` in the project root when present, falling back to defaults otherwise. After changing source files or configuration, run `npm run build` and refresh, or restart `npm run dev`. The local configuration editor remains available at `/tools/sponsors.html` during development.
+`npm run dev` builds the site and starts a local preview at `http://localhost:4173` using Python 3's HTTP server. Make sure Python 3 is installed. Both build and dev automatically use `sponsors.json`, `prize.json`, and `participants.json` in the project root when present, falling back to defaults otherwise. After changing source files or configuration, run `npm run build` and refresh, or restart `npm run dev`. The local configuration editor remains available at `/tools/sponsors.html` during development.
 
 ```bash
 npm run dev

@@ -183,8 +183,10 @@ describe('sponsor configuration and rendering', () => {
 describe('production sponsor configuration', () => {
   it('enables certificate redemption at the four participating libraries in order', async () => {
     const productionConfig = JSON.parse(await readFile(new URL('../sponsors.json', import.meta.url), 'utf8'));
+    const prizeConfig = JSON.parse(await readFile(new URL('../prize.json', import.meta.url), 'utf8'));
     const participantConfig = JSON.parse(await readFile(new URL('../participants.json', import.meta.url), 'utf8'));
-    const config = validateSiteConfig({ ...productionConfig, ...participantConfig });
+    assert.equal(Object.hasOwn(productionConfig, 'redemption'), false, 'sponsor configuration does not contain prize instructions');
+    const config = validateSiteConfig({ ...productionConfig, ...prizeConfig, ...participantConfig });
     const { redemption, participants } = config;
 
     assert.equal(redemption.enabled, true);
@@ -264,16 +266,18 @@ describe('static sponsor builds', () => {
       await writeFile(join(dir, 'custom.json'), JSON.stringify({
         site: { organizerName: 'Library partners', website: 'https://project.example' },
         sponsors: [{ ...sponsor, logo: './logo.png' }, { ...sponsor, title: 'Lions' }, { ...sponsor, title: 'Elks' }],
-        redemption: {
-          enabled: true,
-          instructions: 'Bring the certificate with an adult.',
-          deadline: 'May 31, 2027'
-        },
         participants: [
           { name: 'Main Library', instructions: 'Ask at the desk.', addressLines: ['10 First Ave'], website: 'https://library.example', telephone: '(555) 555-0100' },
           { name: 'West Library', instructions: 'Ask a librarian.' }
         ]
       }));
+      await writeFile(join(dir, 'prize.json'), JSON.stringify({ redemption: {
+        enabled: true,
+        instructions: 'Bring the certificate with an adult.',
+        availabilityDate: 'November 1',
+        limitedSupplyNotice: 'Prize books are available while supplies last.',
+        deadline: 'May 31, 2027'
+      } }));
       build('--config', 'custom.json');
       const output = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
       assert.match(output, /data:image\/png;base64,/);
@@ -282,8 +286,12 @@ describe('static sponsor builds', () => {
       assert.match(output, /Library partners/);
       assert.match(output, /Main Library/);
       assert.match(output, /West Library/);
+      assert.match(output, /Prize books are available while supplies last/);
       await assert.rejects(access(join(dir, 'dist/tools')));
-      await writeFile(join(dir, 'sponsors.json'), JSON.stringify({ sponsors: [{ ...sponsor, title: 'Automatically selected', logo: './logo.png' }] }));
+      await writeFile(join(dir, 'sponsors.json'), JSON.stringify({
+        site: { organizerName: 'Automatic organizer', website: 'https://project.example' },
+        sponsors: [{ ...sponsor, title: 'Automatically selected', logo: './logo.png' }]
+      }));
       build();
       const automatic = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
       assert.match(automatic, /Automatically selected/);
@@ -298,9 +306,9 @@ describe('static sponsor builds', () => {
       await rm(join(dir, 'participants.json'));
       build('--config', 'custom.json');
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
-      await writeFile(join(dir, 'sponsors.json'), '{"sponsors":[]}');
+      await writeFile(join(dir, 'sponsors.json'), '{"site":{"organizerName":"Organizer","website":"https://project.example"},"sponsors":[]}');
       assert.throws(() => build(), /Add at least one sponsor/);
-      await writeFile(join(dir, 'bad.json'), '{"sponsors":[]}');
+      await writeFile(join(dir, 'bad.json'), '{"site":{"organizerName":"Organizer","website":"https://project.example"},"sponsors":[]}');
       assert.throws(() => build('--config', 'bad.json'), /Add at least one sponsor/);
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       await writeFile(join(dir, 'sponsors.json'), JSON.stringify({ sponsors: [sponsor] }));
@@ -308,6 +316,9 @@ describe('static sponsor builds', () => {
       assert.throws(() => build(), /participants array/);
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       await rm(join(dir, 'participants.json'));
+      await writeFile(join(dir, 'prize.json'), '{"redemption":"not an object"}');
+      assert.throws(() => build(), /prize\.json must contain a redemption object/);
+      assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       assert.throws(() => build('--unknown'), /Usage:/);
 
       // Use an OS-assigned port and always stop the preview, including on failure.

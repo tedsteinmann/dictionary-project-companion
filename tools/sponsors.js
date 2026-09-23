@@ -164,10 +164,25 @@ document.querySelector('#import-config').addEventListener('change', async (event
     editors.replaceChildren();
     config.sponsors.forEach(addSponsor);
     setSite(config.site);
-    setRedemption(config.redemption, config.participants);
     status.textContent = 'Configuration loaded.';
   } catch (error) {
     status.textContent = `Could not load configuration: ${error.message}`;
+  }
+  event.target.value = '';
+});
+document.querySelector('#import-prize').addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const raw = JSON.parse(await file.text());
+    if (!raw || typeof raw.redemption !== 'object' || Array.isArray(raw.redemption)) {
+      throw new Error('Prize configuration must contain a redemption object.');
+    }
+    const config = validateSiteConfig({ ...siteConfig, redemption: raw.redemption, participants: readParticipants() });
+    setRedemption(config.redemption, readParticipants());
+    status.textContent = 'Prize configuration loaded.';
+  } catch (error) {
+    status.textContent = `Could not load prize configuration: ${error.message}`;
   }
   event.target.value = '';
 });
@@ -208,10 +223,11 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     };
-    const { participants, ...sponsorConfig } = config;
+    const { participants, redemption, ...sponsorConfig } = config;
     download('sponsors.json', sponsorConfig);
+    download('prize.json', { redemption });
     download('participants.json', { participants });
-    status.textContent = 'Sponsor and participant configurations downloaded. Place both files in the project root before building.';
+    status.textContent = 'Sponsor, prize, and participant configurations downloaded. Place all three files in the project root before building.';
   } catch (error) {
     status.textContent = error.message;
   }

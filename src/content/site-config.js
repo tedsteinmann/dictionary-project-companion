@@ -15,6 +15,8 @@ export const siteConfig = {
   redemption: {
     enabled: false,
     instructions: null,
+    availabilityDate: null,
+    limitedSupplyNotice: null,
     deadline: null
   },
   participants: []

@@ -30,6 +30,7 @@
       <p>Add public organizer details, the groups making your project possible, and any certificate redemption instructions.</p>
       <p class="note">Files stay in your browser. Download your configuration, then build the site with it. This setup page is not included in the published site.</p>
       <label>Open an existing sponsor configuration <input id="import-config" type="file" accept=".json,application/json" /></label>
+      <label>Open an existing prize configuration <input id="import-prize" type="file" accept=".json,application/json" /></label>
       <label>Open an existing participant configuration <input id="import-participants" type="file" accept=".json,application/json" /></label>
       <form id="sponsor-form">
         <fieldset>
@@ -62,7 +63,7 @@
       </form>
       <p id="setup-status" role="status" aria-live="polite"></p>
       <h2>Build your site</h2>
-      <p>Place <code>sponsors.json</code> and <code>participants.json</code> in the project root, then run:</p>
+      <p>Place <code>sponsors.json</code>, <code>prize.json</code>, and <code>participants.json</code> in the project root, then run:</p>
       <pre style="white-space: pre-wrap; overflow-wrap: anywhere">npm run build</pre>
       <p>Deploy <code>dist/</code>, or preview it with <code>python3 -m http.server 4174 --directory dist</code>.</p>
     </section>
