@@ -13,9 +13,7 @@ rather than:
 - a Rotary history lesson,
 - or an advertisement.
 
-The adult experience should feel like the answer to:
-
-> Why did Rotary give this dictionary to my child?
+The adult experience should invite grown-ups to see the dictionary project as one example of local service and offer a welcoming path to meet people, build relationships, and get involved.
 
 ## Entry
 
@@ -91,11 +89,9 @@ Questions already displayed, the current attempt, completed stages, and earned c
 
 ## Adult Flow
 
-### About: The Dictionary as an Invitation
+### About: An Invitation to Get Involved
 
-Lead with purpose.
-
-Explain that the challenge is a companion to the child's physical book, then describe **Find → Understand → Apply → Discover**. Give adults concrete prompts that encourage searching and reasoning without revealing answers. State clearly that the activity requests no child name, email, school, address, location, or account and keeps quiz state within the tab session.
+Lead with the dictionary project as a concrete example of what local service clubs make possible. Explain the social, personal, professional, and community benefits of participation; show a range of local projects; address common concerns about who can join and when clubs meet; and provide links to learn more, find a club, or visit a meeting.
 
 ### Sponsors: Community Support
 
