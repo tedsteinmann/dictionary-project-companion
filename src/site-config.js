@@ -134,7 +134,10 @@ function validateSponsors(value) {
 
 function validateParticipants(value) {
   const rawParticipants = value ?? [];
-  if (!Array.isArray(rawParticipants) || rawParticipants.length > SITE_CONFIG_LIMITS.redemptionLocations) {
+  if (!Array.isArray(rawParticipants)) {
+    throw new Error('Participants must be an array.');
+  }
+  if (rawParticipants.length > SITE_CONFIG_LIMITS.redemptionLocations) {
     throw new Error(`Participants must contain no more than ${SITE_CONFIG_LIMITS.redemptionLocations} locations.`);
   }
   return rawParticipants.map((rawLocation, index) => {
