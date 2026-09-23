@@ -12,9 +12,15 @@ export const siteConfig = {
     url: 'https://www.rotary.org/',
     logo: null
   }],
+  prize: {
+    title: null,
+    description: null
+  },
   redemption: {
     enabled: false,
     instructions: null,
+    availabilityDate: null,
+    limitedSupplyNotice: null,
     deadline: null
   },
   participants: []

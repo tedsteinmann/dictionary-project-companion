@@ -30,6 +30,7 @@
       <p>Add public organizer details, the groups making your project possible, and any certificate redemption instructions.</p>
       <p class="note">Files stay in your browser. Download your configuration, then build the site with it. This setup page is not included in the published site.</p>
       <label>Open an existing sponsor configuration <input id="import-config" type="file" accept=".json,application/json" /></label>
+      <label>Open an existing prize configuration <input id="import-prize" type="file" accept=".json,application/json" /></label>
       <label>Open an existing participant configuration <input id="import-participants" type="file" accept=".json,application/json" /></label>
       <form id="sponsor-form">
         <fieldset>
@@ -47,9 +48,13 @@
         </div>
         <fieldset>
           <legend>Certificate redemption</legend>
+          <label for="prize-title">Prize title<input id="prize-title" name="prize-title" maxlength="120" placeholder="For example, Prize books" /></label>
+          <label for="prize-description">Prize description<textarea id="prize-description" name="prize-description" maxlength="600"></textarea></label
           <label><span><input id="redemption-enabled" name="redemption-enabled" type="checkbox" /> Publish redemption instructions</span></label>
           <p class="note">Leave this off when the project has no certificate offer. No visitor information is collected.</p>
           <label for="redemption-instructions">General instructions<textarea id="redemption-instructions" name="redemption-instructions" maxlength="1200"></textarea></label>
+          <label for="redemption-availability-date">Availability date (optional)<input id="redemption-availability-date" name="redemption-availability-date" maxlength="120" placeholder="For example, November 1" /></label>
+          <label for="redemption-limited-supply">Limited-supply notice (optional)<input id="redemption-limited-supply" name="redemption-limited-supply" maxlength="240" placeholder="Prize books are available while supplies last." /></label>
           <label for="redemption-deadline">Deadline (optional)<input id="redemption-deadline" name="redemption-deadline" maxlength="120" placeholder="For example, May 31, 2027" /></label>
           <div id="location-editors"></div>
           <button class="button button-secondary" type="button" id="add-location">+ Add redemption location</button>
@@ -60,7 +65,7 @@
       </form>
       <p id="setup-status" role="status" aria-live="polite"></p>
       <h2>Build your site</h2>
-      <p>Place <code>sponsors.json</code> and <code>participants.json</code> in the project root, then run:</p>
+      <p>Place <code>sponsors.json</code>, <code>prize.json</code>, and <code>participants.json</code> in the project root, then run:</p>
       <pre style="white-space: pre-wrap; overflow-wrap: anywhere">npm run build</pre>
       <p>Deploy <code>dist/</code>, or preview it with <code>python3 -m http.server 4174 --directory dist</code>.</p>
     </section>

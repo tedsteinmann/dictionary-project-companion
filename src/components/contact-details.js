@@ -43,7 +43,7 @@ export function renderContactContent(config) {
   return `<section class="card adult" aria-labelledby="contact-title">
     <p class="kicker">Project information</p>
     <h1 id="contact-title">Contact the project.</h1>
-    <p class="lede">For questions about the local dictionary project or prize availability, ask a parent, guardian, teacher, or librarian to contact the project organizer.</p>
+    <p class="lede">For questions about the local dictionary project${config.prize.title ? ` or ${escapeHtml(config.prize.title)} availability` : ''}, ask a parent, guardian, teacher, or librarian to contact the project organizer.</p>
     <p>This page publishes contact details only. It does not use a contact form or collect visitor information.</p>
     <section class="adult-section" aria-labelledby="organizer-title"><h2 id="organizer-title">Project organizer</h2>${organizerDetails}</section>
     <section class="adult-section" aria-labelledby="website-title"><h2 id="website-title">Sponsor websites</h2>

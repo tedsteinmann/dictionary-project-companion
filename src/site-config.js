@@ -11,7 +11,11 @@ export const SITE_CONFIG_LIMITS = Object.freeze({
   url: 2048,
   sponsorTitle: 120,
   sponsorDescription: 600,
+  prizeTitle: 120,
+  prizeDescription: 600,
   redemptionInstructions: 1200,
+  availabilityDate: 120,
+  limitedSupplyNotice: 240,
   locationName: 160,
   locationInstructions: 600,
   deadline: 120,
@@ -154,7 +158,7 @@ function validateParticipants(value) {
 }
 
 function validateRedemption(value) {
-  if (value == null) return { enabled: false, instructions: null, deadline: null };
+  if (value == null) return { enabled: false, instructions: null, availabilityDate: null, limitedSupplyNotice: null, deadline: null };
   const redemption = object(value, 'Redemption');
   if (typeof redemption.enabled !== 'boolean') throw new Error('Redemption: enabled must be true or false.');
   const instructions = text(redemption.instructions, {
@@ -163,7 +167,21 @@ function validateRedemption(value) {
   return {
     enabled: redemption.enabled,
     instructions,
+    availabilityDate: text(redemption.availabilityDate, { label: 'Redemption: availabilityDate', limit: SITE_CONFIG_LIMITS.availabilityDate }),
+    limitedSupplyNotice: text(redemption.limitedSupplyNotice, { label: 'Redemption: limitedSupplyNotice', limit: SITE_CONFIG_LIMITS.limitedSupplyNotice }),
     deadline: text(redemption.deadline, { label: 'Redemption: deadline', limit: SITE_CONFIG_LIMITS.deadline })
+  };
+}
+
+function validatePrize(value, redemptionEnabled) {
+  if (value == null) {
+    if (redemptionEnabled) throw new Error('Prize: title and description are required when redemption is enabled.');
+    return { title: null, description: null };
+  }
+  const prize = object(value, 'Prize');
+  return {
+    title: text(prize.title, { label: 'Prize: title', limit: SITE_CONFIG_LIMITS.prizeTitle, required: redemptionEnabled }),
+    description: text(prize.description, { label: 'Prize: description', limit: SITE_CONFIG_LIMITS.prizeDescription, required: redemptionEnabled })
   };
 }
 
@@ -171,6 +189,7 @@ export function validateSiteConfig(config) {
   object(config, 'Site configuration');
   const site = validateSite(legacySite(config));
   const redemption = validateRedemption(config.redemption);
+  const prize = validatePrize(config.prize, redemption.enabled);
   // Accept legacy combined files while keeping participants separate in normalized configuration.
   const participants = validateParticipants(config.participants ?? config.redemption?.locations);
   if (redemption.enabled && participants.length === 0 && !site.telephone && !site.email && !site.website) {
@@ -179,6 +198,7 @@ export function validateSiteConfig(config) {
   return freeze({
     site,
     sponsors: validateSponsors(config.sponsors),
+    prize,
     redemption,
     participants
   });

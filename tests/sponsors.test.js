@@ -12,6 +12,7 @@ import { renderContactContent } from '../src/components/contact-details.js';
 import { renderParticipantLocations } from '../src/participants.js';
 
 const sponsor = { title: 'Local club', description: 'Helping readers.', url: 'https://example.org', logo: null };
+const prize = { title: 'Prize books', description: 'Each child who earns a certificate may choose one new book.' };
 const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aV1sAAAAASUVORK5CYII=';
 
 describe('sponsor configuration and rendering', () => {
@@ -45,13 +46,13 @@ describe('sponsor configuration and rendering', () => {
 
   it('requires a public organizer contact for location-free redemption', () => {
     const redemption = { enabled: true, instructions: 'Ask an adult to contact us.', locations: [] };
-    assert.throws(() => validateSiteConfig({ sponsors: [sponsor], redemption }), /public organizer/);
+    assert.throws(() => validateSiteConfig({ sponsors: [sponsor], prize, redemption }), /public organizer/);
     for (const contact of [
       { telephone: '(555) 555-0100' },
       { email: 'dictionary@example.org' },
       { website: 'https://example.org/project' }
     ]) {
-      assert.equal(validateSiteConfig({ sponsors: [sponsor], site: { organizerName: 'Organizer', ...contact }, redemption }).redemption.enabled, true);
+      assert.equal(validateSiteConfig({ sponsors: [sponsor], prize, site: { organizerName: 'Organizer', ...contact }, redemption }).redemption.enabled, true);
     }
   });
 
@@ -100,7 +101,8 @@ describe('sponsor configuration and rendering', () => {
   it('supplies safe defaults for old sponsor-only configuration files', () => {
     const config = validateSiteConfig({ sponsors: [sponsor] });
     assert.deepEqual(config.site, { organizerName: null, addressLines: [], telephone: null, email: null, website: null });
-    assert.deepEqual(config.redemption, { enabled: false, instructions: null, deadline: null });
+    assert.deepEqual(config.redemption, { enabled: false, instructions: null, availabilityDate: null, limitedSupplyNotice: null, deadline: null });
+    assert.deepEqual(config.prize, { title: null, description: null });
     assert.deepEqual(config.participants, []);
     assert.ok(Object.isFrozen(config));
     assert.ok(Object.isFrozen(config.sponsors));
@@ -113,13 +115,17 @@ describe('sponsor configuration and rendering', () => {
       name: ' Main Library ', instructions: ' Show a printed certificate. ', addressLines: [' 10 First Ave '],
       website: 'https://library.example/claim', telephone: '(555) 555-0110'
     };
-    const one = validateSiteConfig({ sponsors: [sponsor], participants: [library], redemption: {
-      enabled: true, instructions: ' Visit with an adult. ', deadline: ' May 31 '
+    const one = validateSiteConfig({ sponsors: [sponsor], prize, participants: [library], redemption: {
+      enabled: true, instructions: ' Visit with an adult. ', availabilityDate: ' November 1 ',
+      limitedSupplyNotice: ' Prize books are available while supplies last. ', deadline: ' May 31 '
     } });
     assert.equal(one.redemption.instructions, 'Visit with an adult.');
+    assert.deepEqual(one.prize, prize);
+    assert.equal(one.redemption.availabilityDate, 'November 1');
+    assert.equal(one.redemption.limitedSupplyNotice, 'Prize books are available while supplies last.');
     assert.equal(one.participants[0].name, 'Main Library');
     assert.deepEqual(one.participants[0].addressLines, ['10 First Ave']);
-    const multiple = validateSiteConfig({ sponsors: [sponsor], redemption: {
+    const multiple = validateSiteConfig({ sponsors: [sponsor], prize, redemption: {
       enabled: true, instructions: 'Bring the certificate.', locations: [library, { name: 'West Library', instructions: 'Ask at the desk.' }]
     } });
     assert.equal(multiple.participants.length, 2);
@@ -128,7 +134,10 @@ describe('sponsor configuration and rendering', () => {
   });
 
   it('rejects malformed, unsafe, or unreasonably large redemption values', () => {
-    const base = { sponsors: [sponsor], redemption: { enabled: true, instructions: 'Bring the certificate.', locations: [] } };
+    const base = { sponsors: [sponsor], prize, redemption: { enabled: true, instructions: 'Bring the certificate.', locations: [] } };
+    assert.throws(() => validateSiteConfig({ sponsors: [sponsor], redemption: base.redemption }), /title and description/);
+    assert.throws(() => validateSiteConfig({ ...base, prize: { ...prize, title: 'x'.repeat(121) } }), /120/);
+    assert.throws(() => validateSiteConfig({ ...base, prize: { ...prize, description: 'x'.repeat(601) } }), /600/);
     assert.throws(() => validateSiteConfig({ ...base, redemption: { enabled: true } }), /instructions is required/);
     assert.throws(() => validateSiteConfig({ ...base, redemption: { ...base.redemption, instructions: 'x'.repeat(1201) } }), /1200/);
     assert.throws(() => validateSiteConfig({ ...base, redemption: { ...base.redemption, locations: [{ name: '', instructions: 'Ask.' }] } }), /name is required/);
@@ -180,10 +189,18 @@ describe('sponsor configuration and rendering', () => {
 describe('production sponsor configuration', () => {
   it('enables certificate redemption at the four participating libraries in order', async () => {
     const productionConfig = JSON.parse(await readFile(new URL('../sponsors.json', import.meta.url), 'utf8'));
+    const prizeConfig = JSON.parse(await readFile(new URL('../prize.json', import.meta.url), 'utf8'));
     const participantConfig = JSON.parse(await readFile(new URL('../participants.json', import.meta.url), 'utf8'));
-    const config = validateSiteConfig({ ...productionConfig, ...participantConfig });
+    assert.equal(Object.hasOwn(productionConfig, 'redemption'), false, 'sponsor configuration does not contain prize instructions');
+    const config = validateSiteConfig({
+      ...productionConfig,
+      prize: { title: prizeConfig.title, description: prizeConfig.description },
+      redemption: prizeConfig.redemption,
+      ...participantConfig
+    });
     const { redemption, participants } = config;
 
+    assert.deepEqual(config.prize, prize);
     assert.equal(redemption.enabled, true);
     assert.equal(
       redemption.instructions,
@@ -214,10 +231,7 @@ describe('production sponsor configuration', () => {
         }
       ]
     );
-    for (const location of participants) {
-      assert.match(location.instructions, /printed certificate/);
-      assert.match(location.instructions, /one prize book/);
-    }
+    for (const location of participants) assert.match(location.instructions, /printed certificate/);
     const participantHtml = renderParticipantLocations(participants);
     assert.equal((participantHtml.match(/<article /g) || []).length, 4);
     for (const location of participants) {
@@ -233,7 +247,7 @@ describe('participant rendering', () => {
       instructions: 'Ask at the desk.',
       addressLines: ['1 <Main> Street'],
       website: 'https://example.org/library?name=%22safe'
-    }], redemption: {
+    }], prize, redemption: {
       enabled: true,
       instructions: 'Bring a certificate.'
     } }).participants;
@@ -261,16 +275,18 @@ describe('static sponsor builds', () => {
       await writeFile(join(dir, 'custom.json'), JSON.stringify({
         site: { organizerName: 'Library partners', website: 'https://project.example' },
         sponsors: [{ ...sponsor, logo: './logo.png' }, { ...sponsor, title: 'Lions' }, { ...sponsor, title: 'Elks' }],
-        redemption: {
-          enabled: true,
-          instructions: 'Bring the certificate with an adult.',
-          deadline: 'May 31, 2027'
-        },
         participants: [
           { name: 'Main Library', instructions: 'Ask at the desk.', addressLines: ['10 First Ave'], website: 'https://library.example', telephone: '(555) 555-0100' },
           { name: 'West Library', instructions: 'Ask a librarian.' }
         ]
       }));
+      await writeFile(join(dir, 'prize.json'), JSON.stringify({ ...prize, redemption: {
+        enabled: true,
+        instructions: 'Bring the certificate with an adult.',
+        availabilityDate: 'November 1',
+        limitedSupplyNotice: 'Prize books are available while supplies last.',
+        deadline: 'May 31, 2027'
+      } }));
       build('--config', 'custom.json');
       const output = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
       assert.match(output, /data:image\/png;base64,/);
@@ -279,8 +295,12 @@ describe('static sponsor builds', () => {
       assert.match(output, /Library partners/);
       assert.match(output, /Main Library/);
       assert.match(output, /West Library/);
+      assert.match(output, /Prize books are available while supplies last/);
       await assert.rejects(access(join(dir, 'dist/tools')));
-      await writeFile(join(dir, 'sponsors.json'), JSON.stringify({ sponsors: [{ ...sponsor, title: 'Automatically selected', logo: './logo.png' }] }));
+      await writeFile(join(dir, 'sponsors.json'), JSON.stringify({
+        site: { organizerName: 'Automatic organizer', website: 'https://project.example' },
+        sponsors: [{ ...sponsor, title: 'Automatically selected', logo: './logo.png' }]
+      }));
       build();
       const automatic = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
       assert.match(automatic, /Automatically selected/);
@@ -295,9 +315,9 @@ describe('static sponsor builds', () => {
       await rm(join(dir, 'participants.json'));
       build('--config', 'custom.json');
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
-      await writeFile(join(dir, 'sponsors.json'), '{"sponsors":[]}');
+      await writeFile(join(dir, 'sponsors.json'), '{"site":{"organizerName":"Organizer","website":"https://project.example"},"sponsors":[]}');
       assert.throws(() => build(), /Add at least one sponsor/);
-      await writeFile(join(dir, 'bad.json'), '{"sponsors":[]}');
+      await writeFile(join(dir, 'bad.json'), '{"site":{"organizerName":"Organizer","website":"https://project.example"},"sponsors":[]}');
       assert.throws(() => build('--config', 'bad.json'), /Add at least one sponsor/);
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       await writeFile(join(dir, 'sponsors.json'), JSON.stringify({ sponsors: [sponsor] }));
@@ -305,6 +325,9 @@ describe('static sponsor builds', () => {
       assert.throws(() => build(), /participants array/);
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       await rm(join(dir, 'participants.json'));
+      await writeFile(join(dir, 'prize.json'), '{"redemption":"not an object"}');
+      assert.throws(() => build(), /prize\.json must contain a redemption object/);
+      assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       assert.throws(() => build('--unknown'), /Usage:/);
 
       // Use an OS-assigned port and always stop the preview, including on failure.

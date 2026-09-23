@@ -17,8 +17,8 @@ export default async function checkQuizBrowser(page) {
   const publicPages = {
     About: { route: 'about', heading: 'Why a physical dictionary?', text: 'Find → Understand → Apply → Discover' },
     Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
-    Participants: { route: 'participants', heading: 'Participants', text: 'participating in the prize-book program' },
-    Redeem: { route: 'redeem', heading: 'Certificates and prizes', text: 'completion code is a reference only' },
+    Participants: { route: 'participants', heading: 'Participants', text: 'complete redemption' },
+    Redeem: { route: 'redeem', heading: config => `${config.prize.title} redemption`, text: 'completion code is a reference only' },
     Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }
   };
   assert(await publicHeader().isVisible(), 'Public routes render the compact public header');
@@ -29,16 +29,19 @@ export default async function checkQuizBrowser(page) {
   assert(await page.getByRole('contentinfo').isVisible(), 'Page-level contentinfo landmark is rendered');
   assert(await footer.getByText('Helping children use their physical dictionaries').isVisible(), 'Public footer leads with literacy');
   assert(await footer.getByRole('navigation', { name: 'Project information' }).isVisible(), 'Public footer labels its information navigation');
-  assert(await footer.getByRole('link', { name: 'Certificates and prizes', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
+  assert(await footer.getByRole('link', { name: 'Certificate redemption', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
   assert(await footer.getByRole('link', { name: 'Participants', exact: true }).getAttribute('href') === '#participants', 'Participants footer link preserves the participants route');
   assert((await footer.locator('.sponsor-logo').count()) === 0, 'Public footer does not duplicate sponsor logos');
   await wordmark().focus();
   await page.keyboard.press('Tab');
   assert(await challengeAction().evaluate((element) => element === document.activeElement), 'Challenge action follows the wordmark in keyboard order');
   assert(await challengeAction().getAttribute('href') === '#intro', 'Challenge action starts a new challenge without a resumable attempt');
-  for (const [destination, { route, heading, text }] of Object.entries(publicPages)) {
+  const config = await page.evaluate(async () => (await import('/src/content/site-config.js')).siteConfig);
+  for (const [destination, { route, heading, text: expectedText }] of Object.entries(publicPages)) {
+    const resolvedHeading = typeof heading === 'function' ? heading(config) : heading;
+    const text = typeof expectedText === 'function' ? expectedText(config) : expectedText;
     await page.goto(`${base}/#${route}`);
-    assert(await page.getByRole('heading', { name: heading, exact: true }).isVisible(), `${destination} heading`);
+    assert(await page.getByRole('heading', { name: resolvedHeading, exact: true }).isVisible(), `${destination} heading`);
     assert((await page.locator('main').innerText()).includes(text), `${destination} content`);
     assert(await page.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), `${destination} keeps the single challenge action`);
     assert(await page.locator(`.site-footer-nav [data-route="${route}"]`).getAttribute('aria-current') === 'page', `${destination} footer link identifies the active page`);
@@ -48,7 +51,6 @@ export default async function checkQuizBrowser(page) {
   assert(await page.getByRole('heading', { name: 'Grab your dictionary.', exact: true }).isVisible(), 'Public header action opens the child intro');
   await page.getByRole('link', { name: 'Return to public home', exact: true }).click();
   assert(await wordmark().getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
-  const config = await page.evaluate(async () => (await import('/src/content/site-config.js')).siteConfig);
   await page.goto(`${base}/#participants`);
   assert(await page.getByRole('heading', { name: 'Participants', exact: true }).isVisible(), 'Direct #participants access renders the Participants screen');
   assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Participants renders every configured redemption location');
@@ -57,9 +59,16 @@ export default async function checkQuizBrowser(page) {
     assert(await page.getByRole('link', { name: `Visit the ${location.name} website`, exact: true }).getAttribute('href') === location.website, `Participants links ${location.name} safely`);
   }
   await page.goto(`${base}/#redeem`);
-  assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
-  assert((await page.locator('main').innerText()).includes('not online verification or a guaranteed prize claim'), 'Redemption explains the local reference code limitation');
+  assert(await page.getByRole('heading', { name: `${config.prize.title} redemption`, exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
+  assert((await page.locator('main').innerText()).includes(`not online verification or a guaranteed claim for ${config.prize.title}`), 'Redemption explains the local reference code limitation using configured prize content');
   if (config.redemption.enabled) {
+    const redeemText = await page.locator('main').innerText();
+    assert(redeemText.includes(`${config.prize.title} are available beginning November 1.`), 'Redemption shows the configured prize and availability date');
+    assert(redeemText.includes(config.redemption.limitedSupplyNotice), 'Redemption shows the configured limited-supply notice');
+    assert(!redeemText.includes('Redemption deadline: November 1'), 'Availability date is not presented as a redemption deadline');
+    const availabilityBox = page.locator('.redemption-availability');
+    const firstLocation = page.locator('.redemption-location').first();
+    assert(await availabilityBox.evaluate((notice, location) => Boolean(location) && (notice.compareDocumentPosition(location) & Node.DOCUMENT_POSITION_FOLLOWING), await firstLocation.elementHandle()), 'Prize conditions precede participating locations');
     assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Enabled production redemption renders every configured library');
     assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Enabled production redemption requires a printed certificate');
     assert(!(await page.locator('main').innerText()).includes('No certificate redemption program is available'), 'Enabled production redemption omits the unavailable message');
@@ -78,7 +87,13 @@ export default async function checkQuizBrowser(page) {
     redemption: {
       enabled: true,
       instructions: 'A parent or guardian should bring the child’s printed certificate to a participating library desk, mention the Dictionary Challenge stage, ask staff to confirm age guidance and current inventory, and follow any local pickup rules before leaving with a prize.',
+      availabilityDate: 'November 1',
+      limitedSupplyNotice: 'Prize books are available while supplies last.',
       deadline: 'June 30, 2027'
+    },
+    prize: {
+      title: 'Reading rewards',
+      description: 'Each qualifying child may choose one new book.'
     },
     participants: [{
         name: 'North Branch Library',
@@ -98,6 +113,7 @@ export default async function checkQuizBrowser(page) {
     const mod = await import('/src/content/site-config.js');
     mod.siteConfig.site = nextConfig.site;
     mod.siteConfig.sponsors = nextConfig.sponsors;
+    mod.siteConfig.prize = nextConfig.prize;
     mod.siteConfig.redemption = nextConfig.redemption;
     mod.siteConfig.participants = nextConfig.participants;
   }, enabledConfig);
@@ -107,10 +123,11 @@ export default async function checkQuizBrowser(page) {
   assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Redemption says what to bring');
   assert(!(await page.locator('main').innerText()).includes('saved copy'), 'Redemption does not allow saved copies');
   assert((await page.locator('main').innerText()).includes('Redemption deadline: June 30, 2027'), 'Enabled redemption shows its deadline');
+  assert(!(await page.locator('main').innerText()).includes('Redemption deadline: November 1'), 'Enabled redemption keeps availability separate from its deadline');
   assert(await page.getByRole('heading', { name: 'Project organizer', exact: true }).isVisible(), 'Enabled redemption includes organizer contact details');
   await page.getByRole('link', { name: 'About', exact: true }).click();
   await page.goBack();
-  assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Browser Back restores redemption');
+  assert(await page.getByRole('heading', { name: 'Reading rewards redemption', exact: true }).isVisible(), 'Browser Back restores redemption');
   await page.goForward();
   assert(await page.getByRole('heading', { name: 'Why a physical dictionary?', exact: true }).isVisible(), 'Browser Forward restores the following public screen');
   await page.getByRole('link', { name: 'Dictionary Challenge home' }).click();
@@ -251,7 +268,7 @@ export default async function checkQuizBrowser(page) {
     await redeemAction.focus();
     assert(await redeemAction.evaluate((element) => getComputedStyle(element).outlineStyle !== 'none'), 'Redemption action has visible keyboard focus');
     await redeemAction.press('Enter');
-    assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Certificate action navigates to redemption');
+    assert(await page.getByRole('heading', { name: 'Reading rewards redemption', exact: true }).isVisible(), 'Certificate action navigates to redemption');
     await page.goBack();
   }
   const firstCode = await page.locator('.completion-code').innerText();
@@ -265,6 +282,12 @@ export default async function checkQuizBrowser(page) {
   assert(!(await page.locator('.no-print').isVisible()), 'Print hides controls');
   assert(!(await page.locator('.brand').isVisible()), 'Print hides navigation');
   assert(await page.locator('.certificate').isVisible(), 'Print includes certificate');
+  const printedCertificate = await page.locator('.certificate').innerText();
+  assert(printedCertificate.includes('Reading rewards: Each qualifying child may choose one new book.*'), 'Certificate renders the configured prize and marks it with an asterisk');
+  assert(printedCertificate.includes('Reading rewards are available beginning November 1.'), 'Certificate includes the configured title and availability date');
+  assert(printedCertificate.includes('Prize books are available while supplies last.'), 'Certificate includes the limited-supply notice');
+  assert(await page.locator('.certificate-availability').isVisible(), 'Print keeps the certificate prize disclaimer visible');
+  assert(await page.locator('.certificate-availability').evaluate((element) => parseFloat(getComputedStyle(element).fontSize) >= 12), 'Printed certificate disclaimer remains legible');
   assert(!(await page.getByRole('button', { name: 'How to redeem this certificate', exact: true }).isVisible().catch(() => false)), 'Print excludes the redemption action');
   await page.emulateMedia({ media: 'screen' });
   await page.evaluate(() => { window.print = () => { window.__printCalled = true; }; });
