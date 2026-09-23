@@ -42,7 +42,7 @@ try {
   }
   if (prizeText !== undefined) {
     const prizeConfig = JSON.parse(prizeText);
-    if (!prizeConfig || typeof prizeConfig.redemption !== 'object' || Array.isArray(prizeConfig.redemption)) {
+    if (!prizeConfig || !prizeConfig.redemption || typeof prizeConfig.redemption !== 'object' || Array.isArray(prizeConfig.redemption)) {
       throw new Error('prize.json must contain a redemption object.');
     }
     config = {
