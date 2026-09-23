@@ -290,11 +290,11 @@ As a child, I want a clear celebration when I finish.
 
 #### User Story
 
-As an adult, I want to understand how the physical dictionary builds literacy, how to support a child, and who made the local project possible.
+As an adult, I want to understand how local service clubs make projects like the dictionary distribution possible and how I can find a club, meet people, and get involved.
 
 #### Information Architecture
 
-1. **About:** physical-dictionary purpose, the Find → Understand → Apply → Discover model, child privacy, and ways to help without supplying answers.
+1. **About:** a welcoming invitation to service-club involvement, its social and community benefits, examples of local service, flexible meeting options, and links to participating clubs.
 2. **Sponsors:** every participating organization and its build-configured description and website, following literacy-first introductory copy.
 3. **Contact:** the build-configured organizer details and a list of official sponsor website links, with no contact form.
 4. **Certificates and prizes:** static guidance for parents and guardians.
@@ -303,7 +303,7 @@ The former `#adult` URL remains a compatibility alias for `#about`.
 
 #### Acceptance Criteria
 
-- Literacy is the entry point.
+- The dictionary project remains the entry point to the service-club invitation.
 - All configured sponsors are clearly identified.
 - Sponsor descriptions are supplied directly by configuration; the renderer never guesses content from an organization name.
 - Organizers supply public contact details, sponsor descriptions, and links at build time.
