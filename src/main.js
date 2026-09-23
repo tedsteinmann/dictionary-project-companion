@@ -234,8 +234,9 @@ function certificateRedemptionGuidance() {
   const { redemption, site } = siteConfig;
   if (!redemption.enabled) return '';
   const { prize } = siteConfig;
-  const prizeStatement = `<p class="certificate-prize"><strong>${escapeHtml(prize.title)}:</strong> ${escapeHtml(prize.description)}<span aria-hidden="true">*</span><span class="sr-only"> See availability note.</span></p>`;
-  const availabilityNote = `<p class="certificate-availability"><span aria-hidden="true">*</span><strong>${escapeHtml(prize.title)} availability:</strong>${redemption.availabilityDate ? ` ${escapeHtml(prize.title)} are available beginning ${escapeHtml(redemption.availabilityDate)}.` : ''}${redemption.limitedSupplyNotice ? ` ${escapeHtml(redemption.limitedSupplyNotice)}` : ''}</p>`;
+  const hasAvailabilityNote = redemption.availabilityDate || redemption.limitedSupplyNotice;
+  const prizeStatement = `<p class="certificate-prize"><strong>${escapeHtml(prize.title)}:</strong> ${escapeHtml(prize.description)}${hasAvailabilityNote ? '<span aria-hidden="true">*</span><span class="sr-only"> See availability note.</span>' : ''}</p>`;
+  const availabilityNote = hasAvailabilityNote ? `<p class="certificate-availability"><span aria-hidden="true">*</span><strong>${escapeHtml(prize.title)} availability:</strong>${redemption.availabilityDate ? ` ${escapeHtml(prize.title)} are available beginning ${escapeHtml(redemption.availabilityDate)}.` : ''}${redemption.limitedSupplyNotice ? ` ${escapeHtml(redemption.limitedSupplyNotice)}` : ''}</p>` : '';
   const shortEnough = redemption.instructions.length <= SHORT_PRINT_REDEMPTION_LENGTH;
   if (shortEnough) {
     return `${prizeStatement}<p class="certificate-redemption"><strong>Redemption:</strong> ${escapeHtml(redemption.instructions)}${redemption.deadline ? ` Deadline: ${escapeHtml(redemption.deadline)}.` : ''}</p>${availabilityNote}`;
