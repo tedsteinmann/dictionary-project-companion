@@ -290,7 +290,7 @@ function redeem(route) {
   const available = redemption.enabled;
   const redemptionDetails = available ? `
     <p class="lede">A parent or guardian should handle certificate redemption.</p>
-    <p><strong>What to bring:</strong> Bring the printed certificate or a saved copy that shows the completion code.</p>
+    <p><strong>What to bring:</strong> Bring the child’s printed certificate.</p>
     <p>${escapeHtml(redemption.instructions)}</p>
     ${redemption.deadline ? `<p class="redemption-deadline"><strong>Redemption deadline:</strong> ${escapeHtml(redemption.deadline)}</p>` : ''}
     ${redemption.locations.length ? `<div class="redemption-grid" aria-label="Participating libraries">${locations}</div>

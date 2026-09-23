@@ -50,8 +50,14 @@ export default async function checkQuizBrowser(page) {
   await page.goto(`${base}/#redeem`);
   assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
   assert((await page.locator('main').innerText()).includes('not online verification or a guaranteed prize claim'), 'Redemption explains the local reference code limitation');
-  assert((await page.locator('.redemption-grid').count()) === 0, 'Disabled or location-free configuration has no empty location grid');
-  assert((await page.locator('main').innerText()).includes('No certificate redemption program is available'), 'Unavailable redemption has a neutral message');
+  if (config.redemption.enabled) {
+    assert((await page.locator('.redemption-location').count()) === config.redemption.locations.length, 'Enabled production redemption renders every configured library');
+    assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Enabled production redemption requires a printed certificate');
+    assert(!(await page.locator('main').innerText()).includes('No certificate redemption program is available'), 'Enabled production redemption omits the unavailable message');
+  } else {
+    assert((await page.locator('.redemption-grid').count()) === 0, 'Disabled or location-free configuration has no empty location grid');
+    assert((await page.locator('main').innerText()).includes('No certificate redemption program is available'), 'Unavailable redemption has a neutral message');
+  }
   const enabledConfig = {
     ...config,
     site: {
@@ -62,7 +68,7 @@ export default async function checkQuizBrowser(page) {
     },
     redemption: {
       enabled: true,
-      instructions: 'A parent or guardian should bring the certificate code to a participating library desk, mention the Dictionary Challenge stage, ask staff to confirm age guidance and current inventory, and follow any local pickup rules before leaving with a prize.',
+      instructions: 'A parent or guardian should bring the child’s printed certificate to a participating library desk, mention the Dictionary Challenge stage, ask staff to confirm age guidance and current inventory, and follow any local pickup rules before leaving with a prize.',
       deadline: 'June 30, 2027',
       locations: [{
         name: 'North Branch Library',
@@ -88,7 +94,8 @@ export default async function checkQuizBrowser(page) {
   await page.goto(`${base}/#redeem`);
   assert((await page.locator('.redemption-location').count()) === enabledConfig.redemption.locations.length, 'Every configured library is rendered');
   assert((await page.locator('main').innerText()).includes('parent or guardian should handle'), 'Redemption is directed to a parent or guardian');
-  assert((await page.locator('main').innerText()).includes('printed certificate or a saved copy'), 'Redemption says what to bring');
+  assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Redemption says what to bring');
+  assert(!(await page.locator('main').innerText()).includes('saved copy'), 'Redemption does not allow saved copies');
   assert((await page.locator('main').innerText()).includes('Redemption deadline: June 30, 2027'), 'Enabled redemption shows its deadline');
   assert(await page.getByRole('heading', { name: 'Project organizer', exact: true }).isVisible(), 'Enabled redemption includes organizer contact details');
   await page.getByRole('link', { name: 'About', exact: true }).click();
