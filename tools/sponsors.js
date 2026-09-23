@@ -187,7 +187,8 @@ document.querySelector('#import-prize').addEventListener('change', async (event)
       throw new Error('Prize configuration must contain a redemption object.');
     }
     const config = validateSiteConfig({
-      ...siteConfig,
+      site: readSite(),
+      sponsors: [...editors.children].map((editor) => editor.readSponsor()),
       prize: { title: raw.title, description: raw.description },
       redemption: raw.redemption,
       participants: readParticipants()
