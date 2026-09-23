@@ -183,7 +183,7 @@ document.querySelector('#import-prize').addEventListener('change', async (event)
   if (!file) return;
   try {
     const raw = JSON.parse(await file.text());
-    if (!raw || typeof raw.redemption !== 'object' || Array.isArray(raw.redemption)) {
+    if (!raw || !raw.redemption || typeof raw.redemption !== 'object' || Array.isArray(raw.redemption)) {
       throw new Error('Prize configuration must contain a redemption object.');
     }
     const config = validateSiteConfig({
