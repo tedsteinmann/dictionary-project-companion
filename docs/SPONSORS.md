@@ -6,7 +6,7 @@ The Dictionary Challenge supports two build-time JSON configurations with separa
 
 - `site`: the organizer name and optional public contact methods;
 - `sponsors`: one or more organizations recognized separately from quiz mechanics; and
-- `redemption`: an explicit enabled state, general instructions, and an optional deadline in `sponsors.json`; and
+- `redemption`: an explicit enabled state, general instructions, optional prize availability and limited-supply notices, and an optional redemption deadline in `sponsors.json`; and
 - `participants`: certificate-redemption locations in the separate `participants.json` file.
 
 The `participants` collection supplies the Participants page and redemption-location cards. These are certificate-redemption partners, not inferred sponsors: a participating library appears in sponsor recognition only if an organizer deliberately adds it to `sponsors` as well.
@@ -32,7 +32,7 @@ The browser setup tool edits these values locally and downloads `sponsors.json` 
 
 5. Deploy `dist/`. To preview it directly, run `python3 -m http.server 4174 --directory dist`.
 
-The local dictionary-project organizer maintains the `site` details. Review them before every publication and update them whenever the responsible organization, public email address, telephone number, website, redemption offer, deadline, or participating locations change. Test every published link as part of that review. Use a durable organizational or role-based address (for example, `dictionary@example.org`) instead of a volunteer's personal address whenever possible, so families are not directed to an individual's private contact details and the address remains useful when volunteers change.
+The local dictionary-project organizer maintains the `site` details. Review them before every publication and update them whenever the responsible organization, public email address, telephone number, website, redemption offer, prize availability date, limited-supply notice, deadline, or participating locations change. Test every published link as part of that review. Use a durable organizational or role-based address (for example, `dictionary@example.org`) instead of a volunteer's personal address whenever possible, so families are not directed to an individual's private contact details and the address remains useful when volunteers change.
 
 The historical root filename `sponsors.json` remains the automatic sponsor configuration filename. Existing combined files remain valid: legacy `redemption.locations` values are migrated to the normalized `participants` collection when no separate participant collection is supplied. The former `organizer` shape is also migrated during validation. New exports use the separate canonical contracts below.
 
@@ -60,10 +60,14 @@ If no root configuration exists, the build uses `src/content/site-config.js`. Th
   "redemption": {
     "enabled": true,
     "instructions": "Bring a printed certificate with a parent or guardian.",
+    "availabilityDate": "November 1",
+    "limitedSupplyNotice": "Prize books are available while supplies last.",
     "deadline": "May 31, 2027"
   }
 }
 ```
+
+`availabilityDate` states when prize books begin to be available; it is not a redemption deadline. `limitedSupplyNotice` should plainly explain any inventory limitation. These notices appear on the redemption page before the participating locations and in the certificate's associated small print. Use `deadline` only when redemption actually ends on a stated date.
 
 ## Participant configuration
 

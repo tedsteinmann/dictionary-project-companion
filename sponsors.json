@@ -31,6 +31,8 @@
   "redemption": {
     "enabled": true,
     "instructions": "Bring the child’s printed certificate to a participating library in exchange for one prize book.",
-    "deadline": null
+    "deadline": null,
+    "availabilityDate": "November 1",
+    "limitedSupplyNotice": "Prize books are available while supplies last."
   }
 }

@@ -54,6 +54,8 @@ function addLocation(location = { name: '', instructions: '', addressLines: [], 
 function setRedemption(redemption = {}, participants = []) {
   document.querySelector('[name=redemption-enabled]').checked = redemption.enabled || false;
   document.querySelector('[name=redemption-instructions]').value = redemption.instructions || '';
+  document.querySelector('[name=redemption-availability-date]').value = redemption.availabilityDate || '';
+  document.querySelector('[name=redemption-limited-supply]').value = redemption.limitedSupplyNotice || '';
   document.querySelector('[name=redemption-deadline]').value = redemption.deadline || '';
   locationEditors.replaceChildren();
   participants.forEach(addLocation);
@@ -192,6 +194,8 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
       redemption: {
         enabled: document.querySelector('[name=redemption-enabled]').checked,
         instructions: document.querySelector('[name=redemption-instructions]').value,
+        availabilityDate: document.querySelector('[name=redemption-availability-date]').value,
+        limitedSupplyNotice: document.querySelector('[name=redemption-limited-supply]').value,
         deadline: document.querySelector('[name=redemption-deadline]').value
       },
       participants: readParticipants()

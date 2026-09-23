@@ -12,6 +12,8 @@ export const SITE_CONFIG_LIMITS = Object.freeze({
   sponsorTitle: 120,
   sponsorDescription: 600,
   redemptionInstructions: 1200,
+  availabilityDate: 120,
+  limitedSupplyNotice: 240,
   locationName: 160,
   locationInstructions: 600,
   deadline: 120,
@@ -154,7 +156,7 @@ function validateParticipants(value) {
 }
 
 function validateRedemption(value) {
-  if (value == null) return { enabled: false, instructions: null, deadline: null };
+  if (value == null) return { enabled: false, instructions: null, availabilityDate: null, limitedSupplyNotice: null, deadline: null };
   const redemption = object(value, 'Redemption');
   if (typeof redemption.enabled !== 'boolean') throw new Error('Redemption: enabled must be true or false.');
   const instructions = text(redemption.instructions, {
@@ -163,6 +165,8 @@ function validateRedemption(value) {
   return {
     enabled: redemption.enabled,
     instructions,
+    availabilityDate: text(redemption.availabilityDate, { label: 'Redemption: availabilityDate', limit: SITE_CONFIG_LIMITS.availabilityDate }),
+    limitedSupplyNotice: text(redemption.limitedSupplyNotice, { label: 'Redemption: limitedSupplyNotice', limit: SITE_CONFIG_LIMITS.limitedSupplyNotice }),
     deadline: text(redemption.deadline, { label: 'Redemption: deadline', limit: SITE_CONFIG_LIMITS.deadline })
   };
 }

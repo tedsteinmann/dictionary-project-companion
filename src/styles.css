@@ -155,6 +155,9 @@ p { margin: 0 0 var(--space-3); }
 .redemption-location address, .organizer-contact { margin-bottom: var(--space-3); font-style: normal; }
 .redemption-location p:last-child { margin-bottom: 0; }
 .redemption-deadline { width: fit-content; padding: var(--space-2) var(--space-3); border-left: 4px solid var(--retry); background: var(--retry-tint); color: var(--heading); }
+.redemption-availability { width: fit-content; margin: var(--space-4) 0; padding: var(--space-3) var(--space-4); border: 2px solid var(--blue); border-radius: var(--radius); background: var(--blue-tint); color: var(--heading); }
+.redemption-availability p { margin: 0; }
+.redemption-availability p + p { margin-top: var(--space-2); }
 .benefit-list { display: grid; gap: var(--space-3); padding: 0; list-style: none; }
 .benefit-list li { padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); background: var(--page); }
 .benefit-list strong { display: block; margin-bottom: var(--space-1); color: var(--heading); }
@@ -222,6 +225,9 @@ input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .certificate .lede { color: var(--blue); font-weight: 600; }
 .certificate-score { font-size: 1.25rem; font-weight: 700; }
 .certificate-redemption { margin: var(--space-4) auto 0; padding-top: var(--space-3); border-top: 1px solid var(--line); font-size: var(--small-size); }
+.certificate-prize { font-weight: 700; }
+.certificate-availability { margin: var(--space-5) auto 0; padding-top: var(--space-3); border-top: 1px solid var(--line); font-size: 0.8rem; line-height: 1.4; }
+.certificate-availability strong { margin-right: 0.2em; }
 .certificate-sponsors { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line); }
 .certificate-sponsors h2 { margin: 0 0 var(--space-3); color: var(--muted); font-size: var(--small-size); font-weight: 600; }
 .certificate-sponsor-grid { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: var(--space-4) var(--space-5); }
@@ -247,6 +253,7 @@ input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
   .certificate h1 { font-size: 26pt; }
   .certificate p, .certificate strong, .certificate .lede { color: #000; }
   .certificate-redemption { border-color: #777; }
+  .certificate-availability { display: block !important; border-color: #777; color: #000; font-size: 9pt; line-height: 1.35; }
   .redemption-grid { grid-template-columns: repeat(2, 1fr); }
   .redemption-location { break-inside: avoid; border-color: #777; background: #fff; }
 }

@@ -100,7 +100,7 @@ describe('sponsor configuration and rendering', () => {
   it('supplies safe defaults for old sponsor-only configuration files', () => {
     const config = validateSiteConfig({ sponsors: [sponsor] });
     assert.deepEqual(config.site, { organizerName: null, addressLines: [], telephone: null, email: null, website: null });
-    assert.deepEqual(config.redemption, { enabled: false, instructions: null, deadline: null });
+    assert.deepEqual(config.redemption, { enabled: false, instructions: null, availabilityDate: null, limitedSupplyNotice: null, deadline: null });
     assert.deepEqual(config.participants, []);
     assert.ok(Object.isFrozen(config));
     assert.ok(Object.isFrozen(config.sponsors));
@@ -114,9 +114,12 @@ describe('sponsor configuration and rendering', () => {
       website: 'https://library.example/claim', telephone: '(555) 555-0110'
     };
     const one = validateSiteConfig({ sponsors: [sponsor], participants: [library], redemption: {
-      enabled: true, instructions: ' Visit with an adult. ', deadline: ' May 31 '
+      enabled: true, instructions: ' Visit with an adult. ', availabilityDate: ' November 1 ',
+      limitedSupplyNotice: ' Prize books are available while supplies last. ', deadline: ' May 31 '
     } });
     assert.equal(one.redemption.instructions, 'Visit with an adult.');
+    assert.equal(one.redemption.availabilityDate, 'November 1');
+    assert.equal(one.redemption.limitedSupplyNotice, 'Prize books are available while supplies last.');
     assert.equal(one.participants[0].name, 'Main Library');
     assert.deepEqual(one.participants[0].addressLines, ['10 First Ave']);
     const multiple = validateSiteConfig({ sponsors: [sponsor], redemption: {

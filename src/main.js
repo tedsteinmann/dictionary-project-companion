@@ -233,14 +233,16 @@ function certificate(route) {
 function certificateRedemptionGuidance() {
   const { redemption, site } = siteConfig;
   if (!redemption.enabled) return '';
+  const prizeStatement = '<p class="certificate-prize">This certificate may be redeemed for one prize book.<span aria-hidden="true">*</span><span class="sr-only"> See prize availability note.</span></p>';
+  const availabilityNote = `<p class="certificate-availability"><span aria-hidden="true">*</span><strong>Prize availability:</strong>${redemption.availabilityDate ? ` Prize books are available beginning ${escapeHtml(redemption.availabilityDate)}.` : ''}${redemption.limitedSupplyNotice ? ` ${escapeHtml(redemption.limitedSupplyNotice)}` : ''}</p>`;
   const shortEnough = redemption.instructions.length <= SHORT_PRINT_REDEMPTION_LENGTH;
   if (shortEnough) {
-    return `<p class="certificate-redemption"><strong>Redemption:</strong> ${escapeHtml(redemption.instructions)}${redemption.deadline ? ` Deadline: ${escapeHtml(redemption.deadline)}.` : ''}</p>`;
+    return `${prizeStatement}<p class="certificate-redemption"><strong>Redemption:</strong> ${escapeHtml(redemption.instructions)}${redemption.deadline ? ` Deadline: ${escapeHtml(redemption.deadline)}.` : ''}</p>${availabilityNote}`;
   }
   const contactDirection = site.telephone ? `contact the project organizer at ${escapeHtml(site.telephone)}`
     : site.email ? `email ${escapeHtml(site.email)}`
       : 'open “How to redeem this certificate” in the Dictionary Challenge';
-  return `<p class="certificate-redemption">For redemption details, have a parent or guardian ${contactDirection}.</p>`;
+  return `${prizeStatement}<p class="certificate-redemption">For redemption details, have a parent or guardian ${contactDirection}.</p>${availabilityNote}`;
 }
 
 function about(route) {
@@ -308,6 +310,10 @@ function redeem(route) {
     <p class="lede">A parent or guardian should handle certificate redemption.</p>
     <p><strong>What to bring:</strong> Bring the child’s printed certificate.</p>
     <p>${escapeHtml(redemption.instructions)}</p>
+    <aside class="redemption-availability" aria-label="Prize availability">
+      ${redemption.availabilityDate ? `<p><strong>Prize books are available beginning ${escapeHtml(redemption.availabilityDate)}.</strong></p>` : ''}
+      ${redemption.limitedSupplyNotice ? `<p><strong>${escapeHtml(redemption.limitedSupplyNotice)}</strong></p>` : ''}
+    </aside>
     ${redemption.deadline ? `<p class="redemption-deadline"><strong>Redemption deadline:</strong> ${escapeHtml(redemption.deadline)}</p>` : ''}
     ${participants.length ? `<div class="redemption-grid" aria-label="Participating libraries">${locations}</div>
     <p class="note"><strong>Before traveling:</strong> Confirm the library’s hours and prize availability by phone or on its website.</p>` : ''}

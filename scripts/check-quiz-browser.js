@@ -60,6 +60,13 @@ export default async function checkQuizBrowser(page) {
   assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
   assert((await page.locator('main').innerText()).includes('not online verification or a guaranteed prize claim'), 'Redemption explains the local reference code limitation');
   if (config.redemption.enabled) {
+    const redeemText = await page.locator('main').innerText();
+    assert(redeemText.includes('Prize books are available beginning November 1.'), 'Redemption shows the prize availability date');
+    assert(redeemText.includes('Prize books are available while supplies last.'), 'Redemption shows the limited-supply notice');
+    assert(!redeemText.includes('Redemption deadline: November 1'), 'Availability date is not presented as a redemption deadline');
+    const availabilityBox = page.locator('.redemption-availability');
+    const firstLocation = page.locator('.redemption-location').first();
+    assert(await availabilityBox.evaluate((notice, location) => Boolean(location) && (notice.compareDocumentPosition(location) & Node.DOCUMENT_POSITION_FOLLOWING), await firstLocation.elementHandle()), 'Prize conditions precede participating locations');
     assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Enabled production redemption renders every configured library');
     assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Enabled production redemption requires a printed certificate');
     assert(!(await page.locator('main').innerText()).includes('No certificate redemption program is available'), 'Enabled production redemption omits the unavailable message');
@@ -78,6 +85,8 @@ export default async function checkQuizBrowser(page) {
     redemption: {
       enabled: true,
       instructions: 'A parent or guardian should bring the child’s printed certificate to a participating library desk, mention the Dictionary Challenge stage, ask staff to confirm age guidance and current inventory, and follow any local pickup rules before leaving with a prize.',
+      availabilityDate: 'November 1',
+      limitedSupplyNotice: 'Prize books are available while supplies last.',
       deadline: 'June 30, 2027'
     },
     participants: [{
@@ -107,6 +116,7 @@ export default async function checkQuizBrowser(page) {
   assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Redemption says what to bring');
   assert(!(await page.locator('main').innerText()).includes('saved copy'), 'Redemption does not allow saved copies');
   assert((await page.locator('main').innerText()).includes('Redemption deadline: June 30, 2027'), 'Enabled redemption shows its deadline');
+  assert(!(await page.locator('main').innerText()).includes('Redemption deadline: November 1'), 'Enabled redemption keeps availability separate from its deadline');
   assert(await page.getByRole('heading', { name: 'Project organizer', exact: true }).isVisible(), 'Enabled redemption includes organizer contact details');
   await page.getByRole('link', { name: 'About', exact: true }).click();
   await page.goBack();
@@ -265,6 +275,12 @@ export default async function checkQuizBrowser(page) {
   assert(!(await page.locator('.no-print').isVisible()), 'Print hides controls');
   assert(!(await page.locator('.brand').isVisible()), 'Print hides navigation');
   assert(await page.locator('.certificate').isVisible(), 'Print includes certificate');
+  const printedCertificate = await page.locator('.certificate').innerText();
+  assert(printedCertificate.includes('This certificate may be redeemed for one prize book.*'), 'Certificate marks the prize-book statement with an asterisk');
+  assert(printedCertificate.includes('Prize books are available beginning November 1.'), 'Certificate includes the availability date');
+  assert(printedCertificate.includes('Prize books are available while supplies last.'), 'Certificate includes the limited-supply notice');
+  assert(await page.locator('.certificate-availability').isVisible(), 'Print keeps the certificate prize disclaimer visible');
+  assert(await page.locator('.certificate-availability').evaluate((element) => parseFloat(getComputedStyle(element).fontSize) >= 12), 'Printed certificate disclaimer remains legible');
   assert(!(await page.getByRole('button', { name: 'How to redeem this certificate', exact: true }).isVisible().catch(() => false)), 'Print excludes the redemption action');
   await page.emulateMedia({ media: 'screen' });
   await page.evaluate(() => { window.print = () => { window.__printCalled = true; }; });
