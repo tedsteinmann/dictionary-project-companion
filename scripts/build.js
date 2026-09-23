@@ -33,6 +33,24 @@ try {
       }
     }
   }
+  const participantsPath = resolve(root, 'participants.json');
+  let participantsText;
+  try {
+    participantsText = await readFile(participantsPath, 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  if (participantsText !== undefined) {
+    const participantConfig = JSON.parse(participantsText);
+    if (!participantConfig || !Array.isArray(participantConfig.participants)) {
+      throw new Error('participants.json must contain a participants array.');
+    }
+    config = { ...config, participants: participantConfig.participants };
+    if (config.redemption?.locations) {
+      const { locations, ...redemption } = config.redemption;
+      config.redemption = redemption;
+    }
+  }
   // Validate before replacing a previous successful build.
   config = validateSiteConfig(config);
   const dist = resolve(root, 'dist');
@@ -43,7 +61,7 @@ try {
     cp(resolve(root, 'src'), resolve(dist, 'src'), { recursive: true })
   ]);
   await writeFile(resolve(dist, 'src/content/site-config.js'), `export const siteConfig = ${JSON.stringify(config, null, 2)};\n`);
-  console.log(`Built static site in dist/ with ${config.sponsors.length} sponsor(s) from ${configText === undefined ? 'the default configuration' : configPath}.`);
+  console.log(`Built static site in dist/ with ${config.sponsors.length} sponsor(s) and ${config.participants.length} participant location(s).`);
 } catch (error) {
   console.error(`Build failed: ${error.message}`);
   process.exitCode = 1;

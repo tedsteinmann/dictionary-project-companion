@@ -1,0 +1,14 @@
+{
+  "participants": [
+    {
+      "name": "Main Library",
+      "instructions": "Ask at the children's desk.",
+      "addressLines": [
+        "10 First Avenue",
+        "Your Community"
+      ],
+      "website": "https://library.example.org",
+      "telephone": "(555) 555-0110"
+    }
+  ]
+}

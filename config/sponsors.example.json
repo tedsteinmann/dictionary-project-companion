@@ -31,7 +31,6 @@
   "redemption": {
     "enabled": false,
     "instructions": null,
-    "deadline": null,
-    "locations": []
+    "deadline": null
   }
 }

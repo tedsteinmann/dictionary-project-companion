@@ -9,6 +9,7 @@ import { renderSponsorNames, renderSponsors } from '../src/sponsors.js';
 import { validateSiteConfig } from '../src/site-config.js';
 import { siteConfig } from '../src/content/site-config.js';
 import { renderContactContent } from '../src/components/contact-details.js';
+import { renderParticipantLocations } from '../src/participants.js';
 
 const sponsor = { title: 'Local club', description: 'Helping readers.', url: 'https://example.org', logo: null };
 const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aV1sAAAAASUVORK5CYII=';
@@ -99,10 +100,11 @@ describe('sponsor configuration and rendering', () => {
   it('supplies safe defaults for old sponsor-only configuration files', () => {
     const config = validateSiteConfig({ sponsors: [sponsor] });
     assert.deepEqual(config.site, { organizerName: null, addressLines: [], telephone: null, email: null, website: null });
-    assert.deepEqual(config.redemption, { enabled: false, instructions: null, deadline: null, locations: [] });
+    assert.deepEqual(config.redemption, { enabled: false, instructions: null, deadline: null });
+    assert.deepEqual(config.participants, []);
     assert.ok(Object.isFrozen(config));
     assert.ok(Object.isFrozen(config.sponsors));
-    assert.ok(Object.isFrozen(config.redemption.locations));
+    assert.ok(Object.isFrozen(config.participants));
   });
 
   it('accepts disabled redemption and zero, one, or multiple locations', () => {
@@ -111,18 +113,18 @@ describe('sponsor configuration and rendering', () => {
       name: ' Main Library ', instructions: ' Show a printed certificate. ', addressLines: [' 10 First Ave '],
       website: 'https://library.example/claim', telephone: '(555) 555-0110'
     };
-    const one = validateSiteConfig({ sponsors: [sponsor], redemption: {
-      enabled: true, instructions: ' Visit with an adult. ', deadline: ' May 31 ', locations: [library]
-    } }).redemption;
-    assert.equal(one.instructions, 'Visit with an adult.');
-    assert.equal(one.locations[0].name, 'Main Library');
-    assert.deepEqual(one.locations[0].addressLines, ['10 First Ave']);
+    const one = validateSiteConfig({ sponsors: [sponsor], participants: [library], redemption: {
+      enabled: true, instructions: ' Visit with an adult. ', deadline: ' May 31 '
+    } });
+    assert.equal(one.redemption.instructions, 'Visit with an adult.');
+    assert.equal(one.participants[0].name, 'Main Library');
+    assert.deepEqual(one.participants[0].addressLines, ['10 First Ave']);
     const multiple = validateSiteConfig({ sponsors: [sponsor], redemption: {
       enabled: true, instructions: 'Bring the certificate.', locations: [library, { name: 'West Library', instructions: 'Ask at the desk.' }]
     } });
-    assert.equal(multiple.redemption.locations.length, 2);
-    assert.deepEqual(multiple.redemption.locations[1].addressLines, []);
-    assert.equal(multiple.redemption.locations[1].website, null);
+    assert.equal(multiple.participants.length, 2);
+    assert.deepEqual(multiple.participants[1].addressLines, []);
+    assert.equal(multiple.participants[1].website, null);
   });
 
   it('rejects malformed, unsafe, or unreasonably large redemption values', () => {
@@ -178,7 +180,9 @@ describe('sponsor configuration and rendering', () => {
 describe('production sponsor configuration', () => {
   it('enables certificate redemption at the four participating libraries in order', async () => {
     const productionConfig = JSON.parse(await readFile(new URL('../sponsors.json', import.meta.url), 'utf8'));
-    const redemption = validateSiteConfig(productionConfig).redemption;
+    const participantConfig = JSON.parse(await readFile(new URL('../participants.json', import.meta.url), 'utf8'));
+    const config = validateSiteConfig({ ...productionConfig, ...participantConfig });
+    const { redemption, participants } = config;
 
     assert.equal(redemption.enabled, true);
     assert.equal(
@@ -186,7 +190,7 @@ describe('production sponsor configuration', () => {
       'Bring the child’s printed certificate to a participating library in exchange for one prize book.'
     );
     assert.deepEqual(
-      redemption.locations.map(({ name, addressLines, website }) => ({ name, addressLines, website })),
+      participants.map(({ name, addressLines, website }) => ({ name, addressLines, website })),
       [
         {
           name: 'Fargo Public Library — Main Library',
@@ -205,15 +209,41 @@ describe('production sponsor configuration', () => {
         },
         {
           name: 'Lake Agassiz Regional Library — Moorhead',
-          addressLines: ['118 5th Street South', 'Moorhead, MN 56560'],
+          addressLines: ['450 Center Avenue', 'Moorhead, MN 56560'],
           website: 'https://larl.org/locations/moorhead/'
         }
       ]
     );
-    for (const location of redemption.locations) {
+    for (const location of participants) {
       assert.match(location.instructions, /printed certificate/);
       assert.match(location.instructions, /one prize book/);
     }
+    const participantHtml = renderParticipantLocations(participants);
+    assert.equal((participantHtml.match(/<article /g) || []).length, 4);
+    for (const location of participants) {
+      assert.ok(participantHtml.includes(location.name));
+    }
+  });
+});
+
+describe('participant rendering', () => {
+  it('renders configured locations semantically and escapes names, addresses, and links', () => {
+    const locations = validateSiteConfig({ sponsors: [sponsor], participants: [{
+      name: '<script>Library</script>',
+      instructions: 'Ask at the desk.',
+      addressLines: ['1 <Main> Street'],
+      website: 'https://example.org/library?name=%22safe'
+    }], redemption: {
+      enabled: true,
+      instructions: 'Bring a certificate.'
+    } }).participants;
+    const html = renderParticipantLocations(locations);
+    assert.match(html, /<article class="redemption-location">/);
+    assert.match(html, /<h2>&lt;script&gt;Library&lt;\/script&gt;<\/h2>/);
+    assert.match(html, /<address>1 &lt;Main&gt; Street<\/address>/);
+    assert.match(html, /Visit the &lt;script&gt;Library&lt;\/script&gt; website/);
+    assert.match(html, /rel="noreferrer"/);
+    assert.doesNotMatch(html, /<script>|onclick=/);
   });
 });
 
@@ -234,12 +264,12 @@ describe('static sponsor builds', () => {
         redemption: {
           enabled: true,
           instructions: 'Bring the certificate with an adult.',
-          deadline: 'May 31, 2027',
-          locations: [
-            { name: 'Main Library', instructions: 'Ask at the desk.', addressLines: ['10 First Ave'], website: 'https://library.example', telephone: '(555) 555-0100' },
-            { name: 'West Library', instructions: 'Ask a librarian.' }
-          ]
-        }
+          deadline: 'May 31, 2027'
+        },
+        participants: [
+          { name: 'Main Library', instructions: 'Ask at the desk.', addressLines: ['10 First Ave'], website: 'https://library.example', telephone: '(555) 555-0100' },
+          { name: 'West Library', instructions: 'Ask a librarian.' }
+        ]
       }));
       build('--config', 'custom.json');
       const output = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
@@ -255,6 +285,14 @@ describe('static sponsor builds', () => {
       const automatic = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
       assert.match(automatic, /Automatically selected/);
       assert.match(automatic, /data:image\/png;base64,/);
+      await writeFile(join(dir, 'participants.json'), JSON.stringify({ participants: [
+        { name: 'Separate participant', instructions: 'Ask at the desk.' }
+      ] }));
+      build();
+      const separated = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
+      assert.match(separated, /Automatically selected/);
+      assert.match(separated, /Separate participant/);
+      await rm(join(dir, 'participants.json'));
       build('--config', 'custom.json');
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       await writeFile(join(dir, 'sponsors.json'), '{"sponsors":[]}');
@@ -262,6 +300,11 @@ describe('static sponsor builds', () => {
       await writeFile(join(dir, 'bad.json'), '{"sponsors":[]}');
       assert.throws(() => build('--config', 'bad.json'), /Add at least one sponsor/);
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
+      await writeFile(join(dir, 'sponsors.json'), JSON.stringify({ sponsors: [sponsor] }));
+      await writeFile(join(dir, 'participants.json'), '{"participants":"not an array"}');
+      assert.throws(() => build(), /participants array/);
+      assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
+      await rm(join(dir, 'participants.json'));
       assert.throws(() => build('--unknown'), /Usage:/);
 
       // Use an OS-assigned port and always stop the preview, including on failure.

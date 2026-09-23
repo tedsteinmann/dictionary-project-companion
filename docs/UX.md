@@ -101,13 +101,17 @@ Explain that the challenge is a companion to the child's physical book, then des
 
 Lead with the literacy project, then recognize every configured organization with its logo or fallback, title, local description, and descriptive website link. The description is configuration content; the interface must not infer projects or identity from sponsor names. Promotional messaging remains secondary to the dictionary and literacy purpose.
 
+### Participants: Prize-Book Fulfillment
+
+Explain that configured participant organizations help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings and addresses and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify an organization as a financial or project sponsor.
+
 ### Contact: Published Details
 
 Show the configured organizer details in a semantic address and list each sponsor website with descriptive link text. Do not embed a form or request a visitor's name, email address, location, or other personal information. If organizer details are omitted from a build, say so and retain the sponsor links.
 
 ### Static Routing and Publication
 
-About, Sponsors, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` as an alias to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
+About, Sponsors, Participants, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` as an alias to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
 
 ## Child Design Principles
 

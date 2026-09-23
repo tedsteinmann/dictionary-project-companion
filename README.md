@@ -7,7 +7,7 @@ A generic QR code placed in a dictionary, bookmark, handout, or inside-cover sti
 - **Children** enter a short, fun challenge that teaches them how to use their new dictionary.
 - **Parents and other adults** learn why Rotary supports literacy, what Rotary does locally and internationally, and how to connect with a Rotary Club in their community.
 
-The proof of concept grew from a Rotary literacy project. Its clean, contemporary **Dictionary Challenge** interface supports one or more community sponsors configured at build time. See [static project configuration](docs/SPONSORS.md) for organizer contacts, sponsor logos, and optional certificate-redemption instructions.
+The proof of concept grew from a Rotary literacy project. Its clean, contemporary **Dictionary Challenge** interface supports one or more community sponsors configured at build time. A separate Participants page identifies the public-library locations that fulfill the prize-book program; participation does not make a library a financial or project sponsor. See [static project configuration](docs/SPONSORS.md) for organizer contacts, sponsor logos, participant locations, and optional certificate-redemption instructions.
 
 The architecture should not unnecessarily prevent future adaptation for other community service organizations that participate in dictionary-distribution or literacy programs, with a simple static sponsor list. Accounts, tenant management, and runtime theme switching remain out of scope.
 
@@ -353,7 +353,7 @@ Build vertically:
 
 The proof of concept is a client-only application with no backend API. Answers, shown-question history, unlocked stages, and certificates stay in sessionStorage for the current browser tab, with an in-memory fallback if storage is blocked. There are no accounts or requests for personal information. Print or save a certificate before closing the tab. Completion codes are local references, not centrally verified prize claims. Parent/guardian information explains how to contact the organizer about available prizes.
 
-`npm run dev` builds the site and starts a local preview at `http://localhost:4173` using Python 3's HTTP server. Make sure Python 3 is installed. Both build and dev automatically use `sponsors.json` in the project root when present, falling back to the default Rotary sponsor otherwise. After changing source files or sponsor configuration, run `npm run build` and refresh, or restart `npm run dev`. The sponsor editor remains available at `/tools/sponsors.html` during development.
+`npm run dev` builds the site and starts a local preview at `http://localhost:4173` using Python 3's HTTP server. Make sure Python 3 is installed. Both build and dev automatically use `sponsors.json` and the separate `participants.json` in the project root when present, falling back to defaults otherwise. After changing source files or configuration, run `npm run build` and refresh, or restart `npm run dev`. The local configuration editor remains available at `/tools/sponsors.html` during development.
 
 ```bash
 npm run dev
