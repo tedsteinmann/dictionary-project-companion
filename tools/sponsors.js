@@ -64,6 +64,17 @@ function setParticipants(participants = []) {
   participants.forEach(addLocation);
 }
 
+function readParticipants() {
+  return [...locationEditors.children].map((editor) => editor.readLocation());
+}
+
+function importedParticipants(rawConfig) {
+  const hasParticipants = Object.hasOwn(rawConfig, 'participants');
+  const hasLegacyParticipants = rawConfig.redemption && typeof rawConfig.redemption === 'object' && !Array.isArray(rawConfig.redemption)
+    && Object.hasOwn(rawConfig.redemption, 'locations');
+  return hasParticipants || hasLegacyParticipants ? rawConfig.participants ?? rawConfig.redemption?.locations : readParticipants();
+}
+
 function addSponsor(sponsor = { title: '', description: '', url: '', logo: null }) {
   const id = ++nextId;
   const fieldset = document.createElement('fieldset');
@@ -146,7 +157,8 @@ document.querySelector('#import-config').addEventListener('change', async (event
   const file = event.target.files[0];
   if (!file) return;
   try {
-    const config = validateSiteConfig(JSON.parse(await file.text()));
+    const raw = JSON.parse(await file.text());
+    const config = validateSiteConfig({ ...raw, participants: importedParticipants(raw) });
     editors.replaceChildren();
     config.sponsors.forEach(addSponsor);
     setSite(config.site);
@@ -162,7 +174,7 @@ document.querySelector('#import-participants').addEventListener('change', async 
   if (!file) return;
   try {
     const raw = JSON.parse(await file.text());
-    const config = validateSiteConfig({ ...siteConfig, participants: raw.participants });
+    const config = validateSiteConfig({ ...siteConfig, participants: importedParticipants(raw) });
     setParticipants(config.participants);
     status.textContent = 'Participant configuration loaded.';
   } catch (error) {
@@ -182,7 +194,7 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
         instructions: document.querySelector('[name=redemption-instructions]').value,
         deadline: document.querySelector('[name=redemption-deadline]').value
       },
-      participants: [...locationEditors.children].map((editor) => editor.readLocation())
+      participants: readParticipants()
     });
     const download = (filename, value) => {
       const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2) + '\n'], { type: 'application/json' }));
