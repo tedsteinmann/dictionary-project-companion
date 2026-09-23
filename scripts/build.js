@@ -45,7 +45,11 @@ try {
     if (!prizeConfig || typeof prizeConfig.redemption !== 'object' || Array.isArray(prizeConfig.redemption)) {
       throw new Error('prize.json must contain a redemption object.');
     }
-    config = { ...config, redemption: prizeConfig.redemption };
+    config = {
+      ...config,
+      prize: { title: prizeConfig.title, description: prizeConfig.description },
+      redemption: prizeConfig.redemption
+    };
   }
   const participantsPath = resolve(root, 'participants.json');
   let participantsText;

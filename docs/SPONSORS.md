@@ -64,10 +64,12 @@ If no root configuration exists, the build uses `src/content/site-config.js`. Th
 
 ## Prize configuration
 
-`prize.json` contains the redemption instructions and prize conditions:
+`prize.json` defines the prize itself as well as its redemption instructions and conditions:
 
 ```json
 {
+  "title": "Prize books",
+  "description": "Each child who earns a certificate may choose one new book.",
   "redemption": {
     "enabled": true,
     "instructions": "Bring a printed certificate with a parent or guardian.",
@@ -78,7 +80,7 @@ If no root configuration exists, the build uses `src/content/site-config.js`. Th
 }
 ```
 
-`availabilityDate` states when prize books begin to be available; it is not a redemption deadline. `limitedSupplyNotice` should plainly explain any inventory limitation. These notices appear on the redemption page before the participating locations and in the certificate's associated small print. Use `deadline` only when redemption actually ends on a stated date.
+`title` and `description` are required when redemption is enabled and supply all published descriptions of the offered prize. `availabilityDate` states when prize books begin to be available; it is not a redemption deadline. `limitedSupplyNotice` should plainly explain any inventory limitation. These notices appear on the redemption page before the participating locations and in the certificate's associated small print. Use `deadline` only when redemption actually ends on a stated date.
 
 ## Participant configuration
 

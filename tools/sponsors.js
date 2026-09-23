@@ -61,6 +61,11 @@ function setRedemption(redemption = {}, participants = []) {
   participants.forEach(addLocation);
 }
 
+function setPrize(prize = {}) {
+  document.querySelector('[name=prize-title]').value = prize.title || '';
+  document.querySelector('[name=prize-description]').value = prize.description || '';
+}
+
 function setParticipants(participants = []) {
   locationEditors.replaceChildren();
   participants.forEach(addLocation);
@@ -152,6 +157,7 @@ function addSponsor(sponsor = { title: '', description: '', url: '', logo: null 
 
 siteConfig.sponsors.forEach(addSponsor);
 setSite(siteConfig.site);
+setPrize(siteConfig.prize);
 setRedemption(siteConfig.redemption, siteConfig.participants);
 document.querySelector('#add-sponsor').addEventListener('click', () => addSponsor().querySelector('input').focus());
 document.querySelector('#add-location').addEventListener('click', () => addLocation().querySelector('input').focus());
@@ -178,7 +184,13 @@ document.querySelector('#import-prize').addEventListener('change', async (event)
     if (!raw || typeof raw.redemption !== 'object' || Array.isArray(raw.redemption)) {
       throw new Error('Prize configuration must contain a redemption object.');
     }
-    const config = validateSiteConfig({ ...siteConfig, redemption: raw.redemption, participants: readParticipants() });
+    const config = validateSiteConfig({
+      ...siteConfig,
+      prize: { title: raw.title, description: raw.description },
+      redemption: raw.redemption,
+      participants: readParticipants()
+    });
+    setPrize(config.prize);
     setRedemption(config.redemption, readParticipants());
     status.textContent = 'Prize configuration loaded.';
   } catch (error) {
@@ -206,6 +218,10 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
     const config = validateSiteConfig({
       site: readSite(),
       sponsors: [...editors.children].map((editor) => editor.readSponsor()),
+      prize: {
+        title: document.querySelector('[name=prize-title]').value,
+        description: document.querySelector('[name=prize-description]').value
+      },
       redemption: {
         enabled: document.querySelector('[name=redemption-enabled]').checked,
         instructions: document.querySelector('[name=redemption-instructions]').value,
@@ -223,9 +239,9 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     };
-    const { participants, redemption, ...sponsorConfig } = config;
+    const { participants, prize, redemption, ...sponsorConfig } = config;
     download('sponsors.json', sponsorConfig);
-    download('prize.json', { redemption });
+    download('prize.json', { ...prize, redemption });
     download('participants.json', { participants });
     status.textContent = 'Sponsor, prize, and participant configurations downloaded. Place all three files in the project root before building.';
   } catch (error) {
