@@ -175,6 +175,48 @@ describe('sponsor configuration and rendering', () => {
   });
 });
 
+describe('production sponsor configuration', () => {
+  it('enables certificate redemption at the four participating libraries in order', async () => {
+    const productionConfig = JSON.parse(await readFile(new URL('../sponsors.json', import.meta.url), 'utf8'));
+    const redemption = validateSiteConfig(productionConfig).redemption;
+
+    assert.equal(redemption.enabled, true);
+    assert.equal(
+      redemption.instructions,
+      'Bring the child’s printed certificate to a participating library in exchange for one prize book.'
+    );
+    assert.deepEqual(
+      redemption.locations.map(({ name, addressLines, website }) => ({ name, addressLines, website })),
+      [
+        {
+          name: 'Fargo Public Library — Main Library',
+          addressLines: ['101 4th Street North', 'Fargo, ND 58102'],
+          website: 'https://fargond.gov/city-government/departments/library'
+        },
+        {
+          name: 'Fargo Public Library — Dr. James Carlson Library',
+          addressLines: ['2801 32nd Avenue South', 'Fargo, ND 58103'],
+          website: 'https://fargond.gov/city-government/departments/library'
+        },
+        {
+          name: 'West Fargo Public Library',
+          addressLines: ['215 3rd Street East', 'West Fargo, ND 58078'],
+          website: 'https://westfargolibrary.org/1383/Library'
+        },
+        {
+          name: 'Lake Agassiz Regional Library — Moorhead',
+          addressLines: ['118 5th Street South', 'Moorhead, MN 56560'],
+          website: 'https://larl.org/locations/moorhead/'
+        }
+      ]
+    );
+    for (const location of redemption.locations) {
+      assert.match(location.instructions, /printed certificate/);
+      assert.match(location.instructions, /one prize book/);
+    }
+  });
+});
+
 describe('static sponsor builds', () => {
   it('builds defaults, embeds relative logos, excludes setup, and preserves the build on invalid input', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'dictionary-sponsors-'));
