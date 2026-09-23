@@ -1,0 +1,40 @@
+{
+  "participants": [
+    {
+      "name": "Fargo Public Library — Main Library",
+      "instructions": "Bring the child’s printed certificate to the Main Library service desk to exchange it for one prize book.",
+      "addressLines": [
+        "101 4th Street North",
+        "Fargo, ND 58102"
+      ],
+      "website": "https://fargond.gov/city-government/departments/library"
+    },
+    {
+      "name": "Fargo Public Library — Dr. James Carlson Library",
+      "instructions": "Bring the child’s printed certificate to the Dr. James Carlson Library service desk to exchange it for one prize book.",
+      "addressLines": [
+        "2801 32nd Avenue South",
+        "Fargo, ND 58103"
+      ],
+      "website": "https://fargond.gov/city-government/departments/library"
+    },
+    {
+      "name": "West Fargo Public Library",
+      "instructions": "Bring the child’s printed certificate to the West Fargo Public Library service desk to exchange it for one prize book.",
+      "addressLines": [
+        "215 3rd Street East",
+        "West Fargo, ND 58078"
+      ],
+      "website": "https://westfargolibrary.org/1383/Library"
+    },
+    {
+      "name": "Lake Agassiz Regional Library — Moorhead",
+      "instructions": "Bring the child’s printed certificate to the Moorhead branch service desk to exchange it for one prize book.",
+      "addressLines": [
+        "450 Center Avenue",
+        "Moorhead, MN 56560"
+      ],
+      "website": "https://larl.org/locations/moorhead/"
+    }
+  ]
+}

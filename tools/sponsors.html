@@ -29,7 +29,8 @@
       <h1>Project setup</h1>
       <p>Add public organizer details, the groups making your project possible, and any certificate redemption instructions.</p>
       <p class="note">Files stay in your browser. Download your configuration, then build the site with it. This setup page is not included in the published site.</p>
-      <label>Open an existing configuration <input id="import-config" type="file" accept=".json,application/json" /></label>
+      <label>Open an existing sponsor configuration <input id="import-config" type="file" accept=".json,application/json" /></label>
+      <label>Open an existing participant configuration <input id="import-participants" type="file" accept=".json,application/json" /></label>
       <form id="sponsor-form">
         <fieldset>
           <legend>Public organizer contact</legend>
@@ -54,13 +55,13 @@
           <button class="button button-secondary" type="button" id="add-location">+ Add redemption location</button>
         </fieldset>
         <div class="setup-actions">
-          <button class="button button-primary" type="submit">Download configuration</button>
+          <button class="button button-primary" type="submit">Download configurations</button>
         </div>
       </form>
       <p id="setup-status" role="status" aria-live="polite"></p>
       <h2>Build your site</h2>
-      <p>Run this command with the path to your downloaded file:</p>
-      <pre style="white-space: pre-wrap; overflow-wrap: anywhere">npm run build -- --config /path/to/site-config.json</pre>
+      <p>Place <code>sponsors.json</code> and <code>participants.json</code> in the project root, then run:</p>
+      <pre style="white-space: pre-wrap; overflow-wrap: anywhere">npm run build</pre>
       <p>Deploy <code>dist/</code>, or preview it with <code>python3 -m http.server 4174 --directory dist</code>.</p>
     </section>
   </main>

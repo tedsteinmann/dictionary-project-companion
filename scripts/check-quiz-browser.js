@@ -17,6 +17,7 @@ export default async function checkQuizBrowser(page) {
   const publicPages = {
     About: { route: 'about', heading: 'Why a physical dictionary?', text: 'Find → Understand → Apply → Discover' },
     Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
+    Participants: { route: 'participants', heading: 'Participants', text: 'participating in the prize-book program' },
     Redeem: { route: 'redeem', heading: 'Certificates and prizes', text: 'completion code is a reference only' },
     Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }
   };
@@ -29,6 +30,7 @@ export default async function checkQuizBrowser(page) {
   assert(await footer.getByText('Helping children use their physical dictionaries').isVisible(), 'Public footer leads with literacy');
   assert(await footer.getByRole('navigation', { name: 'Project information' }).isVisible(), 'Public footer labels its information navigation');
   assert(await footer.getByRole('link', { name: 'Certificates and prizes', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
+  assert(await footer.getByRole('link', { name: 'Participants', exact: true }).getAttribute('href') === '#participants', 'Participants footer link preserves the participants route');
   assert((await footer.locator('.sponsor-logo').count()) === 0, 'Public footer does not duplicate sponsor logos');
   await wordmark().focus();
   await page.keyboard.press('Tab');
@@ -47,11 +49,18 @@ export default async function checkQuizBrowser(page) {
   await page.getByRole('link', { name: 'Return to public home', exact: true }).click();
   assert(await wordmark().getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
   const config = await page.evaluate(async () => (await import('/src/content/site-config.js')).siteConfig);
+  await page.goto(`${base}/#participants`);
+  assert(await page.getByRole('heading', { name: 'Participants', exact: true }).isVisible(), 'Direct #participants access renders the Participants screen');
+  assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Participants renders every configured redemption location');
+  for (const location of config.participants) {
+    assert(await page.getByRole('heading', { name: location.name, exact: true }).isVisible(), `Participants lists ${location.name}`);
+    assert(await page.getByRole('link', { name: `Visit the ${location.name} website`, exact: true }).getAttribute('href') === location.website, `Participants links ${location.name} safely`);
+  }
   await page.goto(`${base}/#redeem`);
   assert(await page.getByRole('heading', { name: 'Certificates and prizes', exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
   assert((await page.locator('main').innerText()).includes('not online verification or a guaranteed prize claim'), 'Redemption explains the local reference code limitation');
   if (config.redemption.enabled) {
-    assert((await page.locator('.redemption-location').count()) === config.redemption.locations.length, 'Enabled production redemption renders every configured library');
+    assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Enabled production redemption renders every configured library');
     assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Enabled production redemption requires a printed certificate');
     assert(!(await page.locator('main').innerText()).includes('No certificate redemption program is available'), 'Enabled production redemption omits the unavailable message');
   } else {
@@ -69,8 +78,9 @@ export default async function checkQuizBrowser(page) {
     redemption: {
       enabled: true,
       instructions: 'A parent or guardian should bring the child’s printed certificate to a participating library desk, mention the Dictionary Challenge stage, ask staff to confirm age guidance and current inventory, and follow any local pickup rules before leaving with a prize.',
-      deadline: 'June 30, 2027',
-      locations: [{
+      deadline: 'June 30, 2027'
+    },
+    participants: [{
         name: 'North Branch Library',
         addressLines: ['100 Elm Street', 'Exampletown'],
         instructions: 'Ask at the children’s desk.',
@@ -83,16 +93,16 @@ export default async function checkQuizBrowser(page) {
         telephone: '(555) 555-0130',
         website: 'https://example.org/south-branch'
       }]
-    }
   };
   await page.evaluate(async (nextConfig) => {
     const mod = await import('/src/content/site-config.js');
     mod.siteConfig.site = nextConfig.site;
     mod.siteConfig.sponsors = nextConfig.sponsors;
     mod.siteConfig.redemption = nextConfig.redemption;
+    mod.siteConfig.participants = nextConfig.participants;
   }, enabledConfig);
   await page.goto(`${base}/#redeem`);
-  assert((await page.locator('.redemption-location').count()) === enabledConfig.redemption.locations.length, 'Every configured library is rendered');
+  assert((await page.locator('.redemption-location').count()) === enabledConfig.participants.length, 'Every configured library is rendered');
   assert((await page.locator('main').innerText()).includes('parent or guardian should handle'), 'Redemption is directed to a parent or guardian');
   assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Redemption says what to bring');
   assert(!(await page.locator('main').innerText()).includes('saved copy'), 'Redemption does not allow saved copies');

@@ -5,6 +5,7 @@ import { renderAnswerInput, readAnswer } from './components/answer-input.js';
 import { dictionaryHelp } from './components/dictionary-help.js';
 import { learningReview, discoveryActivity } from './components/learning-review.js';
 import { renderContactContent, renderOrganizerContact, telephoneHref } from './components/contact-details.js';
+import { renderParticipantLocations } from './participants.js';
 import { levels, PASSING_SCORE, QUESTIONS_PER_ATTEMPT } from './content/levels.js';
 import {
   canStartLevel, choicesFor, gradeAttempt, moveToQuestion, persistSession, restoreSession,
@@ -27,7 +28,7 @@ const selectedCertificate = () => session.certificates.find((item) => item.code 
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-const publicRoutes = ['home', 'about', 'sponsors', 'redeem', 'contact'];
+const publicRoutes = ['home', 'about', 'sponsors', 'participants', 'redeem', 'contact'];
 const SHORT_PRINT_REDEMPTION_LENGTH = 180;
 
 function organizerContact() {
@@ -66,6 +67,7 @@ function siteFooter(route) {
   const links = [
     ['about', 'About'],
     ['sponsors', 'Sponsors'],
+    ['participants', 'Participants'],
     ['contact', 'Contact'],
     ['redeem', 'Certificates and prizes']
   ];
@@ -277,10 +279,24 @@ function sponsorsPage(route) {
   </section>`, route, true);
 }
 
+function participantsPage(route) {
+  const locations = siteConfig.participants;
+  return layout(`<section class="card adult" aria-labelledby="participants-title">
+    <p class="kicker">Prize-book partners</p>
+    <h1 id="participants-title">Participants</h1>
+    <p class="lede">The Fargo, West Fargo, and Moorhead public library systems are participating in the prize-book program.</p>
+    <p>These libraries help families redeem an earned Dictionary Challenge certificate for a prize book. Their participation in fulfillment does not identify them as financial or project sponsors.</p>
+    <section class="adult-section" aria-labelledby="redemption-locations-title">
+      <h2 id="redemption-locations-title">Certificate redemption locations</h2>
+      ${locations.length ? `<div class="redemption-grid">${renderParticipantLocations(locations)}</div>` : '<p>No participant locations are published for this build.</p>'}
+    </section>
+  </section>`, route, true);
+}
+
 function redeem(route) {
-  const { redemption } = siteConfig;
+  const { redemption, participants } = siteConfig;
   const organizerDetails = organizerContact();
-  const locations = redemption.locations.map((location) => `<article class="redemption-location">
+  const locations = participants.map((location) => `<article class="redemption-location">
     <h2>${escapeHtml(location.name)}</h2>
     ${location.addressLines.length ? `<address>${location.addressLines.map(escapeHtml).join('<br />')}</address>` : ''}
     <p>${escapeHtml(location.instructions)}</p>
@@ -293,7 +309,7 @@ function redeem(route) {
     <p><strong>What to bring:</strong> Bring the child’s printed certificate.</p>
     <p>${escapeHtml(redemption.instructions)}</p>
     ${redemption.deadline ? `<p class="redemption-deadline"><strong>Redemption deadline:</strong> ${escapeHtml(redemption.deadline)}</p>` : ''}
-    ${redemption.locations.length ? `<div class="redemption-grid" aria-label="Participating libraries">${locations}</div>
+    ${participants.length ? `<div class="redemption-grid" aria-label="Participating libraries">${locations}</div>
     <p class="note"><strong>Before traveling:</strong> Confirm the library’s hours and prize availability by phone or on its website.</p>` : ''}
     ${organizerDetails ? `<section class="adult-section" aria-labelledby="redemption-contact-title"><h2 id="redemption-contact-title">Project organizer</h2>${organizerDetails}</section>` : ''}` : `
     <p class="lede">No certificate redemption program is available for this build.</p>
@@ -317,7 +333,7 @@ const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', '
 
 const screens = {
   home: welcome, intro, levels: levelPicker, challenge, review, results, certificate,
-  about, sponsors: sponsorsPage, redeem, contact,
+  about, sponsors: sponsorsPage, participants: participantsPage, redeem, contact,
   adult: () => about('about')
 };
 

@@ -51,12 +51,17 @@ function addLocation(location = { name: '', instructions: '', addressLines: [], 
   return fieldset;
 }
 
-function setRedemption(redemption = {}) {
+function setRedemption(redemption = {}, participants = []) {
   document.querySelector('[name=redemption-enabled]').checked = redemption.enabled || false;
   document.querySelector('[name=redemption-instructions]').value = redemption.instructions || '';
   document.querySelector('[name=redemption-deadline]').value = redemption.deadline || '';
   locationEditors.replaceChildren();
-  (redemption.locations || []).forEach(addLocation);
+  participants.forEach(addLocation);
+}
+
+function setParticipants(participants = []) {
+  locationEditors.replaceChildren();
+  participants.forEach(addLocation);
 }
 
 function addSponsor(sponsor = { title: '', description: '', url: '', logo: null }) {
@@ -134,7 +139,7 @@ function addSponsor(sponsor = { title: '', description: '', url: '', logo: null 
 
 siteConfig.sponsors.forEach(addSponsor);
 setSite(siteConfig.site);
-setRedemption(siteConfig.redemption);
+setRedemption(siteConfig.redemption, siteConfig.participants);
 document.querySelector('#add-sponsor').addEventListener('click', () => addSponsor().querySelector('input').focus());
 document.querySelector('#add-location').addEventListener('click', () => addLocation().querySelector('input').focus());
 document.querySelector('#import-config').addEventListener('change', async (event) => {
@@ -145,10 +150,23 @@ document.querySelector('#import-config').addEventListener('change', async (event
     editors.replaceChildren();
     config.sponsors.forEach(addSponsor);
     setSite(config.site);
-    setRedemption(config.redemption);
+    setRedemption(config.redemption, config.participants);
     status.textContent = 'Configuration loaded.';
   } catch (error) {
     status.textContent = `Could not load configuration: ${error.message}`;
+  }
+  event.target.value = '';
+});
+document.querySelector('#import-participants').addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const raw = JSON.parse(await file.text());
+    const config = validateSiteConfig({ ...siteConfig, participants: raw.participants });
+    setParticipants(config.participants);
+    status.textContent = 'Participant configuration loaded.';
+  } catch (error) {
+    status.textContent = `Could not load participant configuration: ${error.message}`;
   }
   event.target.value = '';
 });
@@ -162,17 +180,22 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
       redemption: {
         enabled: document.querySelector('[name=redemption-enabled]').checked,
         instructions: document.querySelector('[name=redemption-instructions]').value,
-        deadline: document.querySelector('[name=redemption-deadline]').value,
-        locations: [...locationEditors.children].map((editor) => editor.readLocation())
-      }
+        deadline: document.querySelector('[name=redemption-deadline]').value
+      },
+      participants: [...locationEditors.children].map((editor) => editor.readLocation())
     });
-    const url = URL.createObjectURL(new Blob([JSON.stringify(config, null, 2) + '\n'], { type: 'application/json' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'site-config.json';
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    status.textContent = 'Configuration downloaded. Use it with the build command below.';
+    const download = (filename, value) => {
+      const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2) + '\n'], { type: 'application/json' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+    const { participants, ...sponsorConfig } = config;
+    download('sponsors.json', sponsorConfig);
+    download('participants.json', { participants });
+    status.textContent = 'Sponsor and participant configurations downloaded. Place both files in the project root before building.';
   } catch (error) {
     status.textContent = error.message;
   }

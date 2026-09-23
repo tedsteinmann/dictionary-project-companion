@@ -132,19 +132,13 @@ function validateSponsors(value) {
   });
 }
 
-function validateRedemption(value) {
-  if (value == null) return { enabled: false, instructions: null, deadline: null, locations: [] };
-  const redemption = object(value, 'Redemption');
-  if (typeof redemption.enabled !== 'boolean') throw new Error('Redemption: enabled must be true or false.');
-  const instructions = text(redemption.instructions, {
-    label: 'Redemption: instructions', limit: SITE_CONFIG_LIMITS.redemptionInstructions, required: redemption.enabled
-  });
-  const rawLocations = redemption.locations ?? [];
-  if (!Array.isArray(rawLocations) || rawLocations.length > SITE_CONFIG_LIMITS.redemptionLocations) {
-    throw new Error(`Redemption: locations must contain no more than ${SITE_CONFIG_LIMITS.redemptionLocations} locations.`);
+function validateParticipants(value) {
+  const rawParticipants = value ?? [];
+  if (!Array.isArray(rawParticipants) || rawParticipants.length > SITE_CONFIG_LIMITS.redemptionLocations) {
+    throw new Error(`Participants must contain no more than ${SITE_CONFIG_LIMITS.redemptionLocations} locations.`);
   }
-  const locations = rawLocations.map((rawLocation, index) => {
-    const label = `Redemption location ${index + 1}`;
+  return rawParticipants.map((rawLocation, index) => {
+    const label = `Participant ${index + 1}`;
     const location = object(rawLocation, label);
     return {
       name: text(location.name, { label: `${label}: name`, limit: SITE_CONFIG_LIMITS.locationName, required: true }),
@@ -154,11 +148,19 @@ function validateRedemption(value) {
       telephone: telephone(location.telephone, `${label}: telephone`)
     };
   });
+}
+
+function validateRedemption(value) {
+  if (value == null) return { enabled: false, instructions: null, deadline: null };
+  const redemption = object(value, 'Redemption');
+  if (typeof redemption.enabled !== 'boolean') throw new Error('Redemption: enabled must be true or false.');
+  const instructions = text(redemption.instructions, {
+    label: 'Redemption: instructions', limit: SITE_CONFIG_LIMITS.redemptionInstructions, required: redemption.enabled
+  });
   return {
     enabled: redemption.enabled,
     instructions,
-    deadline: text(redemption.deadline, { label: 'Redemption: deadline', limit: SITE_CONFIG_LIMITS.deadline }),
-    locations
+    deadline: text(redemption.deadline, { label: 'Redemption: deadline', limit: SITE_CONFIG_LIMITS.deadline })
   };
 }
 
@@ -166,12 +168,15 @@ export function validateSiteConfig(config) {
   object(config, 'Site configuration');
   const site = validateSite(legacySite(config));
   const redemption = validateRedemption(config.redemption);
-  if (redemption.enabled && redemption.locations.length === 0 && !site.telephone && !site.email && !site.website) {
+  // Accept legacy combined files while keeping participants separate in normalized configuration.
+  const participants = validateParticipants(config.participants ?? config.redemption?.locations);
+  if (redemption.enabled && participants.length === 0 && !site.telephone && !site.email && !site.website) {
     throw new Error('Redemption: add at least one public organizer telephone, email, or website when no locations are supplied.');
   }
   return freeze({
     site,
     sponsors: validateSponsors(config.sponsors),
-    redemption
+    redemption,
+    participants
   });
 }
