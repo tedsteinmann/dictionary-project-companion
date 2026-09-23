@@ -170,6 +170,8 @@ document.querySelector('#import-config').addEventListener('change', async (event
     editors.replaceChildren();
     config.sponsors.forEach(addSponsor);
     setSite(config.site);
+    setPrize(config.prize);
+    setRedemption(config.redemption, config.participants);
     status.textContent = 'Configuration loaded.';
   } catch (error) {
     status.textContent = `Could not load configuration: ${error.message}`;
