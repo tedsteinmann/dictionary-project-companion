@@ -294,10 +294,11 @@ As an adult, I want to understand how local service clubs make projects like the
 
 #### Information Architecture
 
-1. **About:** a welcoming invitation to service-club involvement, its social and community benefits, examples of local service, flexible meeting options, and links to participating clubs.
-2. **Sponsors:** every participating organization and its build-configured description and website, following literacy-first introductory copy.
-3. **Contact:** the build-configured organizer details and a list of official sponsor website links, with no contact form.
-4. **Certificates and prizes:** static guidance for parents and guardians.
+1. **About:** why the physical dictionary matters, which literacy skills the challenge develops, how adults can help, and how child privacy is protected.
+2. **Sponsors:** every participating organization's build-configured description and website, following literacy-first introductory copy.
+3. **Get Involved:** a welcoming invitation to service-club involvement, its social and community benefits, examples of local service, flexible meeting options, and links to participating clubs.
+4. **Contact:** the build-configured organizer details and a list of official sponsor website links, with no contact form.
+5. **Certificates and prizes:** static guidance for parents and guardians.
 
 The former `#adult` URL remains a compatibility alias for `#about`.
 
