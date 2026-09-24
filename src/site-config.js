@@ -83,13 +83,26 @@ function addressLines(value, label) {
 function validateLogo(value, label) {
   const logo = value || null;
   if (logo === null) return null;
-  if (typeof logo !== 'string' || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(logo)) {
+  if (typeof logo !== 'string') {
     throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
   }
-  const base64 = logo.slice(logo.indexOf(',') + 1);
-  const size = base64.length * 3 / 4 - (base64.match(/=+$/)?.[0].length || 0);
-  if (base64.length % 4 !== 0 || size > MAX_LOGO_BYTES) {
-    throw new Error(`${label}: logo must be valid base64 and no larger than 2 MB.`);
+  if (logo.startsWith('data:')) {
+    if (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(logo)) {
+      throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
+    }
+    const base64 = logo.slice(logo.indexOf(',') + 1);
+    const size = base64.length * 3 / 4 - (base64.match(/=+$/)?.[0].length || 0);
+    if (base64.length % 4 !== 0 || size > MAX_LOGO_BYTES) {
+      throw new Error(`${label}: logo must be valid base64 and no larger than 2 MB.`);
+    }
+    return logo;
+  }
+  if (/^(https?:|\/\/)/i.test(logo) || logo.includes('://')) {
+    throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
+  }
+  const cleanPath = logo.replace(/^\/+/, '');
+  if (!/\.(png|jpe?g|webp)$/i.test(cleanPath) || logo.length > SITE_CONFIG_LIMITS.url) {
+    throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
   }
   return logo;
 }

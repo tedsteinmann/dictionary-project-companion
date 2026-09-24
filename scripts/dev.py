@@ -15,7 +15,7 @@ class DevHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
         translated = Path(super().translate_path(path))
         relative = translated.relative_to(DIST)
-        if relative.parts and relative.parts[0] == "tools":
+        if relative.parts and relative.parts[0] in ("tools", "assets"):
             return str(ROOT / relative)
         return str(translated)
 

@@ -26,7 +26,8 @@ try {
         if (typeof sponsor?.logo === 'string' && sponsor.logo && !sponsor.logo.startsWith('data:')) {
           const mime = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' }[extname(sponsor.logo).toLowerCase()];
           if (!mime) throw new Error('Logo files must be PNG, JPEG, or WebP.');
-          const bytes = await readFile(resolve(dirname(configPath), sponsor.logo));
+          const relativeLogo = sponsor.logo.replace(/^\/+/, '');
+          const bytes = await readFile(resolve(dirname(configPath), relativeLogo));
           if (bytes.length > MAX_LOGO_BYTES) throw new Error('Logo files must be no larger than 2 MB.');
           sponsor.logo = `data:${mime};base64,${bytes.toString('base64')}`;
         }

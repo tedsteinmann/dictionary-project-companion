@@ -99,8 +99,11 @@ function addSponsor(sponsor = { title: '', description: '', url: '', logo: null 
   const updatePreview = () => {
     preview.hidden = !logo;
     removeLogo.hidden = !logo;
-    if (logo) preview.src = logo;
-    else preview.removeAttribute('src');
+    if (logo) {
+      preview.src = logo.startsWith('data:') || logo.startsWith('/') ? logo : `/${logo.replace(/^\.\//, '')}`;
+    } else {
+      preview.removeAttribute('src');
+    }
   };
   updatePreview();
   fieldset.readSponsor = () => ({

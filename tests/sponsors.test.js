@@ -164,8 +164,16 @@ describe('sponsor configuration and rendering', () => {
       { title: ' ' }, { description: '' }, { url: 'javascript:alert(1)' },
       { url: '/relative' }, { url: 'https://user:secret@example.org' },
       { logo: 'data:image/svg+xml;base64,AAAA' }, { logo: 'https://example.org/logo.png' },
-      { logo: 'data:image/png;base64,A' }, { logo: `data:image/png;base64,${'A'.repeat(2800000)}` }
+      { logo: 'data:image/png;base64,A' }, { logo: `data:image/png;base64,${'A'.repeat(2800000)}` },
+      { logo: 'not-an-image.txt' }, { logo: 'javascript:alert(1)' }
     ]) assert.throws(() => validateSiteConfig({ sponsors: [{ ...sponsor, ...patch }] }));
+    for (const validLogo of [
+      'assets/sponsors/lions-transparent.webp',
+      '/assets/sponsors/lions-transparent.webp',
+      './assets/sponsors/lions-transparent.webp'
+    ]) {
+      assert.equal(validateSiteConfig({ sponsors: [{ ...sponsor, logo: validLogo }] }).sponsors[0].logo, validLogo);
+    }
   });
 
   it('renders embedded logos with contained dimensions and adjacent sponsor name', () => {
@@ -231,6 +239,12 @@ describe('production sponsor configuration', () => {
     assert.equal((participantHtml.match(/<article /g) || []).length, 3);
     for (const location of participants) {
       assert.ok(participantHtml.includes(location.name));
+    }
+    for (const sponsor of config.sponsors) {
+      assert.ok(sponsor.logo, `Expected logo for sponsor ${sponsor.title}`);
+      const filePath = new URL(`../${sponsor.logo.replace(/^\/+/, '')}`, import.meta.url);
+      const fileBytes = await readFile(filePath);
+      assert.ok(fileBytes.length > 0, `Logo file ${sponsor.logo} should be non-empty`);
     }
   });
 });

@@ -5,11 +5,12 @@ These project assets were created or edited with the built-in image-generation t
 | Asset | Saved path | Purpose |
 | --- | --- | --- |
 | Dictionary | `src/assets/dictionary.webp` | Landing-page illustration; 900 × 600, approximately 76KiB |
+| Rotary | `assets/sponsors/rotary-transparent.png` | Transparent supplied sponsor mark |
 | Lions | `assets/sponsors/lions-transparent.webp` | Transparent cutout of supplied sponsor mark |
 | Elks | `assets/sponsors/elks-transparent.webp` | Transparent cutout of supplied sponsor mark |
 | Grown-up benefit icons | `src/assets/material-symbols-grownups.woff2` | Locally served subset of Google Material Symbols Outlined; approximately 3KiB |
 
-The two sponsor cutouts are also embedded in `sponsors.json` so the local editor can import/export the complete configuration. The supplied Rotary asset already had transparency and was retained. The dictionary is a generic illustrative book, not a photograph of a specific distributed edition. Sponsor marks remain the identities of their respective organizations.
+The three sponsor marks are saved in `assets/sponsors/` and referenced in `sponsors.json`. The build embeds them as data URLs in the static configuration. The dictionary is a generic illustrative book, not a photograph of a specific distributed edition. Sponsor marks remain the identities of their respective organizations.
 
 ## Sponsor-logo display guidance
 
