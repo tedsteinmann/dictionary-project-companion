@@ -111,7 +111,7 @@ Other community organizations participate in dictionary-distribution programs.
 
 The POC supports a static list of sponsors, each with an optional logo, title, description, and website. A local setup tool exports configuration for the build. It has no accounts, hosted uploads, or tenant management. See [feature and acceptance criteria](SPONSORS.md).
 
-Certificate-redemption partners are a separate concept. They are maintained in `participants.json`, independently from sponsor records in `sponsors.json`. The Participants page explains that the Fargo, West Fargo, and Moorhead public library systems participate in prize-book fulfillment and lists each configured redemption location. A library is not presented as a sponsor unless it is also explicitly entered in the separate `sponsors` collection.
+Certificate-redemption partners are a separate concept. They are maintained in `participants.json`, independently from sponsor records in `sponsors.json`. The Participants page explains that the Fargo and West Fargo public library systems participate in prize-book fulfillment and lists each configured redemption location. A library is not presented as a sponsor unless it is also explicitly entered in the separate `sponsors` collection.
 
 ### 7. Progress Through Capability, Not Rank
 
