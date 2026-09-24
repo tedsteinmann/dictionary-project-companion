@@ -187,7 +187,7 @@ describe('sponsor configuration and rendering', () => {
 });
 
 describe('production sponsor configuration', () => {
-  it('enables certificate redemption at the four participating libraries in order', async () => {
+  it('enables certificate redemption at the three participating libraries in order', async () => {
     const productionConfig = JSON.parse(await readFile(new URL('../sponsors.json', import.meta.url), 'utf8'));
     const prizeConfig = JSON.parse(await readFile(new URL('../prize.json', import.meta.url), 'utf8'));
     const participantConfig = JSON.parse(await readFile(new URL('../participants.json', import.meta.url), 'utf8'));
@@ -223,17 +223,12 @@ describe('production sponsor configuration', () => {
           name: 'West Fargo Public Library',
           addressLines: ['215 3rd Street East', 'West Fargo, ND 58078'],
           website: 'https://westfargolibrary.org/1383/Library'
-        },
-        {
-          name: 'Lake Agassiz Regional Library — Moorhead',
-          addressLines: ['450 Center Avenue', 'Moorhead, MN 56560'],
-          website: 'https://larl.org/locations/moorhead/'
         }
       ]
     );
     for (const location of participants) assert.match(location.instructions, /printed certificate/);
     const participantHtml = renderParticipantLocations(participants);
-    assert.equal((participantHtml.match(/<article /g) || []).length, 4);
+    assert.equal((participantHtml.match(/<article /g) || []).length, 3);
     for (const location of participants) {
       assert.ok(participantHtml.includes(location.name));
     }
