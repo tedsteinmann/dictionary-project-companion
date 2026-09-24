@@ -28,7 +28,7 @@ const selectedCertificate = () => session.certificates.find((item) => item.code 
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-const publicRoutes = ['home', 'about', 'sponsors', 'participants', 'redeem', 'contact'];
+const publicRoutes = ['home', 'about', 'sponsors', 'involvement', 'participants', 'redeem', 'contact'];
 const SHORT_PRINT_REDEMPTION_LENGTH = 180;
 
 function organizerContact() {
@@ -67,6 +67,7 @@ function siteFooter(route) {
   const links = [
     ['about', 'About'],
     ['sponsors', 'Sponsors'],
+    ['involvement', 'Get Involved'],
     ['participants', 'Participants'],
     ['contact', 'Contact'],
     ['redeem', 'Certificate redemption']
@@ -97,7 +98,7 @@ function welcome(route) {
     </div>
     <div class="audience-choices">
       ${button('<span><strong>I’m a Kid</strong><span>Grab your book and start exploring.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'intro', 'button audience-choice kid-choice')}
-      ${button('<span><strong>I’m a Grown-up</strong><span>See how local service clubs bring people together.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'about', 'button audience-choice adult-choice')}
+      ${button('<span><strong>I’m a Grown-up</strong><span>Learn why the physical dictionary matters.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'about', 'button audience-choice adult-choice')}
     </div>
     <p class="welcome-note">Your dictionary is all you need. Take your time.</p>
   </section>${renderSponsors(siteConfig, { compact: true })}`, route, true);
@@ -250,7 +251,44 @@ function certificateRedemptionGuidance() {
 function about(route) {
   return layout(`<section class="card adult" aria-labelledby="adult-title">
     <p class="kicker">For grown-ups</p>
-    <h1 id="adult-title">Want to get more involved?</h1>
+    <h1 id="adult-title">Why a physical dictionary?</h1>
+    <p class="lede">The Dictionary Challenge helps a child learn to use the book they received—it does not replace that book with an online lookup.</p>
+
+    <section class="adult-section" aria-labelledby="learning-title">
+      <h2 id="learning-title">Find → Understand → Apply → Discover</h2>
+      <p>Children first find information in their physical dictionary, understand the entry, apply what it means, and discover how independent reading and writing can open new ideas.</p>
+      <p>The short challenges build practical skills such as alphabetical order, guide words, definitions, parts of speech, and choosing a meaning from context.</p>
+    </section>
+
+    <section class="adult-section" aria-labelledby="support-title">
+      <h2 id="support-title">How adults can help</h2>
+      <p>Put the physical dictionary within reach, invite the child to read the instructions aloud, and ask questions such as “Which guide words could help?” or “Which meaning fits the sentence?” Give them time to search instead of giving the answer.</p>
+      <p>Celebrate the search strategy and persistence, whether or not the first answer is correct. The goal is confidence in finding and understanding information.</p>
+    </section>
+
+    <section class="adult-section" aria-labelledby="privacy-title">
+      <h2 id="privacy-title">A private, child-friendly activity</h2>
+      <p>The challenge asks for no name, email address, birthday, school, address, or location. Quiz progress is temporary to this browser tab; there are no child accounts or public scores.</p>
+    </section>
+
+    ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
+  </section>`, route, true);
+}
+
+function sponsorsPage(route) {
+  return layout(`<section class="card adult" aria-labelledby="sponsors-page-title">
+    <p class="kicker">Community support</p>
+    <h1 id="sponsors-page-title">Meet the project sponsors.</h1>
+    <p class="lede">Participating organizations made this local dictionary project possible by supporting children, books, and literacy.</p>
+    <p>The physical dictionary and the child’s learning come first. Sponsor information is provided here so families can recognize the community partners behind the project.</p>
+    ${renderSponsors(siteConfig, { heading: 'Participating organizations', linkLabel: 'Visit organization website' })}
+  </section>`, route, true);
+}
+
+function involvement(route) {
+  return layout(`<section class="card adult" aria-labelledby="involvement-title">
+    <p class="kicker">Get involved</p>
+    <h1 id="involvement-title">Want to get more involved?</h1>
     <p class="lede">Your child’s dictionary is one example of what local service clubs make possible.</p>
     <p>The five Fargo–Moorhead Rotary Clubs, Horace Lions Club, and Fargo Elks bring people together to serve our community, build relationships, and make good things happen.</p>
 
@@ -286,17 +324,6 @@ function about(route) {
 
     ${renderSponsors(siteConfig, { heading: 'Meet the clubs behind the Dictionary Project', linkLabel: 'Learn more • Find a club • Visit a meeting' })}
     <p class="closing-invitation">Come meet some people. Find your place. Make something happen.</p>
-    ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
-  </section>`, route, true);
-}
-
-function sponsorsPage(route) {
-  return layout(`<section class="card adult" aria-labelledby="sponsors-page-title">
-    <p class="kicker">Community support</p>
-    <h1 id="sponsors-page-title">Meet the project sponsors.</h1>
-    <p class="lede">Participating organizations made this local dictionary project possible by supporting children, books, and literacy.</p>
-    <p>The physical dictionary and the child’s learning come first. Sponsor information is provided here so families can recognize the community partners behind the project.</p>
-    ${renderSponsors(siteConfig, { heading: 'Participating organizations', linkLabel: 'Visit organization website' })}
   </section>`, route, true);
 }
 
@@ -359,7 +386,7 @@ const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', '
 
 const screens = {
   home: welcome, intro, levels: levelPicker, challenge, review, results, certificate,
-  about, sponsors: sponsorsPage, participants: participantsPage, redeem, contact,
+  about, sponsors: sponsorsPage, involvement, participants: participantsPage, redeem, contact,
   adult: () => about('about')
 };
 

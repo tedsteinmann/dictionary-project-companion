@@ -17,6 +17,7 @@ export default async function checkQuizBrowser(page) {
   const publicPages = {
     About: { route: 'about', heading: 'Why a physical dictionary?', text: 'Find → Understand → Apply → Discover' },
     Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
+    'Get Involved': { route: 'involvement', heading: 'Want to get more involved?', text: 'Meet the clubs behind the Dictionary Project' },
     Participants: { route: 'participants', heading: 'Participants', text: 'complete redemption' },
     Redeem: { route: 'redeem', heading: config => `${config.prize.title} redemption`, text: 'completion code is a reference only' },
     Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }

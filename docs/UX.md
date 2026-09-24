@@ -89,13 +89,17 @@ Questions already displayed, the current attempt, completed stages, and earned c
 
 ## Adult Flow
 
-### About: An Invitation to Get Involved
+### About: Why the Physical Dictionary Matters
 
-Lead with the dictionary project as a concrete example of what local service clubs make possible. Explain the social, personal, professional, and community benefits of participation; show a range of local projects; address common concerns about who can join and when clubs meet; and provide links to learn more, find a club, or visit a meeting.
+Explain how the challenge keeps the physical dictionary central, the literacy skills children practice, ways adults can support the search process without supplying answers, and the activity's child-privacy approach.
 
 ### Sponsors: Community Support
 
 Lead with the literacy project, then recognize every configured organization with its logo or fallback, title, local description, and descriptive website link. The description is configuration content; the interface must not infer projects or identity from sponsor names. Promotional messaging remains secondary to the dictionary and literacy purpose.
+
+### Get Involved: An Invitation to Participate
+
+Lead with the dictionary project as a concrete example of what local service clubs make possible. Explain the social, personal, professional, and community benefits of participation; show a range of local projects; address common concerns about who can join and when clubs meet; and provide links to learn more, find a club, or visit a meeting.
 
 ### Participants: Prize-Book Fulfillment
 
@@ -107,7 +111,7 @@ Show the configured organizer details in a semantic address and list each sponso
 
 ### Static Routing and Publication
 
-About, Sponsors, Participants, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` as an alias to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
+About, Sponsors, Get Involved, Participants, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` as an alias to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
 
 ## Child Design Principles
 
@@ -192,6 +196,8 @@ Home
  ├── Public pages
  │    ├── About
  │    ├── Sponsors
+ │    ├── Get Involved
+ │    ├── Participants
  │    ├── Redeem
  │    └── Contact
  │
