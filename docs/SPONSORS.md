@@ -94,6 +94,8 @@ If no root configuration exists, the build uses `src/content/site-config.js`. Th
       "instructions": "Ask at the children's desk.",
       "addressLines": ["10 First Avenue", "Your Community"],
       "website": "https://library.example.org",
+      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=10%20First%20Avenue",
+      "logo": "assets/participants/library.png",
       "telephone": "(555) 555-0110"
     }
   ]
@@ -102,9 +104,9 @@ If no root configuration exists, the build uses `src/content/site-config.js`. Th
 
 `site` is optional for legacy compatibility; when provided, its organizer name is required and its contact values are optional. The Contact page displays the organizer name and address plus links only for configured email, telephone, and HTTP(S) website values. `sponsors` requires at least one sponsor. `redemption.enabled` is required when the section is present; general instructions are required when enabled. Zero participants is valid only when the organizer supplies at least one public email, telephone, or website so an adult has a way to ask about redemption. Each configured participant requires a display name and its own instructions. Address lines, website, and telephone display value are optional.
 
-The Participants page reuses each participant's configured name, address, and website. Keep `sponsors.json`, `prize.json`, and `participants.json` independently maintained so prize rules and fulfillment participation never create sponsor recognition by implication.
+The Participants page reuses each participant's configured name, logo, address, directions link, and website. Keep `sponsors.json`, `prize.json`, and `participants.json` independently maintained so prize rules and fulfillment participation never create sponsor recognition by implication.
 
-Text is trimmed and bounded. Collections are limited to 20 sponsors, 50 locations, and five address lines per address. Websites must be absolute HTTP(S) URLs without embedded credentials. Sponsor logos may be embedded PNG, JPEG, or WebP data URLs up to 2 MB. Hand-authored sponsor logo paths may point to those image types relative to the JSON file; the build embeds them before validation.
+Text is trimmed and bounded. Collections are limited to 20 sponsors, 50 locations, and five address lines per address. Websites and directions links must be absolute HTTP(S) URLs without embedded credentials. Sponsor and participant logos may be embedded PNG, JPEG, or WebP data URLs up to 2 MB. Hand-authored logo paths may point to those image types relative to the relevant JSON file; the build embeds them before validation.
 
 ## Acceptance criteria
 

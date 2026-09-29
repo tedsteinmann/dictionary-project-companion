@@ -103,7 +103,7 @@ Lead with the dictionary project as a concrete example of what local service clu
 
 ### Participants: Prize-Book Fulfillment
 
-Explain that configured participant organizations help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings and addresses and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify an organization as a financial or project sponsor.
+Explain that configured participant organizations help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings, optional logos, addresses, directions, and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify an organization as a financial or project sponsor.
 
 ### Contact: Published Details
 

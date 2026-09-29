@@ -107,6 +107,41 @@ function validateLogo(value, label) {
   return logo;
 }
 
+function validateParticipantLogo(value, label) {
+  const logo = value || null;
+  if (logo === null) return null;
+  if (typeof logo !== 'string') {
+    throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
+  }
+  if (logo.startsWith('data:')) {
+    if (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(logo)) {
+      throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
+    }
+    const base64 = logo.slice(logo.indexOf(',') + 1);
+    const size = base64.length * 3 / 4 - (base64.match(/=+$/)?.[0].length || 0);
+    if (base64.length % 4 !== 0 || size > MAX_LOGO_BYTES) {
+      throw new Error(`${label}: logo must be valid base64 and no larger than 2 MB.`);
+    }
+    return logo;
+  }
+  if (/^https?:\/\//i.test(logo)) {
+    try {
+      const url = new URL(logo);
+      if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) {
+        throw new Error();
+      }
+      return url.href;
+    } catch {
+      throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
+    }
+  }
+  const cleanPath = logo.replace(/^\/+/, '');
+  if (!/\.(png|jpe?g|webp)$/i.test(cleanPath) || logo.length > SITE_CONFIG_LIMITS.url) {
+    throw new Error(`${label}: choose a PNG, JPEG, or WebP logo.`);
+  }
+  return logo;
+}
+
 function validateSite(value) {
   if (value == null) return { organizerName: null, addressLines: [], telephone: null, email: null, website: null };
   const site = object(value, 'Site details');
@@ -165,6 +200,8 @@ function validateParticipants(value) {
       instructions: text(location.instructions, { label: `${label}: instructions`, limit: SITE_CONFIG_LIMITS.locationInstructions, required: true }),
       addressLines: addressLines(location.addressLines, `${label}: addressLines`),
       website: webUrl(location.website, `${label}: website`),
+      directionsUrl: webUrl(location.directionsUrl, `${label}: directionsUrl`),
+      logo: validateParticipantLogo(location.logo, label),
       telephone: telephone(location.telephone, `${label}: telephone`)
     };
   });

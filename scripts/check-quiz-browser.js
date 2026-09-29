@@ -57,6 +57,10 @@ export default async function checkQuizBrowser(page) {
   assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Participants renders every configured redemption location');
   for (const location of config.participants) {
     assert(await page.getByRole('heading', { name: location.name, exact: true }).isVisible(), `Participants lists ${location.name}`);
+    if (location.directionsUrl) {
+      const card = page.getByRole('heading', { name: location.name, exact: true }).locator('..');
+      assert(await card.getByRole('link', { name: 'Get directions', exact: true }).getAttribute('href') === location.directionsUrl, `Participants links directions for ${location.name}`);
+    }
     assert(await page.getByRole('link', { name: `Visit the ${location.name} website`, exact: true }).getAttribute('href') === location.website, `Participants links ${location.name} safely`);
   }
   await page.goto(`${base}/#redeem`);

@@ -195,7 +195,7 @@ describe('sponsor configuration and rendering', () => {
 });
 
 describe('production sponsor configuration', () => {
-  it('enables certificate redemption at the three participating libraries in order', async () => {
+  it('enables certificate redemption at every participating library in order', async () => {
     const productionConfig = JSON.parse(await readFile(new URL('../sponsors.json', import.meta.url), 'utf8'));
     const prizeConfig = JSON.parse(await readFile(new URL('../prize.json', import.meta.url), 'utf8'));
     const participantConfig = JSON.parse(await readFile(new URL('../participants.json', import.meta.url), 'utf8'));
@@ -228,6 +228,11 @@ describe('production sponsor configuration', () => {
           website: 'https://fargond.gov/city-government/departments/library'
         },
         {
+          name: 'Fargo Public Library — Northport Library',
+          addressLines: ['2714 Broadway North', 'Fargo, ND 58102'],
+          website: 'https://fargond.gov/city-government/departments/library'
+        },
+        {
           name: 'West Fargo Public Library',
           addressLines: ['215 3rd Street East', 'West Fargo, ND 58078'],
           website: 'https://westfargolibrary.org/1383/Library'
@@ -236,9 +241,13 @@ describe('production sponsor configuration', () => {
     );
     for (const location of participants) assert.match(location.instructions, /printed certificate/);
     const participantHtml = renderParticipantLocations(participants);
-    assert.equal((participantHtml.match(/<article /g) || []).length, 3);
+    assert.equal((participantHtml.match(/class="redemption-location participant-library/g) || []).length, 3);
+    for (const number of [1, 2, 3]) {
+      assert.ok(participantHtml.includes(`Location ${number}`), `Expected numbered location ${number}`);
+    }
     for (const location of participants) {
-      assert.ok(participantHtml.includes(location.name));
+      assert.ok(location.logo, `Expected logo for participant ${location.name}`);
+      assert.ok(location.directionsUrl, `Expected directions for participant ${location.name}`);
     }
     for (const sponsor of config.sponsors) {
       assert.ok(sponsor.logo, `Expected logo for sponsor ${sponsor.title}`);
@@ -255,18 +264,34 @@ describe('participant rendering', () => {
       name: '<script>Library</script>',
       instructions: 'Ask at the desk.',
       addressLines: ['1 <Main> Street'],
-      website: 'https://example.org/library?name=%22safe'
+      website: 'https://example.org/library?name=%22safe',
+      directionsUrl: 'https://maps.example.org/?destination=%22safe'
     }], prize, redemption: {
       enabled: true,
       instructions: 'Bring a certificate.'
     } }).participants;
     const html = renderParticipantLocations(locations);
-    assert.match(html, /<article class="redemption-location">/);
+    assert.match(html, /<article class="redemption-location/);
     assert.match(html, /<h2>&lt;script&gt;Library&lt;\/script&gt;<\/h2>/);
+    assert.match(html, /<h3 class="participant-subheading">Locations<\/h3>/);
     assert.match(html, /<address>1 &lt;Main&gt; Street<\/address>/);
     assert.match(html, /Visit the &lt;script&gt;Library&lt;\/script&gt; website/);
+    assert.match(html, /Get directions/);
     assert.match(html, /rel="noreferrer"/);
     assert.doesNotMatch(html, /<script>|onclick=/);
+  });
+
+  it('groups multiple branches under a single library card and reserves a blank third slot', () => {
+    const html = renderParticipantLocations([
+      { name: 'Fargo Public Library — Main Library', instructions: 'Ask at the desk.', addressLines: ['101 4th Street North', 'Fargo, ND 58102'], website: 'https://example.org/fargo', directionsUrl: 'https://maps.example.org/fargo1', logo: 'https://example.org/fargo-logo.png' },
+      { name: 'Fargo Public Library — Dr. James Carlson Library', instructions: 'Ask at the desk.', addressLines: ['2801 32nd Avenue South', 'Fargo, ND 58103'], website: 'https://example.org/fargo', directionsUrl: 'https://maps.example.org/fargo2', logo: 'https://example.org/fargo-logo.png' },
+      { name: 'West Fargo Public Library', instructions: 'Ask at the desk.', addressLines: ['215 3rd Street East', 'West Fargo, ND 58078'], website: 'https://example.org/west', directionsUrl: 'https://maps.example.org/west1', logo: 'https://example.org/west-logo.png' }
+    ]);
+    assert.equal((html.match(/class="redemption-location participant-library"/g) || []).length, 2);
+    assert.match(html, /<h3 class="participant-subheading">Locations<\/h3>/);
+    assert.match(html, /Location 1/);
+    assert.match(html, /Location 2/);
+    assert.match(html, /class="redemption-location participant-library placeholder"/);
   });
 });
 

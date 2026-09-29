@@ -3,29 +3,34 @@
     {
       "name": "Fargo Public Library — Main Library",
       "instructions": "Bring the child’s printed certificate to the service desk and follow the redemption instructions.",
-      "addressLines": [
-        "101 4th Street North",
-        "Fargo, ND 58102"
-      ],
-      "website": "https://fargond.gov/city-government/departments/library"
+      "addressLines": ["101 4th Street North", "Fargo, ND 58102"],
+      "website": "https://fargond.gov/city-government/departments/library",
+      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=101%204th%20Street%20North%2C%20Fargo%2C%20ND%2058102",
+      "logo": "https://download.fargond.gov/resize/140/140/0/fargo_library-all_white.png"
     },
     {
       "name": "Fargo Public Library — Dr. James Carlson Library",
       "instructions": "Bring the child’s printed certificate to the service desk and follow the redemption instructions.",
-      "addressLines": [
-        "2801 32nd Avenue South",
-        "Fargo, ND 58103"
-      ],
-      "website": "https://fargond.gov/city-government/departments/library"
+      "addressLines": ["2801 32nd Avenue South", "Fargo, ND 58103"],
+      "website": "https://fargond.gov/city-government/departments/library",
+      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=2801%2032nd%20Avenue%20South%2C%20Fargo%2C%20ND%2058103",
+      "logo": "https://download.fargond.gov/resize/140/140/0/fargo_library-all_white.png"
+    },
+    {
+      "name": "Fargo Public Library — Northport Library",
+      "instructions": "Bring the child’s printed certificate to the service desk and follow the redemption instructions.",
+      "addressLines": ["2714 Broadway North", "Fargo, ND 58102"],
+      "website": "https://fargond.gov/city-government/departments/library",
+      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=2714%20Broadway%20North%2C%20Fargo%2C%20ND%2058102",
+      "logo": "https://download.fargond.gov/resize/140/140/0/fargo_library-all_white.png"
     },
     {
       "name": "West Fargo Public Library",
       "instructions": "Bring the child’s printed certificate to the service desk and follow the redemption instructions.",
-      "addressLines": [
-        "215 3rd Street East",
-        "West Fargo, ND 58078"
-      ],
-      "website": "https://westfargolibrary.org/1383/Library"
+      "addressLines": ["215 3rd Street East", "West Fargo, ND 58078"],
+      "website": "https://westfargolibrary.org/1383/Library",
+      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=215%203rd%20Street%20East%2C%20West%20Fargo%2C%20ND%2058078",
+      "logo": "https://westfargolibrary.org/ImageRepository/Document?documentID=9927"
     }
   ]
 }
