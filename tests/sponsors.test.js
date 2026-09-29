@@ -299,7 +299,7 @@ describe('static sponsor builds', () => {
   it('builds defaults, embeds relative logos, excludes setup, and preserves the build on invalid input', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'dictionary-sponsors-'));
     try {
-      for (const path of ['src', 'scripts', 'tools', 'index.html', 'package.json']) {
+      for (const path of ['src', 'scripts', 'tools', 'index.html', 'favicon.svg', 'package.json']) {
         await cp(new URL(`../${path}`, import.meta.url), join(dir, path), { recursive: true });
       }
       const build = (...args) => execFileSync(process.execPath, [join(dir, 'scripts/build.js'), ...args], { cwd: dir, stdio: 'pipe' });

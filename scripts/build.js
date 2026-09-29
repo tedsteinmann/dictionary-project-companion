@@ -87,6 +87,7 @@ try {
   await mkdir(dist);
   await Promise.all([
     cp(resolve(root, 'index.html'), resolve(dist, 'index.html')),
+    cp(resolve(root, 'favicon.svg'), resolve(dist, 'favicon.svg')),
     cp(resolve(root, 'src'), resolve(dist, 'src'), { recursive: true })
   ]);
   await writeFile(resolve(dist, 'src/content/site-config.js'), `export const siteConfig = ${JSON.stringify(config, null, 2)};\n`);
