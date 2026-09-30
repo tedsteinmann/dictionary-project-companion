@@ -170,17 +170,19 @@ export function gradeAttempt(attempt, bank) {
   return { score, passed: score >= PASSING_SCORE, details };
 }
 
-export function createCompletionCode() {
-  // About 59 random bits; omit ambiguous letters/digits for easier transcription.
+export function createCompletionCode(existingCodes = []) {
   const alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  // Rejection sampling avoids modulo bias with this 31-character alphabet.
-  let code = '';
-  while (code.length < 12) {
-    for (const byte of crypto.getRandomValues(new Uint8Array(16))) {
-      if (byte < 248 && code.length < 12) code += alphabet[byte % alphabet.length];
+  const existing = new Set(existingCodes);
+  let code;
+  do {
+    code = '';
+    while (code.length < 8) {
+      for (const byte of crypto.getRandomValues(new Uint8Array(8))) {
+        if (byte < 248 && code.length < 8) code += alphabet[byte % alphabet.length];
+      }
     }
-  }
-  return `DC-${code.slice(0, 4)}-${code.slice(4, 8)}-${code.slice(8)}`;
+  } while (existing.has(code));
+  return code;
 }
 
 export function submitAttempt(session, bank, makeCode = createCompletionCode) {
@@ -191,7 +193,7 @@ export function submitAttempt(session, bank, makeCode = createCompletionCode) {
   const date = [completed.getFullYear(), completed.getMonth() + 1, completed.getDate()]
     .map((part) => String(part).padStart(2, '0')).join('-');
   const certificate = result.passed ? {
-    levelId: attempt.levelId, score: result.score, code: makeCode(), date
+    levelId: attempt.levelId, score: result.score, code: makeCode(session.certificates.map(({ code }) => code)), date
   } : null;
   return {
     ...session,
@@ -219,7 +221,7 @@ export function restoreSession(storage, bank) {
     }
     const validCertificate = (c) => c && levels.some((l) => l.id === c.levelId) &&
       Number.isInteger(c.score) && c.score >= PASSING_SCORE && c.score <= QUESTIONS_PER_ATTEMPT &&
-      /^DC-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/.test(c.code) && /^\d{4}-\d{2}-\d{2}$/.test(c.date);
+      /^(?:[2-9A-HJ-NP-Z]{6,8}|DC-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4})$/.test(c.code) && /^\d{4}-\d{2}-\d{2}$/.test(c.date);
     if (!session.certificates.every(validCertificate)) throw new Error('Invalid certificates');
     if (!session.passedLevels.every((id) => canStartLevel(session, id) &&
       session.certificates.some((c) => c.levelId === id))) throw new Error('Invalid level progress');
