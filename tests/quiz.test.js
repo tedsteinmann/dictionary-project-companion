@@ -203,10 +203,22 @@ describe('level progression and submission', () => {
     assert.equal(retry.certificates.length, 3);
   });
 
-  it('uses random human-readable certificate references', () => {
-    const codes = Array.from({ length: 100 }, createCompletionCode);
+  it('uses short, human-readable certificate references unique within the session', () => {
+    const codes = [];
+    for (let index = 0; index < 100; index++) codes.push(createCompletionCode(codes));
     assert.equal(new Set(codes).size, codes.length);
-    assert.ok(codes.every((code) => /^DC-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/.test(code)));
+    assert.ok(codes.every((code) => /^[2-9A-HJ-NP-Z]{8}$/.test(code)));
+  });
+
+  it('restores certificates with previous completion-code formats', () => {
+    let session = submitAttempt(answerAttempt(startAttempt(createSession(), questions, 1), 10), questions);
+    for (const previousCode of ['ABC234', 'DC-2345-ABCD-EFGH']) {
+      session.certificates[0].code = previousCode;
+      session.attempt.certificate.code = previousCode;
+      const storage = memoryStorage();
+      persistSession(session, storage);
+      assert.deepEqual(restoreSession(storage, questions), session);
+    }
   });
 });
 

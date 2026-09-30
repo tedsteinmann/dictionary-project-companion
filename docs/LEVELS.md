@@ -45,7 +45,7 @@ Accounts, backend persistence, globally verified or redeemable prize codes, priz
 
 ## Completion policy
 
-Passing any stage earns a challenge certificate showing the stage name, score, date, and a short completion code. Children may then continue to the next stage or retake an unlocked stage. Certificates earned earlier remain available in the tab session. Completion codes are random local reference codes, not proof against tampering or a centrally registered redemption system.
+Passing any stage earns a challenge certificate showing the stage name, score, date, and an eight-character completion code. Codes are collision-checked against certificates already issued in the current tab session, but are not globally registered or proof against tampering. Children may continue to the next stage or retake an unlocked stage, and certificates earned earlier remain available in the tab session.
 
 The completion experience should reinforce the larger learning outcome: a resourceful learner does not need to know every answer in advance; they know how to find and evaluate information when they need it.
 

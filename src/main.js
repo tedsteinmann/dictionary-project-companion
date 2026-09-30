@@ -29,7 +29,6 @@ const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
 const publicRoutes = ['home', 'about', 'sponsors', 'involvement', 'participants', 'redeem', 'contact'];
-const SHORT_PRINT_REDEMPTION_LENGTH = 180;
 
 function organizerContact() {
   return renderOrganizerContact(siteConfig.site);
@@ -217,9 +216,9 @@ function certificate(route) {
       <p class="certificate-score">You cracked ${earned.score} out of 10!</p>
       <p>Completed <time datetime="${earned.date}">${earned.date}</time></p>
       <p>Completion code<br /><strong class="completion-code">${earned.code}</strong></p>
-      <p>Show this certificate to a parent, guardian, teacher, or librarian. A parent or guardian can ask the organizer about ${escapeHtml(siteConfig.prize.title || 'certificate redemption')} and how it works.</p>
       ${certificateRedemptionGuidance()}
       ${renderSponsorNames(siteConfig)}
+      ${certificateAvailabilityNote()}
     </div>
     <div class="quiz-actions no-print">
       <button class="button button-primary" data-action="print">Print or save certificate</button>
@@ -232,20 +231,18 @@ function certificate(route) {
 }
 
 function certificateRedemptionGuidance() {
-  const { redemption, site } = siteConfig;
+  const { redemption } = siteConfig;
+  if (!redemption.enabled) return '';
+  const hasAvailabilityNote = redemption.availabilityDate || redemption.limitedSupplyNotice;
+  return `<p class="certificate-redemption"><strong>Redemption:</strong> Bring this certificate to a participating library in exchange for one prize book.${hasAvailabilityNote ? '<span aria-hidden="true">*</span><span class="sr-only"> See availability note.</span>' : ''}</p>`;
+}
+
+function certificateAvailabilityNote() {
+  const { redemption } = siteConfig;
   if (!redemption.enabled) return '';
   const { prize } = siteConfig;
   const hasAvailabilityNote = redemption.availabilityDate || redemption.limitedSupplyNotice;
-  const prizeStatement = `<p class="certificate-prize"><strong>${escapeHtml(prize.title)}:</strong> ${escapeHtml(prize.description)}${hasAvailabilityNote ? '<span aria-hidden="true">*</span><span class="sr-only"> See availability note.</span>' : ''}</p>`;
-  const availabilityNote = hasAvailabilityNote ? `<p class="certificate-availability"><span aria-hidden="true">*</span><strong>${escapeHtml(prize.title)} availability:</strong>${redemption.availabilityDate ? ` ${escapeHtml(prize.title)} are available beginning ${escapeHtml(redemption.availabilityDate)}.` : ''}${redemption.limitedSupplyNotice ? ` ${escapeHtml(redemption.limitedSupplyNotice)}` : ''}</p>` : '';
-  const shortEnough = redemption.instructions.length <= SHORT_PRINT_REDEMPTION_LENGTH;
-  if (shortEnough) {
-    return `${prizeStatement}<p class="certificate-redemption"><strong>Redemption:</strong> ${escapeHtml(redemption.instructions)}${redemption.deadline ? ` Deadline: ${escapeHtml(redemption.deadline)}.` : ''}</p>${availabilityNote}`;
-  }
-  const contactDirection = site.telephone ? `contact the project organizer at ${escapeHtml(site.telephone)}`
-    : site.email ? `email ${escapeHtml(site.email)}`
-      : 'open “How to redeem this certificate” in the Dictionary Challenge';
-  return `${prizeStatement}<p class="certificate-redemption">For redemption details, have a parent or guardian ${contactDirection}.</p>${availabilityNote}`;
+  return hasAvailabilityNote ? `<p class="certificate-availability"><span aria-hidden="true">*</span><span class="sr-only">Availability note:</span> ${redemption.availabilityDate ? `${escapeHtml(prize.title)} are available beginning ${escapeHtml(redemption.availabilityDate)}.` : ''}${redemption.limitedSupplyNotice ? ` ${escapeHtml(redemption.limitedSupplyNotice)}` : ''}</p>` : '';
 }
 
 function about(route) {

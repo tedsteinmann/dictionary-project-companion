@@ -267,7 +267,7 @@ export default async function checkQuizBrowser(page) {
   assert(await page.getByRole('heading', { name: 'Certificate of completion' }).isVisible(), 'Find It earns certificate');
   assert((await page.locator('.certificate').innerText()).includes('Stage 1 · Find It'), 'Certificate names Find It');
   if (enabledConfig.redemption.enabled) {
-    assert((await page.locator('.certificate').innerText()).includes('For redemption details, have a parent or guardian contact the project organizer at (555) 555-0111.'), 'Long instructions use contact fallback in printable certificate guidance');
+    assert((await page.locator('.certificate-redemption').innerText()).includes('Redemption: Bring this certificate to a participating library in exchange for one prize book.*'), 'Certificate uses concise redemption instructions');
     const redeemAction = page.getByRole('button', { name: 'How to redeem this certificate', exact: true });
     assert(await redeemAction.isVisible(), 'Certificate provides a no-print redemption action');
     await redeemAction.focus();
@@ -288,10 +288,14 @@ export default async function checkQuizBrowser(page) {
   assert(!(await page.locator('.brand').isVisible()), 'Print hides navigation');
   assert(await page.locator('.certificate').isVisible(), 'Print includes certificate');
   const printedCertificate = await page.locator('.certificate').innerText();
-  assert(printedCertificate.includes('Reading rewards: Each qualifying child may choose one new book.*'), 'Certificate renders the configured prize and marks it with an asterisk');
+  assert(printedCertificate.includes('Redemption: Bring this certificate to a participating library in exchange for one prize book.*'), 'Certificate marks concise redemption instructions with an asterisk');
+  assert(!printedCertificate.includes('Show this certificate to a parent'), 'Certificate omits the parent/guardian instruction');
+  assert(!printedCertificate.includes('Each qualifying child may choose one new book'), 'Certificate omits the redundant prize statement');
   assert(printedCertificate.includes('Reading rewards are available beginning November 1.'), 'Certificate includes the configured title and availability date');
   assert(printedCertificate.includes('Prize books are available while supplies last.'), 'Certificate includes the limited-supply notice');
   assert(await page.locator('.certificate-availability').isVisible(), 'Print keeps the certificate prize disclaimer visible');
+  assert(await page.locator('.certificate-availability').evaluate((element) => Boolean(element.previousElementSibling?.classList.contains('certificate-sponsors'))), 'Certificate disclaimer follows the sponsor section');
+  assert(await page.locator('.certificate').evaluate((element) => element.getBoundingClientRect().height < 950), 'Printed certificate fits on one page');
   assert(await page.locator('.certificate-availability').evaluate((element) => parseFloat(getComputedStyle(element).fontSize) >= 12), 'Printed certificate disclaimer remains legible');
   assert(!(await page.getByRole('button', { name: 'How to redeem this certificate', exact: true }).isVisible().catch(() => false)), 'Print excludes the redemption action');
   await page.emulateMedia({ media: 'screen' });
