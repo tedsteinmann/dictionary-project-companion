@@ -97,9 +97,9 @@ Connect the physical dictionary gift directly to the local service clubs that ma
 
 Lead with the literacy project, then recognize every configured organization with its logo or fallback, title, local description, and descriptive website link. The description is configuration content; the interface must not infer projects or identity from sponsor names. Promotional messaging remains secondary to the dictionary and literacy purpose.
 
-### Participants: Prize-Book Fulfillment
+### Libraries: Prize-Book Fulfillment
 
-Explain that configured participant organizations help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings, optional logos, addresses, directions, and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify an organization as a financial or project sponsor.
+Explain that configured libraries help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings, optional logos, addresses, directions, and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify a library as a financial or project sponsor.
 
 ### Contact: Published Details
 
@@ -107,7 +107,7 @@ Show the configured organizer details in a semantic address and list each sponso
 
 ### Static Routing and Publication
 
-About, Sponsors, Participants, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` and `#involvement` as aliases to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
+About, Sponsors, Libraries, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` and `#involvement` as aliases to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
 
 ## Child Design Principles
 
@@ -192,7 +192,7 @@ Home
  ├── Public pages
  │    ├── About
  │    ├── Sponsors
- │    ├── Participants
+ │    ├── Libraries
  │    ├── Redeem
  │    └── Contact
  │

@@ -23,5 +23,5 @@ export const siteConfig = {
     limitedSupplyNotice: null,
     deadline: null
   },
-  participants: []
+  libraries: []
 };
