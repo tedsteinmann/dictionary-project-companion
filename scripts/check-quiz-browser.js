@@ -54,14 +54,22 @@ export default async function checkQuizBrowser(page) {
   assert(await wordmark().getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
   await page.goto(`${base}/#libraries`);
   assert(await page.getByRole('heading', { name: 'Libraries', exact: true }).isVisible(), 'Direct #libraries access renders the Libraries screen');
-  assert((await page.locator('.redemption-location').count()) === config.libraries.length, 'Libraries renders every configured redemption location');
+  assert((await page.locator('.library-location:not(.placeholder-location)').count()) === config.libraries.length, 'Libraries renders every configured redemption location');
   for (const location of config.libraries) {
-    assert(await page.getByRole('heading', { name: location.name, exact: true }).isVisible(), `Libraries lists ${location.name}`);
+    const libraryName = location.name.replace(/\s+—.*$/, '').trim();
+    const branchName = location.name.replace(`${libraryName} — `, '').trim();
+    const libraryLocations = config.libraries.filter((candidate) => candidate.name.replace(/\s+—.*$/, '').trim() === libraryName);
+    const locationName = `Location ${libraryLocations.indexOf(location) + 1}${branchName ? ` · ${branchName}` : ''}`;
+    const locationEntry = page.locator('.library-location').filter({ has: page.getByRole('heading', { name: locationName, exact: true }) });
+    assert(await locationEntry.getByRole('heading', { name: locationName, exact: true }).isVisible(), `Libraries lists ${locationName}`);
     if (location.directionsUrl) {
-      const card = page.getByRole('heading', { name: location.name, exact: true }).locator('..');
-      assert(await card.getByRole('link', { name: 'Get directions', exact: true }).getAttribute('href') === location.directionsUrl, `Libraries links directions for ${location.name}`);
+      assert(await locationEntry.getByRole('link', { name: 'Get directions', exact: true }).getAttribute('href') === location.directionsUrl, `Libraries links directions for ${locationName}`);
     }
-    assert(await page.getByRole('link', { name: `Visit the ${location.name} website`, exact: true }).getAttribute('href') === location.website, `Libraries links ${location.name} safely`);
+  }
+  const libraryNames = [...new Set(config.libraries.map(({ name }) => name.replace(/\s+—.*$/, '').trim()))];
+  for (const libraryName of libraryNames) {
+    const location = config.libraries.find(({ name }) => name.replace(/\s+—.*$/, '').trim() === libraryName);
+    assert(await page.getByRole('link', { name: `Visit the ${libraryName} website`, exact: true }).getAttribute('href') === location.website, `Libraries links ${libraryName} safely`);
   }
   await page.goto(`${base}/#redeem`);
   assert(await page.getByRole('heading', { name: `${config.prize.title} redemption`, exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
