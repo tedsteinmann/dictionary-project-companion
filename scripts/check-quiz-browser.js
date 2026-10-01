@@ -15,9 +15,8 @@ export default async function checkQuizBrowser(page) {
   const wordmark = () => page.getByRole('link', { name: 'Dictionary Challenge home' });
   const challengeAction = () => page.getByRole('link', { name: 'Start Challenge', exact: true });
   const publicPages = {
-    About: { route: 'about', heading: 'Why a physical dictionary?', text: 'Find → Understand → Apply → Discover' },
+    About: { route: 'about', heading: 'Why this dictionary matters.', text: 'Please consider joining a service club.' },
     Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
-    'Get Involved': { route: 'involvement', heading: 'Want to get more involved?', text: 'Meet the clubs behind the Dictionary Project' },
     Participants: { route: 'participants', heading: 'Participants', text: 'complete redemption' },
     Redeem: { route: 'redeem', heading: config => `${config.prize.title} redemption`, text: 'completion code is a reference only' },
     Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }
@@ -32,6 +31,7 @@ export default async function checkQuizBrowser(page) {
   assert(await footer.getByRole('navigation', { name: 'Project information' }).isVisible(), 'Public footer labels its information navigation');
   assert(await footer.getByRole('link', { name: 'Certificate redemption', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
   assert(await footer.getByRole('link', { name: 'Participants', exact: true }).getAttribute('href') === '#participants', 'Participants footer link preserves the participants route');
+  assert((await footer.getByRole('link', { name: 'Get Involved', exact: true }).count()) === 0, 'Footer does not hide the service-club invitation on a separate page');
   assert((await footer.locator('.sponsor-logo').count()) === 0, 'Public footer does not duplicate sponsor logos');
   await wordmark().focus();
   await page.keyboard.press('Tab');
@@ -47,6 +47,9 @@ export default async function checkQuizBrowser(page) {
     assert(await page.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), `${destination} keeps the single challenge action`);
     assert(await page.locator(`.site-footer-nav [data-route="${route}"]`).getAttribute('aria-current') === 'page', `${destination} footer link identifies the active page`);
   }
+  await page.goto(`${base}/#involvement`);
+  assert(page.url().endsWith('#about'), 'Legacy Get Involved URL redirects to the combined grown-up page');
+  assert(await page.getByRole('heading', { name: 'Please consider joining a service club.' }).isVisible(), 'Legacy involvement bookmarks reach the service-club invitation');
   await page.getByRole('link', { name: 'Start Challenge', exact: true }).click();
   assert(page.url().endsWith('#intro'), 'Public header action navigates to the new-challenge route');
   assert(await page.getByRole('heading', { name: 'Grab your dictionary.', exact: true }).isVisible(), 'Public header action opens the child intro');
@@ -134,7 +137,7 @@ export default async function checkQuizBrowser(page) {
   await page.goBack();
   assert(await page.getByRole('heading', { name: 'Reading rewards redemption', exact: true }).isVisible(), 'Browser Back restores redemption');
   await page.goForward();
-  assert(await page.getByRole('heading', { name: 'Why a physical dictionary?', exact: true }).isVisible(), 'Browser Forward restores the following public screen');
+  assert(await page.getByRole('heading', { name: 'Why this dictionary matters.', exact: true }).isVisible(), 'Browser Forward restores the following public screen');
   await page.getByRole('link', { name: 'Dictionary Challenge home' }).click();
   const bank = await page.evaluate(async () => (await import('/src/content/questions.js')).questions);
   const state = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
@@ -148,7 +151,8 @@ export default async function checkQuizBrowser(page) {
   assert(await challengeAction().evaluate((element) => element === document.activeElement), 'Phone header keeps wordmark before the challenge action');
   await noOverflow('welcome');
   await page.getByRole('button', { name: 'I’m a Grown-up' }).click();
-  assert(await page.getByRole('heading', { name: 'Why a physical dictionary?' }).isVisible(), 'Adult path opens About');
+  assert(await page.getByRole('heading', { name: 'Why this dictionary matters.' }).isVisible(), 'Adult path opens About');
+  assert(await page.getByRole('heading', { name: 'Please consider joining a service club.' }).isVisible(), 'Adult path puts the service-club invitation front and center');
   assert((await page.locator('main').innerText()).includes('Find → Understand → Apply → Discover'), 'Adult literacy guidance retained');
   await noOverflow('adult');
   await click('Explore the Kid Challenge');
