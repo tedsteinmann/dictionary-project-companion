@@ -366,6 +366,10 @@ npm test
 npm run build
 ```
 
+For UI changes, install the locked development dependencies with `npm ci`, then install Chromium with `npx playwright install chromium` (on Linux, `npx playwright install --with-deps chromium` also installs required system libraries). After building, run `npm run test:browser`. The small runner uses the existing browser assertions and starts and stops `scripts/dev.py` on an available port; Python 3 is required. It exits non-zero on validation failure. `npm test` remains the Node behavioral test command.
+
+To capture a 320px welcome-page screenshot during validation, run `BROWSER_SCREENSHOT=/tmp/dictionary-mobile.png npm run test:browser`. Screenshot capture is optional and reports failures separately from browser assertions.
+
 The original vertical-slice definition and intentionally deferred infrastructure are documented in [`docs/PR1.md`](docs/PR1.md).
 
 The multi-question POC expands the learning experience without expanding the original static, client-only architecture.

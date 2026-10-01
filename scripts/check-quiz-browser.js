@@ -1,5 +1,5 @@
-// Run with the Playwright browser tool (pass this function as its code argument).
-// Start npm run dev first and navigate the browser to that local preview.
+// Run with npm run test:browser after npm run build, or pass this function
+// to a Playwright browser tool already navigated to the local preview.
 // This checks behavior through UI controls; sessionStorage is read only to obtain
 // the randomized question IDs for test answers. No application state is forged.
 export default async function checkQuizBrowser(page) {
@@ -57,14 +57,17 @@ export default async function checkQuizBrowser(page) {
   assert(await wordmark().getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
   await page.goto(`${base}/#participants`);
   assert(await page.getByRole('heading', { name: 'Participants', exact: true }).isVisible(), 'Direct #participants access renders the Participants screen');
-  assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Participants renders every configured redemption location');
+  assert((await page.locator('.participant-library:not(.placeholder) .participant-location').count()) === config.participants.length, 'Participants renders every configured redemption location');
   for (const location of config.participants) {
-    assert(await page.getByRole('heading', { name: location.name, exact: true }).isVisible(), `Participants lists ${location.name}`);
+    const libraryName = location.name.replace(/\s+—.*$/, '').trim();
+    const branchName = location.name.replace(`${libraryName} — `, '').trim();
+    const card = page.getByRole('heading', { name: libraryName, exact: true }).locator('..');
+    const branch = card.locator('.participant-location').filter({ has: page.getByRole('heading', { name: new RegExp(`^Location \\d+ · ${branchName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }) });
+    assert(await branch.isVisible(), `Participants lists ${location.name}`);
     if (location.directionsUrl) {
-      const card = page.getByRole('heading', { name: location.name, exact: true }).locator('..');
-      assert(await card.getByRole('link', { name: 'Get directions', exact: true }).getAttribute('href') === location.directionsUrl, `Participants links directions for ${location.name}`);
+      assert(await branch.getByRole('link', { name: 'Get directions', exact: true }).getAttribute('href') === location.directionsUrl, `Participants links directions for ${location.name}`);
     }
-    assert(await page.getByRole('link', { name: `Visit the ${location.name} website`, exact: true }).getAttribute('href') === location.website, `Participants links ${location.name} safely`);
+    assert(await card.getByRole('link', { name: `Visit the ${libraryName} website`, exact: true }).getAttribute('href') === location.website, `Participants links ${location.name} safely`);
   }
   await page.goto(`${base}/#redeem`);
   assert(await page.getByRole('heading', { name: `${config.prize.title} redemption`, exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
@@ -117,7 +120,7 @@ export default async function checkQuizBrowser(page) {
         website: 'https://example.org/south-branch'
       }]
   };
-  await page.evaluate(async (nextConfig) => {
+  const applyEnabledConfig = () => page.evaluate(async (nextConfig) => {
     const mod = await import('/src/content/site-config.js');
     mod.siteConfig.site = nextConfig.site;
     mod.siteConfig.sponsors = nextConfig.sponsors;
@@ -125,6 +128,7 @@ export default async function checkQuizBrowser(page) {
     mod.siteConfig.redemption = nextConfig.redemption;
     mod.siteConfig.participants = nextConfig.participants;
   }, enabledConfig);
+  await applyEnabledConfig();
   await page.goto(`${base}/#redeem`);
   assert((await page.locator('.redemption-location').count()) === enabledConfig.participants.length, 'Every configured library is rendered');
   assert((await page.locator('main').innerText()).includes('parent or guardian should handle'), 'Redemption is directed to a parent or guardian');
@@ -202,10 +206,12 @@ export default async function checkQuizBrowser(page) {
   await page.getByRole('radio').first().press('Space');
   assert((await state()).attempt.index === 0, 'Choosing does not advance automatically');
   await click('Submit answer →');
-  await click('← Previous question');
+  await page.getByRole('link', { name: '← Previous question', exact: true }).click();
   assert(await page.getByRole('radio').first().isChecked(), 'Previous preserves selection');
   await page.reload();
   assert(await page.getByRole('radio').first().isChecked(), 'Reload preserves selection');
+  // Reload replaces the module instance; restore the content fixture used below.
+  await applyEnabledConfig();
   assert(JSON.stringify(await page.getByRole('radio').evaluateAll((radios) => radios.map((r) => r.value))) === JSON.stringify(firstOptions), 'Reload preserves choice order');
   await page.getByRole('radio').first().focus();
   assert(await page.getByRole('radio').first().evaluate((el) => getComputedStyle(el).outlineStyle !== 'none'), 'Visible keyboard focus');
@@ -274,15 +280,20 @@ export default async function checkQuizBrowser(page) {
     assert((await page.locator('.certificate-redemption').innerText()).includes('Redemption: Bring this certificate to a participating library in exchange for one prize book.*'), 'Certificate uses concise redemption instructions');
     const redeemAction = page.getByRole('button', { name: 'How to redeem this certificate', exact: true });
     assert(await redeemAction.isVisible(), 'Certificate provides a no-print redemption action');
+    await page.keyboard.press('Tab');
     await redeemAction.focus();
     assert(await redeemAction.evaluate((element) => getComputedStyle(element).outlineStyle !== 'none'), 'Redemption action has visible keyboard focus');
     await redeemAction.press('Enter');
+    await page.getByRole('heading', { name: 'Reading rewards redemption', exact: true }).waitFor();
     assert(await page.getByRole('heading', { name: 'Reading rewards redemption', exact: true }).isVisible(), 'Certificate action navigates to redemption');
     await page.goBack();
   }
   const firstCode = await page.locator('.completion-code').innerText();
   await page.reload();
   assert(await page.locator('.completion-code').innerText() === firstCode, 'Certificate stable across reload');
+  await applyEnabledConfig();
+  await page.goto(`${base}/#levels`);
+  await click('View Find It certificate');
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 844 });
     await noOverflow(`certificate ${width}`);
