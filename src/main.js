@@ -5,7 +5,7 @@ import { renderAnswerInput, readAnswer } from './components/answer-input.js';
 import { dictionaryHelp } from './components/dictionary-help.js';
 import { learningReview, discoveryActivity } from './components/learning-review.js';
 import { renderContactContent, renderOrganizerContact, telephoneHref } from './components/contact-details.js';
-import { renderParticipantLocations } from './participants.js';
+import { renderLibraryLocations } from './libraries.js';
 import { levels, PASSING_SCORE, QUESTIONS_PER_ATTEMPT } from './content/levels.js';
 import {
   canStartLevel, choicesFor, gradeAttempt, moveToQuestion, persistSession, restoreSession,
@@ -28,7 +28,7 @@ const selectedCertificate = () => session.certificates.find((item) => item.code 
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-const publicRoutes = ['home', 'about', 'sponsors', 'involvement', 'participants', 'redeem', 'contact'];
+const publicRoutes = ['home', 'about', 'sponsors', 'involvement', 'libraries', 'redeem', 'contact'];
 
 function organizerContact() {
   return renderOrganizerContact(siteConfig.site);
@@ -67,7 +67,7 @@ function siteFooter(route) {
     ['about', 'About'],
     ['sponsors', 'Sponsors'],
     ['involvement', 'Get Involved'],
-    ['participants', 'Participants'],
+    ['libraries', 'Libraries'],
     ['contact', 'Contact'],
     ['redeem', 'Certificate redemption']
   ];
@@ -324,24 +324,24 @@ function involvement(route) {
   </section>`, route, true);
 }
 
-function participantsPage(route) {
-  const locations = siteConfig.participants;
-  return layout(`<section class="card adult" aria-labelledby="participants-title">
+function librariesPage(route) {
+  const locations = siteConfig.libraries;
+  return layout(`<section class="card adult" aria-labelledby="libraries-title">
     <p class="kicker">Redemption partners</p>
-    <h1 id="participants-title">Participants</h1>
-    <p class="lede">Participant locations help families complete redemption for an earned Dictionary Challenge certificate.</p>
+    <h1 id="libraries-title">Libraries</h1>
+    <p class="lede">Library locations help families complete redemption for an earned Dictionary Challenge certificate.</p>
     <p>Participation in certificate fulfillment does not identify an organization as a financial or project sponsor.</p>
     <section class="adult-section" aria-labelledby="redemption-locations-title">
       <h2 id="redemption-locations-title">Certificate redemption locations</h2>
-      ${locations.length ? `<div class="redemption-grid">${renderParticipantLocations(locations)}</div>` : '<p>No participant locations are published for this build.</p>'}
+      ${locations.length ? `<div class="redemption-grid">${renderLibraryLocations(locations)}</div>` : '<p>No library locations are published for this build.</p>'}
     </section>
   </section>`, route, true);
 }
 
 function redeem(route) {
-  const { prize, redemption, participants } = siteConfig;
+  const { prize, redemption, libraries } = siteConfig;
   const organizerDetails = organizerContact();
-  const locations = participants.map((location) => `<article class="redemption-location">
+  const locations = libraries.map((location) => `<article class="redemption-location">
     <h2>${escapeHtml(location.name)}</h2>
     ${location.addressLines.length ? `<address>${location.addressLines.map(escapeHtml).join('<br />')}</address>` : ''}
     <p>${escapeHtml(location.instructions)}</p>
@@ -359,7 +359,7 @@ function redeem(route) {
       ${redemption.limitedSupplyNotice ? `<p><strong>${escapeHtml(redemption.limitedSupplyNotice)}</strong></p>` : ''}
     </aside>
     ${redemption.deadline ? `<p class="redemption-deadline"><strong>Redemption deadline:</strong> ${escapeHtml(redemption.deadline)}</p>` : ''}
-    ${participants.length ? `<div class="redemption-grid" aria-label="Participating libraries">${locations}</div>
+    ${libraries.length ? `<div class="redemption-grid" aria-label="Participating libraries">${locations}</div>
     <p class="note"><strong>Before traveling:</strong> Confirm the library’s hours and ${escapeHtml(prize.title)} availability by phone or on its website.</p>` : ''}
     ${organizerDetails ? `<section class="adult-section" aria-labelledby="redemption-contact-title"><h2 id="redemption-contact-title">Project organizer</h2>${organizerDetails}</section>` : ''}` : `
     <p class="lede">No certificate redemption program is available for this build.</p>
@@ -383,7 +383,7 @@ const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', '
 
 const screens = {
   home: welcome, intro, levels: levelPicker, challenge, review, results, certificate,
-  about, sponsors: sponsorsPage, involvement, participants: participantsPage, redeem, contact,
+  about, sponsors: sponsorsPage, involvement, libraries: librariesPage, redeem, contact,
   adult: () => about('about')
 };
 

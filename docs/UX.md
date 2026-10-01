@@ -101,9 +101,9 @@ Lead with the literacy project, then recognize every configured organization wit
 
 Lead with the dictionary project as a concrete example of what local service clubs make possible. Explain the social, personal, professional, and community benefits of participation; show a range of local projects; address common concerns about who can join and when clubs meet; and provide links to learn more, find a club, or visit a meeting.
 
-### Participants: Prize-Book Fulfillment
+### Libraries: Prize-Book Fulfillment
 
-Explain that configured participant organizations help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings, optional logos, addresses, directions, and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify an organization as a financial or project sponsor.
+Explain that configured libraries help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings, optional logos, addresses, directions, and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify a library as a financial or project sponsor.
 
 ### Contact: Published Details
 
@@ -111,7 +111,7 @@ Show the configured organizer details in a semantic address and list each sponso
 
 ### Static Routing and Publication
 
-About, Sponsors, Get Involved, Participants, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` as an alias to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
+About, Sponsors, Get Involved, Libraries, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` as an alias to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
 
 ## Child Design Principles
 
@@ -197,7 +197,7 @@ Home
  │    ├── About
  │    ├── Sponsors
  │    ├── Get Involved
- │    ├── Participants
+ │    ├── Libraries
  │    ├── Redeem
  │    └── Contact
  │

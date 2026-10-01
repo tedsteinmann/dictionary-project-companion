@@ -18,7 +18,7 @@ export default async function checkQuizBrowser(page) {
     About: { route: 'about', heading: 'Why a physical dictionary?', text: 'Find → Understand → Apply → Discover' },
     Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
     'Get Involved': { route: 'involvement', heading: 'Want to get more involved?', text: 'Meet the clubs behind the Dictionary Project' },
-    Participants: { route: 'participants', heading: 'Participants', text: 'complete redemption' },
+    Libraries: { route: 'libraries', heading: 'Libraries', text: 'complete redemption' },
     Redeem: { route: 'redeem', heading: config => `${config.prize.title} redemption`, text: 'completion code is a reference only' },
     Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }
   };
@@ -31,7 +31,7 @@ export default async function checkQuizBrowser(page) {
   assert(await footer.getByText('Helping children use their physical dictionaries').isVisible(), 'Public footer leads with literacy');
   assert(await footer.getByRole('navigation', { name: 'Project information' }).isVisible(), 'Public footer labels its information navigation');
   assert(await footer.getByRole('link', { name: 'Certificate redemption', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
-  assert(await footer.getByRole('link', { name: 'Participants', exact: true }).getAttribute('href') === '#participants', 'Participants footer link preserves the participants route');
+  assert(await footer.getByRole('link', { name: 'Libraries', exact: true }).getAttribute('href') === '#libraries', 'Libraries footer link preserves the libraries route');
   assert((await footer.locator('.sponsor-logo').count()) === 0, 'Public footer does not duplicate sponsor logos');
   await wordmark().focus();
   await page.keyboard.press('Tab');
@@ -52,16 +52,16 @@ export default async function checkQuizBrowser(page) {
   assert(await page.getByRole('heading', { name: 'Grab your dictionary.', exact: true }).isVisible(), 'Public header action opens the child intro');
   await page.getByRole('link', { name: 'Return to public home', exact: true }).click();
   assert(await wordmark().getAttribute('aria-current') === 'page', 'Header action can return to public home after opening the child flow');
-  await page.goto(`${base}/#participants`);
-  assert(await page.getByRole('heading', { name: 'Participants', exact: true }).isVisible(), 'Direct #participants access renders the Participants screen');
-  assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Participants renders every configured redemption location');
-  for (const location of config.participants) {
-    assert(await page.getByRole('heading', { name: location.name, exact: true }).isVisible(), `Participants lists ${location.name}`);
+  await page.goto(`${base}/#libraries`);
+  assert(await page.getByRole('heading', { name: 'Libraries', exact: true }).isVisible(), 'Direct #libraries access renders the Libraries screen');
+  assert((await page.locator('.redemption-location').count()) === config.libraries.length, 'Libraries renders every configured redemption location');
+  for (const location of config.libraries) {
+    assert(await page.getByRole('heading', { name: location.name, exact: true }).isVisible(), `Libraries lists ${location.name}`);
     if (location.directionsUrl) {
       const card = page.getByRole('heading', { name: location.name, exact: true }).locator('..');
-      assert(await card.getByRole('link', { name: 'Get directions', exact: true }).getAttribute('href') === location.directionsUrl, `Participants links directions for ${location.name}`);
+      assert(await card.getByRole('link', { name: 'Get directions', exact: true }).getAttribute('href') === location.directionsUrl, `Libraries links directions for ${location.name}`);
     }
-    assert(await page.getByRole('link', { name: `Visit the ${location.name} website`, exact: true }).getAttribute('href') === location.website, `Participants links ${location.name} safely`);
+    assert(await page.getByRole('link', { name: `Visit the ${location.name} website`, exact: true }).getAttribute('href') === location.website, `Libraries links ${location.name} safely`);
   }
   await page.goto(`${base}/#redeem`);
   assert(await page.getByRole('heading', { name: `${config.prize.title} redemption`, exact: true }).isVisible(), 'Direct #redeem access renders the redemption screen');
@@ -74,7 +74,7 @@ export default async function checkQuizBrowser(page) {
     const availabilityBox = page.locator('.redemption-availability');
     const firstLocation = page.locator('.redemption-location').first();
     assert(await availabilityBox.evaluate((notice, location) => Boolean(location) && (notice.compareDocumentPosition(location) & Node.DOCUMENT_POSITION_FOLLOWING), await firstLocation.elementHandle()), 'Prize conditions precede participating locations');
-    assert((await page.locator('.redemption-location').count()) === config.participants.length, 'Enabled production redemption renders every configured library');
+    assert((await page.locator('.redemption-location').count()) === config.libraries.length, 'Enabled production redemption renders every configured library');
     assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Enabled production redemption requires a printed certificate');
     assert(!(await page.locator('main').innerText()).includes('No certificate redemption program is available'), 'Enabled production redemption omits the unavailable message');
   } else {
@@ -100,7 +100,7 @@ export default async function checkQuizBrowser(page) {
       title: 'Reading rewards',
       description: 'Each qualifying child may choose one new book.'
     },
-    participants: [{
+    libraries: [{
         name: 'North Branch Library',
         addressLines: ['100 Elm Street', 'Exampletown'],
         instructions: 'Ask at the children’s desk.',
@@ -120,10 +120,10 @@ export default async function checkQuizBrowser(page) {
     mod.siteConfig.sponsors = nextConfig.sponsors;
     mod.siteConfig.prize = nextConfig.prize;
     mod.siteConfig.redemption = nextConfig.redemption;
-    mod.siteConfig.participants = nextConfig.participants;
+    mod.siteConfig.libraries = nextConfig.libraries;
   }, enabledConfig);
   await page.goto(`${base}/#redeem`);
-  assert((await page.locator('.redemption-location').count()) === enabledConfig.participants.length, 'Every configured library is rendered');
+  assert((await page.locator('.redemption-location').count()) === enabledConfig.libraries.length, 'Every configured library is rendered');
   assert((await page.locator('main').innerText()).includes('parent or guardian should handle'), 'Redemption is directed to a parent or guardian');
   assert((await page.locator('main').innerText()).includes('Bring the child’s printed certificate.'), 'Redemption says what to bring');
   assert(!(await page.locator('main').innerText()).includes('saved copy'), 'Redemption does not allow saved copies');

@@ -51,14 +51,14 @@ function addLocation(location = { name: '', instructions: '', addressLines: [], 
   return fieldset;
 }
 
-function setRedemption(redemption = {}, participants = []) {
+function setRedemption(redemption = {}, libraries = []) {
   document.querySelector('[name=redemption-enabled]').checked = redemption.enabled || false;
   document.querySelector('[name=redemption-instructions]').value = redemption.instructions || '';
   document.querySelector('[name=redemption-availability-date]').value = redemption.availabilityDate || '';
   document.querySelector('[name=redemption-limited-supply]').value = redemption.limitedSupplyNotice || '';
   document.querySelector('[name=redemption-deadline]').value = redemption.deadline || '';
   locationEditors.replaceChildren();
-  participants.forEach(addLocation);
+  libraries.forEach(addLocation);
 }
 
 function setPrize(prize = {}) {
@@ -66,20 +66,20 @@ function setPrize(prize = {}) {
   document.querySelector('[name=prize-description]').value = prize.description || '';
 }
 
-function setParticipants(participants = []) {
+function setLibraries(libraries = []) {
   locationEditors.replaceChildren();
-  participants.forEach(addLocation);
+  libraries.forEach(addLocation);
 }
 
-function readParticipants() {
+function readLibraries() {
   return [...locationEditors.children].map((editor) => editor.readLocation());
 }
 
-function importedParticipants(rawConfig) {
-  const hasParticipants = Object.hasOwn(rawConfig, 'participants');
-  const hasLegacyParticipants = rawConfig.redemption && typeof rawConfig.redemption === 'object' && !Array.isArray(rawConfig.redemption)
+function importedLibraries(rawConfig) {
+  const hasLibraries = Object.hasOwn(rawConfig, 'libraries');
+  const hasLegacyLibraries = rawConfig.redemption && typeof rawConfig.redemption === 'object' && !Array.isArray(rawConfig.redemption)
     && Object.hasOwn(rawConfig.redemption, 'locations');
-  return hasParticipants || hasLegacyParticipants ? rawConfig.participants ?? rawConfig.redemption?.locations : readParticipants();
+  return hasLibraries || hasLegacyLibraries ? rawConfig.libraries ?? rawConfig.redemption?.locations : readLibraries();
 }
 
 function addSponsor(sponsor = { title: '', description: '', url: '', logo: null }) {
@@ -161,7 +161,7 @@ function addSponsor(sponsor = { title: '', description: '', url: '', logo: null 
 siteConfig.sponsors.forEach(addSponsor);
 setSite(siteConfig.site);
 setPrize(siteConfig.prize);
-setRedemption(siteConfig.redemption, siteConfig.participants);
+setRedemption(siteConfig.redemption, siteConfig.libraries);
 document.querySelector('#add-sponsor').addEventListener('click', () => addSponsor().querySelector('input').focus());
 document.querySelector('#add-location').addEventListener('click', () => addLocation().querySelector('input').focus());
 document.querySelector('#import-config').addEventListener('change', async (event) => {
@@ -169,12 +169,12 @@ document.querySelector('#import-config').addEventListener('change', async (event
   if (!file) return;
   try {
     const raw = JSON.parse(await file.text());
-    const config = validateSiteConfig({ ...raw, participants: importedParticipants(raw) });
+    const config = validateSiteConfig({ ...raw, libraries: importedLibraries(raw) });
     editors.replaceChildren();
     config.sponsors.forEach(addSponsor);
     setSite(config.site);
     setPrize(config.prize);
-    setRedemption(config.redemption, config.participants);
+    setRedemption(config.redemption, config.libraries);
     status.textContent = 'Configuration loaded.';
   } catch (error) {
     status.textContent = `Could not load configuration: ${error.message}`;
@@ -194,26 +194,26 @@ document.querySelector('#import-prize').addEventListener('change', async (event)
       sponsors: [...editors.children].map((editor) => editor.readSponsor()),
       prize: { title: raw.title, description: raw.description },
       redemption: raw.redemption,
-      participants: readParticipants()
+      libraries: readLibraries()
     });
     setPrize(config.prize);
-    setRedemption(config.redemption, readParticipants());
+    setRedemption(config.redemption, readLibraries());
     status.textContent = 'Prize configuration loaded.';
   } catch (error) {
     status.textContent = `Could not load prize configuration: ${error.message}`;
   }
   event.target.value = '';
 });
-document.querySelector('#import-participants').addEventListener('change', async (event) => {
+document.querySelector('#import-libraries').addEventListener('change', async (event) => {
   const file = event.target.files[0];
   if (!file) return;
   try {
     const raw = JSON.parse(await file.text());
-    const config = validateSiteConfig({ ...siteConfig, participants: importedParticipants(raw) });
-    setParticipants(config.participants);
-    status.textContent = 'Participant configuration loaded.';
+    const config = validateSiteConfig({ ...siteConfig, libraries: importedLibraries(raw) });
+    setLibraries(config.libraries);
+    status.textContent = 'Library configuration loaded.';
   } catch (error) {
-    status.textContent = `Could not load participant configuration: ${error.message}`;
+    status.textContent = `Could not load library configuration: ${error.message}`;
   }
   event.target.value = '';
 });
@@ -235,7 +235,7 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
         limitedSupplyNotice: document.querySelector('[name=redemption-limited-supply]').value,
         deadline: document.querySelector('[name=redemption-deadline]').value
       },
-      participants: readParticipants()
+      libraries: readLibraries()
     });
     const download = (filename, value) => {
       const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2) + '\n'], { type: 'application/json' }));
@@ -245,11 +245,11 @@ document.querySelector('#sponsor-form').addEventListener('submit', (event) => {
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     };
-    const { participants, prize, redemption, ...sponsorConfig } = config;
+    const { libraries, prize, redemption, ...sponsorConfig } = config;
     download('sponsors.json', sponsorConfig);
     download('prize.json', { ...prize, redemption });
-    download('participants.json', { participants });
-    status.textContent = 'Sponsor, prize, and participant configurations downloaded. Place all three files in the project root before building.';
+    download('libraries.json', { libraries });
+    status.textContent = 'Sponsor, prize, and library configurations downloaded. Place all three files in the project root before building.';
   } catch (error) {
     status.textContent = error.message;
   }
