@@ -28,7 +28,7 @@ const selectedCertificate = () => session.certificates.find((item) => item.code 
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-const publicRoutes = ['home', 'about', 'sponsors', 'involvement', 'libraries', 'redeem', 'contact'];
+const publicRoutes = ['home', 'about', 'sponsors', 'libraries', 'redeem', 'contact'];
 
 function organizerContact() {
   return renderOrganizerContact(siteConfig.site);
@@ -66,7 +66,6 @@ function siteFooter(route) {
   const links = [
     ['about', 'About'],
     ['sponsors', 'Sponsors'],
-    ['involvement', 'Get Involved'],
     ['libraries', 'Libraries'],
     ['contact', 'Contact'],
     ['redeem', 'Certificate redemption']
@@ -97,7 +96,7 @@ function welcome(route) {
     </div>
     <div class="audience-choices">
       ${button('<span><strong>I’m a Kid</strong><span>Grab your book and start exploring.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'intro', 'button audience-choice kid-choice')}
-      ${button('<span><strong>I’m a Grown-up</strong><span>Learn why the physical dictionary matters.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'about', 'button audience-choice adult-choice')}
+      ${button('<span><strong>I’m a Grown-up</strong><span>Learn why the dictionary matters—and how to get involved.</span></span><span class="choice-arrow" aria-hidden="true">→</span>', 'about', 'button audience-choice adult-choice')}
     </div>
     <p class="welcome-note">Your dictionary is all you need. Take your time.</p>
   </section>${renderSponsors(siteConfig, { compact: true })}`, route, true);
@@ -248,8 +247,29 @@ function certificateAvailabilityNote() {
 function about(route) {
   return layout(`<section class="card adult" aria-labelledby="adult-title">
     <p class="kicker">For grown-ups</p>
-    <h1 id="adult-title">Why a physical dictionary?</h1>
-    <p class="lede">The Dictionary Challenge helps a child learn to use the book they received—it does not replace that book with an online lookup.</p>
+    <h1 id="adult-title">Why this dictionary matters.</h1>
+    <p class="lede">The Dictionary Challenge helps a child learn to use the book they received—and the gift is one example of what local service clubs make possible.</p>
+
+    <section class="adult-section involvement-invitation" aria-labelledby="join-title">
+      <p class="kicker">An invitation for you</p>
+      <h2 id="join-title">Please consider joining a service club.</h2>
+      <p>The five Fargo–Moorhead Rotary Clubs, Horace Lions Club, and Fargo Elks bring people together to serve our community, build relationships, and make good things happen.</p>
+      <p>Service clubs offer a welcoming way to meet people, build friendships, grow personally and professionally, and make a visible difference close to home.</p>
+    </section>
+
+    <section class="adult-section" aria-labelledby="why-involved-title">
+      <h2 id="why-involved-title">Why get involved?</h2>
+      <p>As adults, it can be surprisingly hard to meet new people, make genuine friendships, expand our circles, and find meaningful ways to get involved in our community. Service clubs make that easier.</p>
+      <p>Getting involved can help you:</p>
+      <ul class="benefit-list">
+        <li><span class="benefit-icon" aria-hidden="true">diversity_3</span><strong>Meet people you might never meet otherwise</strong> from different professions, ages, backgrounds, and walks of life.</li>
+        <li><span class="benefit-icon" aria-hidden="true">celebration</span><strong>Build friendships and have fun</strong> while doing something worthwhile.</li>
+        <li><span class="benefit-icon" aria-hidden="true">trending_up</span><strong>Grow personally and professionally</strong> by learning from others and taking on new challenges.</li>
+        <li><span class="benefit-icon" aria-hidden="true">location_city</span><strong>Get to know your community</strong>—the people, organizations, needs, and opportunities around you.</li>
+        <li><span class="benefit-icon" aria-hidden="true">emoji_objects</span><strong>Turn your dreams into reality</strong> by connecting with people who have the knowledge, resources, and connections to help make things happen.</li>
+        <li><span class="benefit-icon" aria-hidden="true">volunteer_activism</span><strong>Make a difference close to home</strong> through projects you can actually see and be part of.</li>
+      </ul>
+    </section>
 
     <section class="adult-section" aria-labelledby="learning-title">
       <h2 id="learning-title">Find → Understand → Apply → Discover</h2>
@@ -268,6 +288,23 @@ function about(route) {
       <p>The challenge asks for no name, email address, birthday, school, address, or location. Quiz progress is temporary to this browser tab; there are no child accounts or public scores.</p>
     </section>
 
+    <section class="adult-section" aria-labelledby="more-than-dictionaries-title">
+      <h2 id="more-than-dictionaries-title">More than dictionaries</h2>
+      <p>Five Fargo–Moorhead Rotary Clubs have joined forces to create major community projects like the Rotary Natural Play Hill and Lindenwood Playground, along with literacy, arts, and international service projects.</p>
+      <p>Horace Lions has given hundreds of thousands of dollars back to the community and provides free vision screening for local children.</p>
+      <p>Fargo Elks Lodge #260 brings the community together through events like its popular Summer Car Show Series, while raising money and supporting causes that benefit local youth, veterans, and neighbors in need.</p>
+      <p class="note"><strong>Different clubs. Different projects.</strong> One idea: people working together can accomplish a lot.</p>
+    </section>
+
+    <section class="adult-section" aria-labelledby="find-a-club-title">
+      <h2 id="find-a-club-title">Find a club that fits your life</h2>
+      <p>You don’t need to know someone before you come, and you don’t need to be a business executive or longtime community leader. You just need to be interested in meeting people and getting involved.</p>
+      <p>Service clubs aren’t all noon lunch meetings. Local clubs meet on different days of the week, with options at 7:00 a.m., noon, and in the evening. With several clubs to choose from, there’s likely an option that works with your schedule.</p>
+    </section>
+
+    ${renderSponsors(siteConfig, { heading: 'Meet the clubs behind the Dictionary Project', linkLabel: 'Learn more • Find a club • Visit a meeting' })}
+    <p class="closing-invitation">Come meet some people. Find your place. Make something happen.</p>
+
     ${button('Explore the Kid Challenge', 'intro', 'button button-primary')}
   </section>`, route, true);
 }
@@ -279,48 +316,6 @@ function sponsorsPage(route) {
     <p class="lede">Participating organizations made this local dictionary project possible by supporting children, books, and literacy.</p>
     <p>The physical dictionary and the child’s learning come first. Sponsor information is provided here so families can recognize the community partners behind the project.</p>
     ${renderSponsors(siteConfig, { heading: 'Participating organizations', linkLabel: 'Visit organization website' })}
-  </section>`, route, true);
-}
-
-function involvement(route) {
-  return layout(`<section class="card adult" aria-labelledby="involvement-title">
-    <p class="kicker">Get involved</p>
-    <h1 id="involvement-title">Want to get more involved?</h1>
-    <p class="lede">Your child’s dictionary is one example of what local service clubs make possible.</p>
-    <p>The five Fargo–Moorhead Rotary Clubs, Horace Lions Club, and Fargo Elks bring people together to serve our community, build relationships, and make good things happen.</p>
-
-    <section class="adult-section" aria-labelledby="why-involved-title">
-      <h2 id="why-involved-title">Why get involved?</h2>
-      <p>As adults, it can be surprisingly hard to meet new people, make genuine friendships, expand our circles, and find meaningful ways to get involved in our community.</p>
-      <p>Service clubs make that easier.</p>
-      <p>Getting involved can help you:</p>
-      <ul class="benefit-list">
-        <li><span class="benefit-icon" aria-hidden="true">diversity_3</span><strong>Meet people you might never meet otherwise</strong> from different professions, ages, backgrounds, and walks of life.</li>
-        <li><span class="benefit-icon" aria-hidden="true">celebration</span><strong>Build friendships and have fun</strong> while doing something worthwhile.</li>
-        <li><span class="benefit-icon" aria-hidden="true">trending_up</span><strong>Grow personally and professionally</strong> by learning from others and taking on new challenges.</li>
-        <li><span class="benefit-icon" aria-hidden="true">location_city</span><strong>Get to know your community</strong>—the people, organizations, needs, and opportunities around you.</li>
-        <li><span class="benefit-icon" aria-hidden="true">emoji_objects</span><strong>Turn your dreams into reality</strong> by connecting with people who have the knowledge, resources, and connections to help make things happen.</li>
-        <li><span class="benefit-icon" aria-hidden="true">volunteer_activism</span><strong>Make a difference close to home</strong> through projects you can actually see and be part of.</li>
-      </ul>
-    </section>
-
-    <section class="adult-section" aria-labelledby="more-than-dictionaries-title">
-      <h2 id="more-than-dictionaries-title">More than dictionaries</h2>
-      <p>The Dictionary Project is just one example of what local service clubs make possible.</p>
-      <p>Five Fargo–Moorhead Rotary Clubs have joined forces to create major community projects like the Rotary Natural Play Hill and Lindenwood Playground, along with literacy, arts, and international service projects.</p>
-      <p>Horace Lions has given hundreds of thousands of dollars back to the community and provides free vision screening for local children.</p>
-      <p>Fargo Elks Lodge #260 brings the community together through events like its popular Summer Car Show Series, while raising money and supporting causes that benefit local youth, veterans, and neighbors in need.</p>
-      <p class="note"><strong>Different clubs. Different projects.</strong> One idea: people working together can accomplish a lot.</p>
-    </section>
-
-    <section class="adult-section" aria-labelledby="find-a-club-title">
-      <h2 id="find-a-club-title">Find a club that fits your life</h2>
-      <p>You don’t need to know someone before you come, and you don’t need to be a business executive or longtime community leader. You just need to be interested in meeting people and getting involved.</p>
-      <p>And service clubs aren’t all noon lunch meetings! Local clubs meet on different days of the week, with options at 7:00 a.m., noon, and in the evening. With several clubs to choose from, there’s likely an option that works with your schedule.</p>
-    </section>
-
-    ${renderSponsors(siteConfig, { heading: 'Meet the clubs behind the Dictionary Project', linkLabel: 'Learn more • Find a club • Visit a meeting' })}
-    <p class="closing-invitation">Come meet some people. Find your place. Make something happen.</p>
   </section>`, route, true);
 }
 
@@ -379,11 +374,11 @@ function contact(route) {
   return layout(renderContactContent(siteConfig), route, true);
 }
 
-const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', 'review', 'results', 'certificate', 'adult']);
+const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', 'review', 'results', 'certificate', 'adult', 'involvement']);
 
 const screens = {
   home: welcome, intro, levels: levelPicker, challenge, review, results, certificate,
-  about, sponsors: sponsorsPage, involvement, libraries: librariesPage, redeem, contact,
+  about, sponsors: sponsorsPage, libraries: librariesPage, redeem, contact,
   adult: () => about('about')
 };
 
@@ -392,7 +387,7 @@ function renderScreen(route) {
 }
 
 function navigate(route, push = true, focus = true) {
-  let safeRoute = route === 'adult' ? 'about' : (screenRoutes.has(route) ? route : 'home');
+  let safeRoute = ['adult', 'involvement'].includes(route) ? 'about' : (screenRoutes.has(route) ? route : 'home');
   if (['challenge', 'review', 'results'].includes(safeRoute)) {
     if (!session.attempt) safeRoute = 'levels';
     else if (session.attempt.submitted) safeRoute = 'results';

@@ -257,6 +257,15 @@ Behavioral tests should cover:
 
 Do not pursue coverage percentage merely for its own sake.
 
+## Browser Validation
+
+- Run `npm test` and `npm run build` for changes.
+- For UI changes, also run `npm run test:browser` after building. This runs the existing browser assertions with headless Playwright Chromium and starts/stops the Python preview server automatically.
+- On a fresh checkout, run `npm ci` and `npx playwright install chromium`. On Linux, use `npx playwright install --with-deps chromium` when system dependencies are needed.
+- Validate phone-width behavior, including 320px where relevant. The existing browser checks include 320–1280px layouts.
+- Capture and inspect screenshots for material visual changes. For example: `BROWSER_SCREENSHOT=/tmp/dictionary-mobile.png npm run test:browser` captures the welcome page at 320px.
+- Do not fail nonvisual work solely because screenshot capture is unavailable; report the limitation separately from behavioral validation.
+
 ## Implementation Workflow
 
 For each meaningful feature, describe:

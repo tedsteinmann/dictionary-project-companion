@@ -149,6 +149,8 @@ p { margin: 0 0 var(--space-3); }
 .adult > p { max-width: 44rem; }
 .adult-section { max-width: 52rem; margin-top: var(--space-6); }
 .adult-section > h2 { margin: 0 0 var(--space-3); font-size: 1.5rem; }
+.involvement-invitation { padding: var(--space-4); border: 2px solid var(--blue); border-radius: var(--radius); background: var(--blue-tint); }
+.involvement-invitation .kicker { margin-top: 0; }
 .redemption-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-4) 0; }
 .redemption-location { min-width: 0; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); background: var(--page); overflow-wrap: anywhere; }
 .redemption-location h2 { margin: 0 0 var(--space-2); font-size: 1.25rem; }

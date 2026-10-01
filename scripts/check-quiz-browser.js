@@ -1,5 +1,5 @@
-// Run with the Playwright browser tool (pass this function as its code argument).
-// Start npm run dev first and navigate the browser to that local preview.
+// Run with npm run test:browser after npm run build, or pass this function
+// to a Playwright browser tool already navigated to the local preview.
 // This checks behavior through UI controls; sessionStorage is read only to obtain
 // the randomized question IDs for test answers. No application state is forged.
 export default async function checkQuizBrowser(page) {
@@ -15,9 +15,8 @@ export default async function checkQuizBrowser(page) {
   const wordmark = () => page.getByRole('link', { name: 'Dictionary Challenge home' });
   const challengeAction = () => page.getByRole('link', { name: 'Start Challenge', exact: true });
   const publicPages = {
-    About: { route: 'about', heading: 'Why a physical dictionary?', text: 'Find → Understand → Apply → Discover' },
+    About: { route: 'about', heading: 'Why this dictionary matters.', text: 'Please consider joining a service club.' },
     Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
-    'Get Involved': { route: 'involvement', heading: 'Want to get more involved?', text: 'Meet the clubs behind the Dictionary Project' },
     Libraries: { route: 'libraries', heading: 'Libraries', text: 'complete redemption' },
     Redeem: { route: 'redeem', heading: config => `${config.prize.title} redemption`, text: 'completion code is a reference only' },
     Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }
@@ -31,6 +30,7 @@ export default async function checkQuizBrowser(page) {
   assert(await footer.getByText('Helping children use their physical dictionaries').isVisible(), 'Public footer leads with literacy');
   assert(await footer.getByRole('navigation', { name: 'Project information' }).isVisible(), 'Public footer labels its information navigation');
   assert(await footer.getByRole('link', { name: 'Certificate redemption', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
+  assert((await footer.getByRole('link', { name: 'Get Involved', exact: true }).count()) === 0, 'Footer does not hide the service-club invitation on a separate page');
   assert(await footer.getByRole('link', { name: 'Libraries', exact: true }).getAttribute('href') === '#libraries', 'Libraries footer link preserves the libraries route');
   assert((await footer.locator('.sponsor-logo').count()) === 0, 'Public footer does not duplicate sponsor logos');
   await wordmark().focus();
@@ -47,6 +47,10 @@ export default async function checkQuizBrowser(page) {
     assert(await page.getByRole('link', { name: 'Start Challenge', exact: true }).isVisible(), `${destination} keeps the single challenge action`);
     assert(await page.locator(`.site-footer-nav [data-route="${route}"]`).getAttribute('aria-current') === 'page', `${destination} footer link identifies the active page`);
   }
+  await page.goto(`${base}/#involvement`);
+  await page.waitForURL('**/#about');
+  assert(page.url().endsWith('#about'), 'Legacy Get Involved URL redirects to the combined grown-up page');
+  assert(await page.getByRole('heading', { name: 'Please consider joining a service club.' }).isVisible(), 'Legacy involvement bookmarks reach the service-club invitation');
   await page.getByRole('link', { name: 'Start Challenge', exact: true }).click();
   assert(page.url().endsWith('#intro'), 'Public header action navigates to the new-challenge route');
   assert(await page.getByRole('heading', { name: 'Grab your dictionary.', exact: true }).isVisible(), 'Public header action opens the child intro');
@@ -122,7 +126,7 @@ export default async function checkQuizBrowser(page) {
         website: 'https://example.org/south-branch'
       }]
   };
-  await page.evaluate(async (nextConfig) => {
+  const applyEnabledConfig = () => page.evaluate(async (nextConfig) => {
     const mod = await import('/src/content/site-config.js');
     mod.siteConfig.site = nextConfig.site;
     mod.siteConfig.sponsors = nextConfig.sponsors;
@@ -130,6 +134,7 @@ export default async function checkQuizBrowser(page) {
     mod.siteConfig.redemption = nextConfig.redemption;
     mod.siteConfig.libraries = nextConfig.libraries;
   }, enabledConfig);
+  await applyEnabledConfig();
   await page.goto(`${base}/#redeem`);
   assert((await page.locator('.redemption-location').count()) === enabledConfig.libraries.length, 'Every configured library is rendered');
   assert((await page.locator('main').innerText()).includes('parent or guardian should handle'), 'Redemption is directed to a parent or guardian');
@@ -142,7 +147,7 @@ export default async function checkQuizBrowser(page) {
   await page.goBack();
   assert(await page.getByRole('heading', { name: 'Reading rewards redemption', exact: true }).isVisible(), 'Browser Back restores redemption');
   await page.goForward();
-  assert(await page.getByRole('heading', { name: 'Why a physical dictionary?', exact: true }).isVisible(), 'Browser Forward restores the following public screen');
+  assert(await page.getByRole('heading', { name: 'Why this dictionary matters.', exact: true }).isVisible(), 'Browser Forward restores the following public screen');
   await page.getByRole('link', { name: 'Dictionary Challenge home' }).click();
   const bank = await page.evaluate(async () => (await import('/src/content/questions.js')).questions);
   const state = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('dictionary-challenge-v2')));
@@ -156,7 +161,8 @@ export default async function checkQuizBrowser(page) {
   assert(await challengeAction().evaluate((element) => element === document.activeElement), 'Phone header keeps wordmark before the challenge action');
   await noOverflow('welcome');
   await page.getByRole('button', { name: 'I’m a Grown-up' }).click();
-  assert(await page.getByRole('heading', { name: 'Why a physical dictionary?' }).isVisible(), 'Adult path opens About');
+  assert(await page.getByRole('heading', { name: 'Why this dictionary matters.' }).isVisible(), 'Adult path opens About');
+  assert(await page.getByRole('heading', { name: 'Please consider joining a service club.' }).isVisible(), 'Adult path puts the service-club invitation front and center');
   assert((await page.locator('main').innerText()).includes('Find → Understand → Apply → Discover'), 'Adult literacy guidance retained');
   await noOverflow('adult');
   await click('Explore the Kid Challenge');
@@ -206,10 +212,12 @@ export default async function checkQuizBrowser(page) {
   await page.getByRole('radio').first().press('Space');
   assert((await state()).attempt.index === 0, 'Choosing does not advance automatically');
   await click('Submit answer →');
-  await click('← Previous question');
+  await page.getByRole('link', { name: '← Previous question', exact: true }).click();
   assert(await page.getByRole('radio').first().isChecked(), 'Previous preserves selection');
   await page.reload();
   assert(await page.getByRole('radio').first().isChecked(), 'Reload preserves selection');
+  // Reload replaces the module instance; restore the content fixture used below.
+  await applyEnabledConfig();
   assert(JSON.stringify(await page.getByRole('radio').evaluateAll((radios) => radios.map((r) => r.value))) === JSON.stringify(firstOptions), 'Reload preserves choice order');
   await page.getByRole('radio').first().focus();
   assert(await page.getByRole('radio').first().evaluate((el) => getComputedStyle(el).outlineStyle !== 'none'), 'Visible keyboard focus');
@@ -278,15 +286,20 @@ export default async function checkQuizBrowser(page) {
     assert((await page.locator('.certificate-redemption').innerText()).includes('Redemption: Bring this certificate to a participating library in exchange for one prize book.*'), 'Certificate uses concise redemption instructions');
     const redeemAction = page.getByRole('button', { name: 'How to redeem this certificate', exact: true });
     assert(await redeemAction.isVisible(), 'Certificate provides a no-print redemption action');
+    await page.keyboard.press('Tab');
     await redeemAction.focus();
     assert(await redeemAction.evaluate((element) => getComputedStyle(element).outlineStyle !== 'none'), 'Redemption action has visible keyboard focus');
     await redeemAction.press('Enter');
+    await page.getByRole('heading', { name: 'Reading rewards redemption', exact: true }).waitFor();
     assert(await page.getByRole('heading', { name: 'Reading rewards redemption', exact: true }).isVisible(), 'Certificate action navigates to redemption');
     await page.goBack();
   }
   const firstCode = await page.locator('.completion-code').innerText();
   await page.reload();
   assert(await page.locator('.completion-code').innerText() === firstCode, 'Certificate stable across reload');
+  await applyEnabledConfig();
+  await page.goto(`${base}/#levels`);
+  await click('View Find It certificate');
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 844 });
     await noOverflow(`certificate ${width}`);
