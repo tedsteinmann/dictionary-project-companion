@@ -111,7 +111,7 @@ Other community organizations participate in dictionary-distribution programs.
 
 The POC supports a static list of sponsors, each with an optional logo, title, description, and website. A local setup tool exports configuration for the build. It has no accounts, hosted uploads, or tenant management. See [feature and acceptance criteria](SPONSORS.md).
 
-Certificate-redemption partners are a separate concept. They are maintained in `participants.json`, independently from sponsor records in `sponsors.json`. The Participants page explains that the Fargo and West Fargo public library systems participate in prize-book fulfillment and lists each configured redemption location. A library is not presented as a sponsor unless it is also explicitly entered in the separate `sponsors` collection.
+Certificate-redemption partners are a separate concept. They are maintained in `libraries.json`, independently from sponsor records in `sponsors.json`. The Libraries page explains that the Fargo and West Fargo public library systems participate in prize-book fulfillment and lists each configured redemption location. A library is not presented as a sponsor unless it is also explicitly entered in the separate `sponsors` collection.
 
 ### 7. Progress Through Capability, Not Rank
 
@@ -294,13 +294,12 @@ As an adult, I want to understand how local service clubs make projects like the
 
 #### Information Architecture
 
-1. **About:** why the physical dictionary matters, which literacy skills the challenge develops, how adults can help, and how child privacy is protected.
+1. **About:** why the physical dictionary matters, which literacy skills the challenge develops, how adults can help, how child privacy is protected, and a prominent invitation to consider joining a local service club.
 2. **Sponsors:** every participating organization's build-configured description and website, following literacy-first introductory copy.
-3. **Get Involved:** a welcoming invitation to service-club involvement, its social and community benefits, examples of local service, flexible meeting options, and links to participating clubs.
-4. **Contact:** the build-configured organizer details and a list of official sponsor website links, with no contact form.
-5. **Certificates and prizes:** static guidance for parents and guardians.
+3. **Contact:** the build-configured organizer details and a list of official sponsor website links, with no contact form.
+4. **Certificates and prizes:** static guidance for parents and guardians.
 
-The former `#adult` URL remains a compatibility alias for `#about`.
+The former `#adult` and `#involvement` URLs remain compatibility aliases for `#about`.
 
 #### Acceptance Criteria
 

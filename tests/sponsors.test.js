@@ -9,7 +9,7 @@ import { renderSponsorNames, renderSponsors } from '../src/sponsors.js';
 import { validateSiteConfig } from '../src/site-config.js';
 import { siteConfig } from '../src/content/site-config.js';
 import { renderContactContent } from '../src/components/contact-details.js';
-import { renderParticipantLocations } from '../src/participants.js';
+import { renderLibraryLocations } from '../src/libraries.js';
 
 const sponsor = { title: 'Local club', description: 'Helping readers.', url: 'https://example.org', logo: null };
 const prize = { title: 'Prize books', description: 'Each child who earns a certificate may choose one new book.' };
@@ -103,10 +103,10 @@ describe('sponsor configuration and rendering', () => {
     assert.deepEqual(config.site, { organizerName: null, addressLines: [], telephone: null, email: null, website: null });
     assert.deepEqual(config.redemption, { enabled: false, instructions: null, availabilityDate: null, limitedSupplyNotice: null, deadline: null });
     assert.deepEqual(config.prize, { title: null, description: null });
-    assert.deepEqual(config.participants, []);
+    assert.deepEqual(config.libraries, []);
     assert.ok(Object.isFrozen(config));
     assert.ok(Object.isFrozen(config.sponsors));
-    assert.ok(Object.isFrozen(config.participants));
+    assert.ok(Object.isFrozen(config.libraries));
   });
 
   it('accepts disabled redemption and zero, one, or multiple locations', () => {
@@ -115,7 +115,7 @@ describe('sponsor configuration and rendering', () => {
       name: ' Main Library ', instructions: ' Show a printed certificate. ', addressLines: [' 10 First Ave '],
       website: 'https://library.example/claim', telephone: '(555) 555-0110'
     };
-    const one = validateSiteConfig({ sponsors: [sponsor], prize, participants: [library], redemption: {
+    const one = validateSiteConfig({ sponsors: [sponsor], prize, libraries: [library], redemption: {
       enabled: true, instructions: ' Visit with an adult. ', availabilityDate: ' November 1 ',
       limitedSupplyNotice: ' Prize books are available while supplies last. ', deadline: ' May 31 '
     } });
@@ -123,14 +123,14 @@ describe('sponsor configuration and rendering', () => {
     assert.deepEqual(one.prize, prize);
     assert.equal(one.redemption.availabilityDate, 'November 1');
     assert.equal(one.redemption.limitedSupplyNotice, 'Prize books are available while supplies last.');
-    assert.equal(one.participants[0].name, 'Main Library');
-    assert.deepEqual(one.participants[0].addressLines, ['10 First Ave']);
+    assert.equal(one.libraries[0].name, 'Main Library');
+    assert.deepEqual(one.libraries[0].addressLines, ['10 First Ave']);
     const multiple = validateSiteConfig({ sponsors: [sponsor], prize, redemption: {
       enabled: true, instructions: 'Bring the certificate.', locations: [library, { name: 'West Library', instructions: 'Ask at the desk.' }]
     } });
-    assert.equal(multiple.participants.length, 2);
-    assert.deepEqual(multiple.participants[1].addressLines, []);
-    assert.equal(multiple.participants[1].website, null);
+    assert.equal(multiple.libraries.length, 2);
+    assert.deepEqual(multiple.libraries[1].addressLines, []);
+    assert.equal(multiple.libraries[1].website, null);
   });
 
   it('rejects malformed, unsafe, or unreasonably large redemption values', () => {
@@ -198,15 +198,15 @@ describe('production sponsor configuration', () => {
   it('enables certificate redemption at every participating library in order', async () => {
     const productionConfig = JSON.parse(await readFile(new URL('../sponsors.json', import.meta.url), 'utf8'));
     const prizeConfig = JSON.parse(await readFile(new URL('../prize.json', import.meta.url), 'utf8'));
-    const participantConfig = JSON.parse(await readFile(new URL('../participants.json', import.meta.url), 'utf8'));
+    const libraryConfig = JSON.parse(await readFile(new URL('../libraries.json', import.meta.url), 'utf8'));
     assert.equal(Object.hasOwn(productionConfig, 'redemption'), false, 'sponsor configuration does not contain prize instructions');
     const config = validateSiteConfig({
       ...productionConfig,
       prize: { title: prizeConfig.title, description: prizeConfig.description },
       redemption: prizeConfig.redemption,
-      ...participantConfig
+      ...libraryConfig
     });
-    const { redemption, participants } = config;
+    const { redemption, libraries } = config;
 
     assert.deepEqual(config.prize, prize);
     assert.equal(redemption.enabled, true);
@@ -215,7 +215,7 @@ describe('production sponsor configuration', () => {
       'Bring the child’s printed certificate to a participating library in exchange for one prize book.'
     );
     assert.deepEqual(
-      participants.map(({ name, addressLines, website }) => ({ name, addressLines, website })),
+      libraries.map(({ name, addressLines, website }) => ({ name, addressLines, website })),
       [
         {
           name: 'Fargo Public Library — Main Library',
@@ -239,15 +239,15 @@ describe('production sponsor configuration', () => {
         }
       ]
     );
-    for (const location of participants) assert.match(location.instructions, /printed certificate/);
-    const participantHtml = renderParticipantLocations(participants);
-    assert.equal((participantHtml.match(/class="redemption-location participant-library/g) || []).length, 3);
+    for (const location of libraries) assert.match(location.instructions, /printed certificate/);
+    const libraryHtml = renderLibraryLocations(libraries);
+    assert.equal((libraryHtml.match(/class="redemption-location library-card/g) || []).length, 3);
     for (const number of [1, 2, 3]) {
-      assert.ok(participantHtml.includes(`Location ${number}`), `Expected numbered location ${number}`);
+      assert.ok(libraryHtml.includes(`Location ${number}`), `Expected numbered location ${number}`);
     }
-    for (const location of participants) {
-      assert.ok(location.logo, `Expected logo for participant ${location.name}`);
-      assert.ok(location.directionsUrl, `Expected directions for participant ${location.name}`);
+    for (const location of libraries) {
+      assert.ok(location.logo, `Expected logo for library ${location.name}`);
+      assert.ok(location.directionsUrl, `Expected directions for library ${location.name}`);
     }
     for (const sponsor of config.sponsors) {
       assert.ok(sponsor.logo, `Expected logo for sponsor ${sponsor.title}`);
@@ -258,9 +258,9 @@ describe('production sponsor configuration', () => {
   });
 });
 
-describe('participant rendering', () => {
+describe('library rendering', () => {
   it('renders configured locations semantically and escapes names, addresses, and links', () => {
-    const locations = validateSiteConfig({ sponsors: [sponsor], participants: [{
+    const locations = validateSiteConfig({ sponsors: [sponsor], libraries: [{
       name: '<script>Library</script>',
       instructions: 'Ask at the desk.',
       addressLines: ['1 <Main> Street'],
@@ -269,11 +269,11 @@ describe('participant rendering', () => {
     }], prize, redemption: {
       enabled: true,
       instructions: 'Bring a certificate.'
-    } }).participants;
-    const html = renderParticipantLocations(locations);
+    } }).libraries;
+    const html = renderLibraryLocations(locations);
     assert.match(html, /<article class="redemption-location/);
     assert.match(html, /<h2>&lt;script&gt;Library&lt;\/script&gt;<\/h2>/);
-    assert.match(html, /<h3 class="participant-subheading">Locations<\/h3>/);
+    assert.match(html, /<h3 class="library-subheading">Locations<\/h3>/);
     assert.match(html, /<address>1 &lt;Main&gt; Street<\/address>/);
     assert.match(html, /Visit the &lt;script&gt;Library&lt;\/script&gt; website/);
     assert.match(html, /Get directions/);
@@ -282,16 +282,16 @@ describe('participant rendering', () => {
   });
 
   it('groups multiple branches under a single library card and reserves a blank third slot', () => {
-    const html = renderParticipantLocations([
+    const html = renderLibraryLocations([
       { name: 'Fargo Public Library — Main Library', instructions: 'Ask at the desk.', addressLines: ['101 4th Street North', 'Fargo, ND 58102'], website: 'https://example.org/fargo', directionsUrl: 'https://maps.example.org/fargo1', logo: 'https://example.org/fargo-logo.png' },
       { name: 'Fargo Public Library — Dr. James Carlson Library', instructions: 'Ask at the desk.', addressLines: ['2801 32nd Avenue South', 'Fargo, ND 58103'], website: 'https://example.org/fargo', directionsUrl: 'https://maps.example.org/fargo2', logo: 'https://example.org/fargo-logo.png' },
       { name: 'West Fargo Public Library', instructions: 'Ask at the desk.', addressLines: ['215 3rd Street East', 'West Fargo, ND 58078'], website: 'https://example.org/west', directionsUrl: 'https://maps.example.org/west1', logo: 'https://example.org/west-logo.png' }
     ]);
-    assert.equal((html.match(/class="redemption-location participant-library"/g) || []).length, 2);
-    assert.match(html, /<h3 class="participant-subheading">Locations<\/h3>/);
+    assert.equal((html.match(/class="redemption-location library-card"/g) || []).length, 2);
+    assert.match(html, /<h3 class="library-subheading">Locations<\/h3>/);
     assert.match(html, /Location 1/);
     assert.match(html, /Location 2/);
-    assert.match(html, /class="redemption-location participant-library placeholder"/);
+    assert.match(html, /class="redemption-location library-card placeholder"/);
   });
 });
 
@@ -309,7 +309,7 @@ describe('static sponsor builds', () => {
       await writeFile(join(dir, 'custom.json'), JSON.stringify({
         site: { organizerName: 'Library partners', website: 'https://project.example' },
         sponsors: [{ ...sponsor, logo: './logo.png' }, { ...sponsor, title: 'Lions' }, { ...sponsor, title: 'Elks' }],
-        participants: [
+        libraries: [
           { name: 'Main Library', instructions: 'Ask at the desk.', addressLines: ['10 First Ave'], website: 'https://library.example', telephone: '(555) 555-0100' },
           { name: 'West Library', instructions: 'Ask a librarian.' }
         ]
@@ -339,14 +339,14 @@ describe('static sponsor builds', () => {
       const automatic = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
       assert.match(automatic, /Automatically selected/);
       assert.match(automatic, /data:image\/png;base64,/);
-      await writeFile(join(dir, 'participants.json'), JSON.stringify({ participants: [
-        { name: 'Separate participant', instructions: 'Ask at the desk.' }
+      await writeFile(join(dir, 'libraries.json'), JSON.stringify({ libraries: [
+        { name: 'Separate library', instructions: 'Ask at the desk.' }
       ] }));
       build();
       const separated = await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8');
       assert.match(separated, /Automatically selected/);
-      assert.match(separated, /Separate participant/);
-      await rm(join(dir, 'participants.json'));
+      assert.match(separated, /Separate library/);
+      await rm(join(dir, 'libraries.json'));
       build('--config', 'custom.json');
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       await writeFile(join(dir, 'sponsors.json'), '{"site":{"organizerName":"Organizer","website":"https://project.example"},"sponsors":[]}');
@@ -355,10 +355,10 @@ describe('static sponsor builds', () => {
       assert.throws(() => build('--config', 'bad.json'), /Add at least one sponsor/);
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
       await writeFile(join(dir, 'sponsors.json'), JSON.stringify({ sponsors: [sponsor] }));
-      await writeFile(join(dir, 'participants.json'), '{"participants":"not an array"}');
-      assert.throws(() => build(), /participants array/);
+      await writeFile(join(dir, 'libraries.json'), '{"libraries":"not an array"}');
+      assert.throws(() => build(), /libraries array/);
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);
-      await rm(join(dir, 'participants.json'));
+      await rm(join(dir, 'libraries.json'));
       await writeFile(join(dir, 'prize.json'), '{"redemption":"not an object"}');
       assert.throws(() => build(), /prize\.json must contain a redemption object/);
       assert.equal(await readFile(join(dir, 'dist/src/content/site-config.js'), 'utf8'), output);

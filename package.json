@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "npm run build && python3 scripts/dev.py",
     "build": "node scripts/build.js",
-    "test": "node --test"
+    "test": "node --test",
+    "test:browser": "node scripts/run-quiz-browser.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
   }
 }

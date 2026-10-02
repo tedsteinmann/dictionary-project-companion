@@ -89,21 +89,17 @@ Questions already displayed, the current attempt, completed stages, and earned c
 
 ## Adult Flow
 
-### About: Why the Physical Dictionary Matters
+### About: Dictionary Purpose and an Invitation to Participate
 
-Explain how the challenge keeps the physical dictionary central, the literacy skills children practice, ways adults can support the search process without supplying answers, and the activity's child-privacy approach.
+Connect the physical dictionary gift directly to the local service clubs that made it possible. Put a clear invitation to consider joining a service club near the top of the page, followed by the social, personal, professional, and community benefits of participation; examples of local service; common concerns about who can join and when clubs meet; and links to learn more, find a club, or visit a meeting. Also explain how the challenge keeps the physical dictionary central, the literacy skills children practice, ways adults can support the search process without supplying answers, and the activity's child-privacy approach.
 
 ### Sponsors: Community Support
 
 Lead with the literacy project, then recognize every configured organization with its logo or fallback, title, local description, and descriptive website link. The description is configuration content; the interface must not infer projects or identity from sponsor names. Promotional messaging remains secondary to the dictionary and literacy purpose.
 
-### Get Involved: An Invitation to Participate
+### Libraries: Prize-Book Fulfillment
 
-Lead with the dictionary project as a concrete example of what local service clubs make possible. Explain the social, personal, professional, and community benefits of participation; show a range of local projects; address common concerns about who can join and when clubs meet; and provide links to learn more, find a club, or visit a meeting.
-
-### Participants: Prize-Book Fulfillment
-
-Explain that configured participant organizations help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings, optional logos, addresses, directions, and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify an organization as a financial or project sponsor.
+Explain that configured libraries help families redeem certificates through the prize-book program. List the configured certificate-redemption locations as responsive cards with semantic headings, optional logos, addresses, directions, and a descriptive website link for each location; do not assume particular organizations or locations in the reusable UX guidance. Make clear that fulfillment participation does not automatically identify a library as a financial or project sponsor.
 
 ### Contact: Published Details
 
@@ -111,7 +107,7 @@ Show the configured organizer details in a semantic address and list each sponso
 
 ### Static Routing and Publication
 
-About, Sponsors, Get Involved, Participants, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` as an alias to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
+About, Sponsors, Libraries, Contact, and Certificates and Prizes are separate static client-side screens. Keep `#adult` and `#involvement` as aliases to About for old bookmarks. Their content is emitted from build configuration; there are no organization accounts, CMS controls, or runtime administration on the published site.
 
 ## Child Design Principles
 
@@ -196,8 +192,7 @@ Home
  ├── Public pages
  │    ├── About
  │    ├── Sponsors
- │    ├── Get Involved
- │    ├── Participants
+ │    ├── Libraries
  │    ├── Redeem
  │    └── Contact
  │
@@ -208,7 +203,7 @@ Home
  │    └── Certificate
  │
  └── Grown-up
-      └── About
+      └── About (dictionary purpose + service-club invitation)
 ```
 
 Browser navigation must not corrupt quiz state.

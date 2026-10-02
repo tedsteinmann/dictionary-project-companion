@@ -1,0 +1,66 @@
+name: Check production sync
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+      timezone: "America/Chicago"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git fetch origin main production
+
+          if git diff --quiet origin/production..origin/main; then
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check for existing PR
+        if: steps.changes.outputs.changes == 'true'
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COUNT=$(gh pr list \
+            --base production \
+            --head main \
+            --state open \
+            --json number \
+            --jq 'length')
+
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Create production update PR
+        if: >
+          steps.changes.outputs.changes == 'true' &&
+          steps.existing.outputs.count == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --base production \
+            --head main \
+            --draft \
+            --title "Sync main into production" \
+            --body "Automated production sync check.
+
+          Changes have accumulated on \`main\` that are not yet present on \`production\`.
+
+          Review the changes and merge this PR when they are ready for production."

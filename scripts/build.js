@@ -52,29 +52,29 @@ try {
       redemption: prizeConfig.redemption
     };
   }
-  const participantsPath = resolve(root, 'participants.json');
-  let participantsText;
+  const librariesPath = resolve(root, 'libraries.json');
+  let librariesText;
   try {
-    participantsText = await readFile(participantsPath, 'utf8');
+    librariesText = await readFile(librariesPath, 'utf8');
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  if (participantsText !== undefined) {
-    const participantConfig = JSON.parse(participantsText);
-    if (!participantConfig || !Array.isArray(participantConfig.participants)) {
-      throw new Error('participants.json must contain a participants array.');
+  if (librariesText !== undefined) {
+    const libraryConfig = JSON.parse(librariesText);
+    if (!libraryConfig || !Array.isArray(libraryConfig.libraries)) {
+      throw new Error('libraries.json must contain a libraries array.');
     }
-    for (const participant of participantConfig.participants) {
-      if (typeof participant?.logo === 'string' && participant.logo && !participant.logo.startsWith('data:') && !/^https?:\/\//i.test(participant.logo)) {
-        const mime = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' }[extname(participant.logo).toLowerCase()];
+    for (const library of libraryConfig.libraries) {
+      if (typeof library?.logo === 'string' && library.logo && !library.logo.startsWith('data:') && !/^https?:\/\//i.test(library.logo)) {
+        const mime = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' }[extname(library.logo).toLowerCase()];
         if (!mime) throw new Error('Logo files must be PNG, JPEG, or WebP.');
-        const relativeLogo = participant.logo.replace(/^\/+/, '');
-        const bytes = await readFile(resolve(dirname(participantsPath), relativeLogo));
+        const relativeLogo = library.logo.replace(/^\/+/, '');
+        const bytes = await readFile(resolve(dirname(librariesPath), relativeLogo));
         if (bytes.length > MAX_LOGO_BYTES) throw new Error('Logo files must be no larger than 2 MB.');
-        participant.logo = `data:${mime};base64,${bytes.toString('base64')}`;
+        library.logo = `data:${mime};base64,${bytes.toString('base64')}`;
       }
     }
-    config = { ...config, participants: participantConfig.participants };
+    config = { ...config, libraries: libraryConfig.libraries };
     if (config.redemption?.locations) {
       const { locations, ...redemption } = config.redemption;
       config.redemption = redemption;
@@ -91,7 +91,7 @@ try {
     cp(resolve(root, 'src'), resolve(dist, 'src'), { recursive: true })
   ]);
   await writeFile(resolve(dist, 'src/content/site-config.js'), `export const siteConfig = ${JSON.stringify(config, null, 2)};\n`);
-  console.log(`Built static site in dist/ with ${config.sponsors.length} sponsor(s) and ${config.participants.length} participant location(s).`);
+  console.log(`Built static site in dist/ with ${config.sponsors.length} sponsor(s) and ${config.libraries.length} library location(s).`);
 } catch (error) {
   console.error(`Build failed: ${error.message}`);
   process.exitCode = 1;

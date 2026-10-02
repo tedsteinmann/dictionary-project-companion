@@ -107,7 +107,7 @@ function validateLogo(value, label) {
   return logo;
 }
 
-function validateParticipantLogo(value, label) {
+function validateLibraryLogo(value, label) {
   const logo = value || null;
   if (logo === null) return null;
   if (typeof logo !== 'string') {
@@ -184,16 +184,16 @@ function validateSponsors(value) {
   });
 }
 
-function validateParticipants(value) {
-  const rawParticipants = value ?? [];
-  if (!Array.isArray(rawParticipants)) {
-    throw new Error('Participants must be an array.');
+function validateLibraries(value) {
+  const rawLibraries = value ?? [];
+  if (!Array.isArray(rawLibraries)) {
+    throw new Error('Libraries must be an array.');
   }
-  if (rawParticipants.length > SITE_CONFIG_LIMITS.redemptionLocations) {
-    throw new Error(`Participants must contain no more than ${SITE_CONFIG_LIMITS.redemptionLocations} locations.`);
+  if (rawLibraries.length > SITE_CONFIG_LIMITS.redemptionLocations) {
+    throw new Error(`Libraries must contain no more than ${SITE_CONFIG_LIMITS.redemptionLocations} locations.`);
   }
-  return rawParticipants.map((rawLocation, index) => {
-    const label = `Participant ${index + 1}`;
+  return rawLibraries.map((rawLocation, index) => {
+    const label = `Library ${index + 1}`;
     const location = object(rawLocation, label);
     return {
       name: text(location.name, { label: `${label}: name`, limit: SITE_CONFIG_LIMITS.locationName, required: true }),
@@ -201,7 +201,7 @@ function validateParticipants(value) {
       addressLines: addressLines(location.addressLines, `${label}: addressLines`),
       website: webUrl(location.website, `${label}: website`),
       directionsUrl: webUrl(location.directionsUrl, `${label}: directionsUrl`),
-      logo: validateParticipantLogo(location.logo, label),
+      logo: validateLibraryLogo(location.logo, label),
       telephone: telephone(location.telephone, `${label}: telephone`)
     };
   });
@@ -240,9 +240,9 @@ export function validateSiteConfig(config) {
   const site = validateSite(legacySite(config));
   const redemption = validateRedemption(config.redemption);
   const prize = validatePrize(config.prize, redemption.enabled);
-  // Accept legacy combined files while keeping participants separate in normalized configuration.
-  const participants = validateParticipants(config.participants ?? config.redemption?.locations);
-  if (redemption.enabled && participants.length === 0 && !site.telephone && !site.email && !site.website) {
+  // Accept legacy combined files while keeping libraries separate in normalized configuration.
+  const libraries = validateLibraries(config.libraries ?? config.redemption?.locations);
+  if (redemption.enabled && libraries.length === 0 && !site.telephone && !site.email && !site.website) {
     throw new Error('Redemption: add at least one public organizer telephone, email, or website when no locations are supplied.');
   }
   return freeze({
@@ -250,6 +250,6 @@ export function validateSiteConfig(config) {
     sponsors: validateSponsors(config.sponsors),
     prize,
     redemption,
-    participants
+    libraries
   });
 }
