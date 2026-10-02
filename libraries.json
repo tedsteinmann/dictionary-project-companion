@@ -31,6 +31,14 @@
       "website": "https://westfargolibrary.org/1383/Library",
       "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=215%203rd%20Street%20East%2C%20West%20Fargo%2C%20ND%2058078",
       "logo": "https://westfargolibrary.org/ImageRepository/Document?documentID=9927"
+    },
+    {
+      "name": "Moorhead Public Library",
+      "instructions": "Bring the child’s printed certificate to the service desk and follow the redemption instructions.",
+      "addressLines": ["118 5th Street South", "Moorhead, MN 56560"],
+      "website": "https://larl.org/locations/moorhead/",
+      "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=118%205th%20Street%20South%2C%20Moorhead%2C%20MN%2056560",
+      "logo": "assets/libraries/lake-agassiz-regional-library.png"
     }
   ]
 }

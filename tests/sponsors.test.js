@@ -236,6 +236,11 @@ describe('production sponsor configuration', () => {
           name: 'West Fargo Public Library',
           addressLines: ['215 3rd Street East', 'West Fargo, ND 58078'],
           website: 'https://westfargolibrary.org/1383/Library'
+        },
+        {
+          name: 'Moorhead Public Library',
+          addressLines: ['118 5th Street South', 'Moorhead, MN 56560'],
+          website: 'https://larl.org/locations/moorhead/'
         }
       ]
     );
@@ -249,6 +254,9 @@ describe('production sponsor configuration', () => {
       assert.ok(location.logo, `Expected logo for library ${location.name}`);
       assert.ok(location.directionsUrl, `Expected directions for library ${location.name}`);
     }
+    const moorhead = libraries.find(({ name }) => name === 'Moorhead Public Library');
+    assert.equal(moorhead.logo, 'assets/libraries/lake-agassiz-regional-library.png');
+    assert.ok((await readFile(new URL(`../${moorhead.logo}`, import.meta.url))).length > 0);
     for (const sponsor of config.sponsors) {
       assert.ok(sponsor.logo, `Expected logo for sponsor ${sponsor.title}`);
       const filePath = new URL(`../${sponsor.logo.replace(/^\/+/, '')}`, import.meta.url);
