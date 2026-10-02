@@ -149,6 +149,7 @@ p { margin: 0 0 var(--space-3); }
 .adult > p { max-width: 44rem; }
 .adult-section { max-width: 52rem; margin-top: var(--space-6); }
 .adult-section > h2 { margin: 0 0 var(--space-3); font-size: 1.5rem; }
+.adult-section > .redemption-grid { grid-template-columns: minmax(0, 1fr); }
 .involvement-invitation { padding: var(--space-4); border: 2px solid var(--blue); border-radius: var(--radius); background: var(--blue-tint); }
 .involvement-invitation .kicker { margin-top: 0; }
 .redemption-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-4) 0; }
@@ -201,10 +202,12 @@ p { margin: 0 0 var(--space-3); }
   .hero { grid-template-columns: 1.2fr 1fr; gap: var(--space-5); padding: var(--space-6) 0; }
   .hero-dictionary { width: 100%; max-height: 320px; }
   .audience-choices, .adult-grid { grid-template-columns: 1fr 1fr; }
+  .adult-section > .redemption-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .benefit-list { grid-template-columns: repeat(2, 1fr); }
   .audience-choice { padding: var(--space-5); }
 }
 @media (min-width: 960px) {
+  .adult-section > .redemption-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .benefit-list { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 799px) {
