@@ -1,4 +1,6 @@
 import { siteConfig } from './content/site-config.js';
+import { analyticsConfig } from './analytics-config.js';
+import { initializeAnalytics, track } from './analytics.js';
 import { escapeHtml, renderSponsorNames, renderSponsors } from './sponsors.js';
 import { questions } from './content/questions.js';
 import { renderAnswerInput, readAnswer } from './components/answer-input.js';
@@ -13,6 +15,7 @@ import {
 } from './quiz.js';
 
 const app = document.querySelector('#app');
+void initializeAnalytics(analyticsConfig);
 const footerRoot = document.querySelector('#site-footer');
 let storage;
 try { storage = window.sessionStorage; } catch { /* Storage may be disabled. */ }
@@ -286,6 +289,7 @@ function about(route) {
     <section class="adult-section" aria-labelledby="privacy-title">
       <h2 id="privacy-title">A private, child-friendly activity</h2>
       <p>The challenge asks for no name, email address, birthday, school, address, or location. Quiz progress is temporary to this browser tab; there are no child accounts or public scores.</p>
+      ${analyticsConfig.enabled ? '<p>On approved production sites, organizers use Microsoft Azure Monitor to count challenge starts, submissions, certificates opened, print requests, and visits to redemption information. Counts include the challenge stage and whether a submitted challenge passed. Answers, scores, certificate codes, and browsing identifiers are not included. These counts describe activity, not unique children or completed printing.</p>' : ''}
     </section>
 
     <section class="adult-section" aria-labelledby="more-than-dictionaries-title">
@@ -432,6 +436,7 @@ app.addEventListener('click', (event) => {
   const routeTarget = event.target.closest('[data-route]');
   if (routeTarget) {
     event.preventDefault();
+    if (routeTarget.dataset.route === 'redeem') track('redemption_viewed');
     return navigate(routeTarget.dataset.route);
   }
   const levelTarget = event.target.closest('[data-level]');
@@ -439,11 +444,14 @@ app.addEventListener('click', (event) => {
     const next = startAttempt(session, questions, Number(levelTarget.dataset.level));
     if (next === session) return;
     updateSession(next);
+    track('quiz_started', { stage: session.attempt.levelId });
     return navigate('challenge');
   }
   const certificateTarget = event.target.closest('[data-certificate]');
   if (certificateTarget) {
     updateSession({ ...session, certificateCode: certificateTarget.dataset.certificate });
+    const certificate = selectedCertificate();
+    if (certificate?.code === certificateTarget.dataset.certificate) track('certificate_viewed', { stage: certificate.levelId });
     return navigate('certificate');
   }
   const questionTarget = event.target.closest('[data-question]');
@@ -457,10 +465,23 @@ app.addEventListener('click', (event) => {
     return navigate('challenge', false);
   }
   if (event.target.closest('[data-action="submit"]')) {
-    updateSession(submitAttempt(session, questions));
+    const wasSubmitted = session.attempt?.submitted;
+    const next = submitAttempt(session, questions);
+    updateSession(next);
+    if (wasSubmitted === false && next.attempt.submitted) {
+      track('quiz_submitted', { stage: next.attempt.levelId, passed: Boolean(next.attempt.certificate) });
+      if (next.attempt.certificate) track('certificate_earned', { stage: next.attempt.levelId });
+    }
     return navigate('results');
   }
-  if (event.target.closest('[data-action="print"]')) window.print();
+  if (event.target.closest('[data-action="print"]')) {
+    track('certificate_print_requested', { stage: selectedCertificate()?.levelId });
+    window.print();
+  }
+});
+
+footerRoot?.addEventListener('click', (event) => {
+  if (event.target.closest('[data-route="redeem"]')) track('redemption_viewed');
 });
 
 window.addEventListener('popstate', () => {

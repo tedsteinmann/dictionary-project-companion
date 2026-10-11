@@ -5,6 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import checkQuizBrowser from './check-quiz-browser.js';
+import checkAnalyticsBrowser from './check-analytics-browser.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 let server;
@@ -54,11 +55,17 @@ try {
   browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
+  const analyticsRequests = [];
+  context.on('request', (request) => {
+    if (/applicationinsights|monitor\.azure|\/vendor\/ai\.min\.js/.test(request.url())) analyticsRequests.push(request.url());
+  });
   page.setDefaultTimeout(10000);
   await page.goto(url);
   const result = await checkQuizBrowser(page);
   if (!result?.passed) throw new Error('Browser validation did not report success.');
   console.log(`Browser validation passed: ${result.checks}`);
+  if (analyticsRequests.length) throw new Error(`Default-off build loaded analytics: ${analyticsRequests.join(', ')}`);
+  await checkAnalyticsBrowser(browser, root);
   if (process.env.BROWSER_SCREENSHOT) {
     const screenshot = resolve(process.env.BROWSER_SCREENSHOT);
     try {

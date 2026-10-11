@@ -3,6 +3,7 @@ import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { siteConfig as defaultSiteConfig } from '../src/content/site-config.js';
 import { MAX_LOGO_BYTES, validateSiteConfig } from '../src/site-config.js';
+import { validateAnalyticsConfig } from '../src/analytics-policy.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const args = process.argv.slice(2);
@@ -82,6 +83,15 @@ try {
   }
   // Validate before replacing a previous successful build.
   config = validateSiteConfig(config);
+  const analytics = validateAnalyticsConfig({
+    enabled: process.env.ANALYTICS_ENABLED === 'true',
+    connectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING,
+    allowedHosts: (process.env.ANALYTICS_ALLOWED_HOSTS || '').split(',').map((host) => host.trim())
+  });
+  // Read the pinned package before replacing a successful artifact.
+  const sdkRoot = resolve(root, 'node_modules/@microsoft/applicationinsights-web');
+  const sdk = analytics.enabled ? await readFile(resolve(sdkRoot, 'browser/es5/ai.3.gbl.min.js')) : null;
+  const sdkLicense = analytics.enabled ? await readFile(resolve(sdkRoot, 'LICENSE')) : null;
   const dist = resolve(root, 'dist');
   await rm(dist, { recursive: true, force: true });
   await mkdir(dist);
@@ -91,6 +101,13 @@ try {
     cp(resolve(root, 'src'), resolve(dist, 'src'), { recursive: true })
   ]);
   await writeFile(resolve(dist, 'src/content/site-config.js'), `export const siteConfig = ${JSON.stringify(config, null, 2)};\n`);
+  await writeFile(resolve(dist, 'src/analytics-config.js'), `export const analyticsConfig = ${JSON.stringify(analytics)};\n`);
+  if (sdk) {
+    await mkdir(resolve(dist, 'src/vendor'));
+    await writeFile(resolve(dist, 'src/vendor/ai.min.js'), sdk);
+    await writeFile(resolve(dist, 'src/vendor/LICENSE'), sdkLicense);
+    await cp(resolve(sdkRoot, 'NOTICE'), resolve(dist, 'src/vendor/NOTICE'));
+  }
   console.log(`Built static site in dist/ with ${config.sponsors.length} sponsor(s) and ${config.libraries.length} library location(s).`);
 } catch (error) {
   console.error(`Build failed: ${error.message}`);

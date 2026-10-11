@@ -187,6 +187,11 @@ Do not build a full theming system merely to enforce it.
 
 ## Navigation
 
+Enabled production builds add a short aggregate-count explanation to the grown-up
+privacy section. See [analytics behavior and rollout boundaries](ANALYTICS.md).
+This authorizes only the six restricted optional events, without child input or
+identifiers; broader tracking remains out of scope.
+
 ```text
 Home
  ├── Public pages
