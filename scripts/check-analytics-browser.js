@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 
 const origin = 'https://dictionary.example.org';
-const connectionString = 'InstrumentationKey=00000000-0000-0000-0000-000000000001;IngestionEndpoint=https://centralus-0.in.applicationinsights.azure.com/';
+const connectionString = 'InstrumentationKey=00000000-0000-0000-0000-000000000001;IngestionEndpoint=https://centralus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://centralus.livediagnostics.monitor.azure.com/;ApplicationId=00000000-0000-0000-0000-000000000002';
 
 export default async function checkAnalyticsBrowser(browser, root) {
   const context = await browser.newContext();

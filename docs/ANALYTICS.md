@@ -4,8 +4,8 @@
 
 Count quiz attempts, submissions, certificates and interest in redemption through
 an optional Azure Application Insights adapter. Analytics is disabled by default;
-the default build contains no SDK artifact or connection string. GitHub Pages and
-deployment workflows remain unchanged.
+the default build contains no SDK artifact or connection string. GitHub Pages stays
+off. The Azure deployment workflow maps repository settings into its build.
 
 ## User story
 
@@ -59,9 +59,19 @@ or a sovereign cloud would require a separately reviewed validation change.
 Runtime initialization requires exact `location.hostname` membership. Local and
 preview origins do not load the SDK even if they receive an enabled artifact.
 
-See [Azure setup](AZURE-MONITOR-SETUP.md) for manual resources and GitHub settings.
-No workflow mapping, secret, Azure resource, production activation or deployment
-has been performed as part of the reusable code change.
+Portal-generated connection strings can also include an optional `LiveEndpoint`
+under `.livediagnostics.monitor.azure.com` or the legacy `.applicationinsights.azure.com`
+domain, plus `ApplicationId`. These fields are accepted without enabling live metrics.
+The ingestion endpoint keeps its separate domain restriction. Both endpoint types
+must use HTTPS without credentials, query strings, fragments, custom ports or paths
+beyond `/`. Validation errors identify the invalid field without printing its value.
+
+Follow [Azure setup](AZURE-MONITOR-SETUP.md) for resource creation, OTLP set to Off,
+repository-secret/variable entry, deployment, ingestion checks and disabling tracking.
+The workflow mapping is present on `main`; ensure it and the analytics code reach
+`fm-rotary-foundation`. The current job uses repository settings, with no GitHub
+environment association. External resource/settings state and production ingestion
+must be verified by the operator; their existence is not established by source code.
 
 ## Data and privacy boundaries
 
@@ -86,6 +96,8 @@ not replace required organizational/privacy review for a child-directed site.
 
 - Unit/build tests cover property filtering, typed stages, allowlists, no-op mode,
   SDK failure, missing configuration, enabled assets and clean disabled rebuilds.
+  Enabled-build and browser fixtures include a full portal-style connection string
+  with regional `LiveEndpoint` and `ApplicationId`; malformed endpoints remain rejected.
 - Browser checks run the existing child/adult flows and assert no default-off SDK
   or ingestion requests.
 - A synthetic approved HTTPS origin uses the real pinned SDK with intercepted

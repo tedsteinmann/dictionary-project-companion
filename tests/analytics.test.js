@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 
 export const config = {
   enabled: true,
-  connectionString: 'InstrumentationKey=00000000-0000-0000-0000-000000000001;IngestionEndpoint=https://centralus-0.in.applicationinsights.azure.com/',
+  connectionString: 'InstrumentationKey=00000000-0000-0000-0000-000000000001;IngestionEndpoint=https://centralus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://centralus.livediagnostics.monitor.azure.com/;ApplicationId=00000000-0000-0000-0000-000000000002',
   allowedHosts: ['dictionary.example.org']
 };
 
@@ -33,6 +33,36 @@ test('config fails closed and requires exact custom production hosts', () => {
   for (const connectionString of ['', 'InstrumentationKey=bad', config.connectionString.replace('https:', 'http:'), `${config.connectionString};secret=hidden`]) {
     assert.throws(() => validateAnalyticsConfig({ ...config, connectionString }));
   }
+});
+
+test('portal-style connection strings support regional and legacy LiveEndpoint domains', () => {
+  assert.deepEqual(validateAnalyticsConfig(config), config);
+  const legacy = { ...config, connectionString: config.connectionString.replace('centralus.livediagnostics.monitor.azure.com', 'live.applicationinsights.azure.com') };
+  assert.deepEqual(validateAnalyticsConfig(legacy), legacy);
+  const withoutLive = { ...config, connectionString: config.connectionString.replace(/;LiveEndpoint=[^;]+/, '') };
+  assert.deepEqual(validateAnalyticsConfig(withoutLive), withoutLive);
+});
+
+test('endpoint rules stay strict and identify the invalid field without echoing its value', () => {
+  const ingestion = 'https://centralus-0.in.applicationinsights.azure.com/';
+  const live = 'https://centralus.livediagnostics.monitor.azure.com/';
+  for (const [key, original] of [['IngestionEndpoint', ingestion], ['LiveEndpoint', live]]) {
+    for (const invalid of [
+      'not-a-url', original.replace('https:', 'http:'),
+      original.replace('https://', 'https://user:DO_NOT_ECHO@'),
+      original.replace('.com/', '.com.evil.org/'),
+      original.replace('.com/', '.com:444/'),
+      `${original}?DO_NOT_ECHO`, `${original}#DO_NOT_ECHO`, `${original}DO_NOT_ECHO`
+    ]) {
+      assert.throws(() => validateAnalyticsConfig({ ...config, connectionString: config.connectionString.replace(original, invalid) }), (error) => {
+        assert.match(error.message, new RegExp(key));
+        assert.ok(!error.message.includes('DO_NOT_ECHO'));
+        return true;
+      });
+    }
+  }
+  assert.throws(() => validateAnalyticsConfig({ ...config, connectionString: config.connectionString.replace(ingestion, live) }), /IngestionEndpoint/);
+  assert.throws(() => validateAnalyticsConfig({ ...config, connectionString: config.connectionString.replace(`IngestionEndpoint=${ingestion};`, '') }), /IngestionEndpoint/);
 });
 
 test('disabled, malformed and unapproved hosts never load SDK', async () => {
