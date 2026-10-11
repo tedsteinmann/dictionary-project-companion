@@ -2,7 +2,7 @@
 
 **Target branch:** `main`  
 **Initial enabled deployment:** `fm-rotary-foundation` (Azure Static Web Apps)  
-**Status:** Reusable default-off implementation added; Azure rollout pending. No Azure resources, GitHub secrets, or deployment changes have been made. See [`ANALYTICS.md`](ANALYTICS.md) for implemented behavior and validation.  
+**Status:** Reusable default-off implementation and Azure workflow environment mapping are in place; Azure rollout pending. No Azure resources or GitHub settings have been created. See [`ANALYTICS.md`](ANALYTICS.md) for implemented behavior and validation.  
 **Companion runbook:** [`AZURE-MONITOR-SETUP.md`](AZURE-MONITOR-SETUP.md)
 
 ## Goal
@@ -98,7 +98,7 @@ Customer isolation is provided through separate Azure resources and deployment-t
 - If `ANALYTICS_ENABLED=true`, fail the build for a missing/invalid connection string or empty/malformed allowlist; otherwise produce a clean uninstrumented build.
 - At runtime, require exact `window.location.hostname` allowlist membership; do not accept suffix/substring matching. Disallow localhost, `127.0.0.1`, and known preview hosts by default; the preview host must not be added to the allowlist.
   - Initial implementation is more restrictive: all `azurestaticapps.net` hostnames are rejected. Use a verified custom production domain. Only explicit public Azure HTTPS ingestion endpoints are supported initially.
-- Be explicit that GitHub **repository secrets are not automatically exposed** to Oryx, node, or the Static Web Apps deployment action. The Azure workflow will need a minimal `env:` mapping for these settings after the operator creates them manually (see runbook). GitHub Pages on `main` stays unchanged and disabled.
+- Be explicit that GitHub **repository secrets are not automatically exposed** to Oryx, node, or the Static Web Apps deployment action. The Azure workflow maps these settings into the deployment build environment; operators must create the settings manually (see runbook). GitHub Pages on `main` stays unchanged and disabled.
 
 **Acceptance:** Build tests prove main/preview builds don't collect; production build has correct sanitized configuration; enabling with missing settings fails clearly.
 
@@ -118,7 +118,7 @@ Customer isolation is provided through separate Azure resources and deployment-t
 - Browser tests: current quiz flows unchanged, no analytics requests on the GitHub Pages/development host, telemetry enablement in a mocked approved hostname/build, failed telemetry never blocks the quiz.
 - Test in an isolated Azure resource or controlled local SDK mock before deploying production. Validate Application Insights ingestion by generating test traffic on the **actual approved production origin**; don't accidentally allow preview environments.
 - Perform human privacy review of a captured outbound payload, confirming that telemetry envelope fields, headers and automatic SDK fields meet the approved standard. This is separate from reviewing only application-supplied event properties.
-- Merge the instrumentation into `main` first with analytics disabled. Existing GitHub Pages CI should continue to pass. Later merge to `fm-rotary-foundation`, provision Azure resources and manual GitHub settings, apply only the minimal workflow env mapping, validate on production. A merge alone must not activate tracking.
+- Merge the instrumentation into `main` first with analytics disabled. Existing GitHub Pages CI should continue to pass. Later merge to `fm-rotary-foundation`, provision Azure resources, enter the GitHub settings consumed by the existing workflow mapping, and validate on production. A merge alone must not activate tracking.
 - Update the parent-facing privacy description before enabling collection. Obtain any required organizational/legal review for a child-directed site.
 
 ## Out of scope

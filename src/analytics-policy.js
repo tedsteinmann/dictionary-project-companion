@@ -31,12 +31,15 @@ export function validateAnalyticsConfig(config) {
   if (entries.some(([key]) => !['InstrumentationKey', 'IngestionEndpoint', 'LiveEndpoint', 'ApplicationId'].includes(key))) {
     throw new Error('Unsupported analytics connection string field.');
   }
-  for (const key of ['IngestionEndpoint', 'LiveEndpoint']) {
+  for (const [key, hostnameSuffix] of [
+    ['IngestionEndpoint', '.applicationinsights.azure.com'],
+    ['LiveEndpoint', '.livediagnostics.monitor.azure.com']
+  ]) {
     if (!fields[key] && key === 'LiveEndpoint') continue;
     let endpoint;
     try { endpoint = new URL(fields[key]); } catch { throw new Error('Analytics requires an HTTPS ingestion endpoint.'); }
     if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash || endpoint.port ||
-        !endpoint.hostname.endsWith('.applicationinsights.azure.com') || endpoint.pathname !== '/') {
+        !endpoint.hostname.endsWith(hostnameSuffix) || endpoint.pathname !== '/') {
       throw new Error('Analytics endpoint must be an Azure Application Insights HTTPS endpoint.');
     }
   }

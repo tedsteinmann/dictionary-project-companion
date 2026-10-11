@@ -5,7 +5,8 @@
 Count quiz attempts, submissions, certificates and interest in redemption through
 an optional Azure Application Insights adapter. Analytics is disabled by default;
 the default build contains no SDK artifact or connection string. GitHub Pages and
-deployment workflows remain unchanged.
+other deployments remain unaffected. The Azure Static Web Apps workflow maps its
+opt-in settings at build time and retains pull-request preview deployment and cleanup.
 
 ## User story
 
@@ -51,16 +52,19 @@ is missing or invalid. Generated `dist/src/analytics-config.js` contains only th
 enabled flag, public connection string and allowed hosts. Deployment credentials
 are never read by the build.
 
-This initial implementation supports explicit public Azure HTTPS ingestion
-endpoints ending in `.applicationinsights.azure.com`. It rejects wildcard hosts,
-local names, IP literals, URL paths and **all** `azurestaticapps.net` hosts. Use an
-approved custom production domain. Supporting the default Azure production hostname
-or a sovereign cloud would require a separately reviewed validation change.
+This implementation supports explicit public Azure HTTPS ingestion endpoints
+ending in `.applicationinsights.azure.com` and optional live-diagnostics endpoints
+ending in `.livediagnostics.monitor.azure.com`, as found in standard Application
+Insights connection strings. It rejects wildcard hosts, local names, IP literals,
+URL paths and **all** `azurestaticapps.net` hosts. Use an approved custom production
+domain. Supporting the default Azure production hostname or a sovereign cloud would
+require a separately reviewed validation change.
 Runtime initialization requires exact `location.hostname` membership. Local and
 preview origins do not load the SDK even if they receive an enabled artifact.
 
 See [Azure setup](AZURE-MONITOR-SETUP.md) for manual resources and GitHub settings.
-No workflow mapping, secret, Azure resource, production activation or deployment
+The Azure workflow maps the connection string and analytics variables into the
+build environment. No secret, Azure resource, production activation or deployment
 has been performed as part of the reusable code change.
 
 ## Data and privacy boundaries

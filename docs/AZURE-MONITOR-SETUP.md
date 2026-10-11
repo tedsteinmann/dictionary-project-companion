@@ -5,7 +5,7 @@
 **Implementation source:** reusable analytics code added to `main`, then merged into existing branch.  
 **Status:** Reusable code is implemented with analytics disabled by default; deployment instructions remain manual. No resources or secrets have been created or edited. See [implemented analytics behavior](ANALYTICS.md).
 
-> **Important:** Azure Static Web Apps **runtime application settings do not automatically configure a static frontend built by GitHub Actions/Oryx**. To inject the public browser telemetry connection string at build time, manually enter it as a GitHub Actions setting and explicitly map it into the Azure deploy action's `env`. The current Azure workflow does not yet provide that mapping.
+> **Important:** Azure Static Web Apps **runtime application settings do not automatically configure a static frontend built by GitHub Actions/Oryx**. The Azure workflow maps the public browser telemetry connection string and analytics variables from GitHub Actions settings into the Azure deploy action's build environment. Enter the settings there; do not rely on Static Web Apps runtime settings.
 
 ## 1. Resource inventory
 
@@ -50,9 +50,9 @@ Open `tedsteinmann/dictionary-project-companion` → **Settings** → **Secrets 
 
 Do **not** confuse these with the existing `AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_WATER_0A5A5AD10` secret. That token authorizes **deployment** and is unrelated to Application Insights tracking; keep it unchanged.
 
-## 5. Minimal, mergeable workflow change (not performed yet)
+## 5. Azure workflow configuration
 
-After the `main` analytics adapter and build-time support are merged into `fm-rotary-foundation`, modify only `.github/workflows/azure-static-web-apps-witty-water-0a5a5ad10.yml` under its existing `Build And Deploy` step:
+The existing `.github/workflows/azure-static-web-apps-witty-water-0a5a5ad10.yml` maps the three GitHub Actions settings under its `Build And Deploy` step:
 
 ```yaml
       - name: Build And Deploy
@@ -67,7 +67,7 @@ After the `main` analytics adapter and build-time support are merged into `fm-ro
           ANALYTICS_ALLOWED_HOSTS: ${{ vars.ANALYTICS_ALLOWED_HOSTS }}
 ```
 
-The snippet is an **illustration of where to add `env:`**, not a replacement complete workflow. Verify in a controlled build that the environment variables actually reach the nested Oryx/Node build. If they do not, add a separate explicit build step fed from the same settings and adjust `skip_app_build` / `app_location` only after testing; do not silently change the production deployment mechanism.
+The snippet is an **illustration of the existing mapping**, not a replacement complete workflow. Verify in a controlled build that the environment variables reach the nested Oryx/Node build. If they do not, add a separate explicit build step fed from the same settings and adjust `skip_app_build` / `app_location` only after testing; do not silently change the production deployment mechanism.
 
 **Critical:** A production build with `ANALYTICS_ENABLED=true` must fail rather than silently fall back to disabled when required configuration is absent. An unset flag must result in an entirely analytics-disabled artifact.
 
@@ -139,7 +139,7 @@ Create a Workbook from those queries if needed, and export/store the Workbook JS
 - [ ] Customer-specific workspace and Application Insights exist and are linked.
 - [ ] Allowed production hostnames verified against the live site.
 - [ ] GitHub Actions settings manually entered and restricted as appropriate.
-- [ ] Minimal Azure workflow `env` mapping reviewed and merged when enabling.
+- [ ] Existing Azure workflow `env` mapping reviewed and GitHub Actions settings entered when enabling.
 - [ ] `main`/GitHub Pages telemetry stays disabled; PR previews also disabled.
 - [ ] Event ingestion and KQL reports validated on production.
 - [ ] Full SDK telemetry privacy validation recorded.

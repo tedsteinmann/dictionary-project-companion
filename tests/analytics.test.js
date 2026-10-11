@@ -27,10 +27,12 @@ test('event contract accepts only typed stage/pass properties', () => {
 test('config fails closed and requires exact custom production hosts', () => {
   assert.deepEqual(validateAnalyticsConfig({ connectionString: 'secret' }), { enabled: false });
   assert.deepEqual(validateAnalyticsConfig(config), config);
+  const portalConnectionString = 'InstrumentationKey=00000000-0000-0000-0000-000000000001;IngestionEndpoint=https://centralus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/;ApplicationId=00000000-0000-0000-0000-000000000002';
+  assert.deepEqual(validateAnalyticsConfig({ ...config, connectionString: portalConnectionString }), { ...config, connectionString: portalConnectionString });
   for (const host of ['', '*.example.org', 'localhost', '127.0.0.1', 'foo.localhost', 'preview.azurestaticapps.net', 'https://dictionary.example.org', 'example.org/path', 'example.org-', `${'x'.repeat(64)}.org`]) {
     assert.throws(() => validateAnalyticsConfig({ ...config, allowedHosts: [host] }));
   }
-  for (const connectionString of ['', 'InstrumentationKey=bad', config.connectionString.replace('https:', 'http:'), `${config.connectionString};secret=hidden`]) {
+  for (const connectionString of ['', 'InstrumentationKey=bad', config.connectionString.replace('https:', 'http:'), `${config.connectionString};LiveEndpoint=https://attacker.example/`, `${config.connectionString};secret=hidden`]) {
     assert.throws(() => validateAnalyticsConfig({ ...config, connectionString }));
   }
 });
