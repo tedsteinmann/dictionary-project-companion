@@ -240,7 +240,9 @@ The POC does **not** need:
 
 Optional [aggregate program evaluation](docs/ANALYTICS.md) is implemented and stays
 disabled unless explicitly configured for an approved production custom domain.
-See [Azure setup](docs/AZURE-MONITOR-SETUP.md) for the pending manual rollout.
+Follow [Azure configuration steps](docs/AZURE-MONITOR-SETUP.md) to create the
+workspace and Application Insights resource (OTLP Off), enter the GitHub repository
+secret and variables, deploy, verify ingestion, and disable tracking when needed.
 
 ## Quiz Philosophy
 

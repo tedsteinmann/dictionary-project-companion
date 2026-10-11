@@ -2,7 +2,8 @@
 
 **Target branch:** `main`  
 **Initial enabled deployment:** `fm-rotary-foundation` (Azure Static Web Apps)  
-**Status:** Reusable default-off implementation added; Azure rollout pending. No Azure resources, GitHub secrets, or deployment changes have been made. See [`ANALYTICS.md`](ANALYTICS.md) for implemented behavior and validation.  
+**Status:** Reusable default-off implementation and Azure workflow build-variable mapping are present on `main`. Deployment-branch integration, external Azure/GitHub configuration, and production ingestion require operator verification. See [`ANALYTICS.md`](ANALYTICS.md) for implemented behavior and validation.
+
 **Companion runbook:** [`AZURE-MONITOR-SETUP.md`](AZURE-MONITOR-SETUP.md)
 
 ## Goal
@@ -98,7 +99,7 @@ Customer isolation is provided through separate Azure resources and deployment-t
 - If `ANALYTICS_ENABLED=true`, fail the build for a missing/invalid connection string or empty/malformed allowlist; otherwise produce a clean uninstrumented build.
 - At runtime, require exact `window.location.hostname` allowlist membership; do not accept suffix/substring matching. Disallow localhost, `127.0.0.1`, and known preview hosts by default; the preview host must not be added to the allowlist.
   - Initial implementation is more restrictive: all `azurestaticapps.net` hostnames are rejected. Use a verified custom production domain. Only explicit public Azure HTTPS ingestion endpoints are supported initially.
-- Be explicit that GitHub **repository secrets are not automatically exposed** to Oryx, node, or the Static Web Apps deployment action. The Azure workflow will need a minimal `env:` mapping for these settings after the operator creates them manually (see runbook). GitHub Pages on `main` stays unchanged and disabled.
+- GitHub **repository secrets are not automatically exposed** to Oryx, node, or the Static Web Apps deployment action. The Azure workflow now contains the minimal `env:` mapping; ensure it reaches the deployment branch and verify build-variable propagation after entering repository settings (see runbook). GitHub Pages on `main` stays unchanged and disabled.
 
 **Acceptance:** Build tests prove main/preview builds don't collect; production build has correct sanitized configuration; enabling with missing settings fails clearly.
 
