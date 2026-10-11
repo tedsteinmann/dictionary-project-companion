@@ -289,7 +289,7 @@ function about(route) {
     <section class="adult-section" aria-labelledby="privacy-title">
       <h2 id="privacy-title">A private, child-friendly activity</h2>
       <p>The challenge asks for no name, email address, birthday, school, address, or location. Quiz progress is temporary to this browser tab; there are no child accounts or public scores.</p>
-      ${analyticsConfig.enabled ? '<p>On approved production sites, organizers use Microsoft Azure Monitor to count challenge starts, submissions, certificates opened, print requests, and visits to redemption information. Counts include the challenge stage and whether a submitted challenge passed. Answers, scores, certificate codes, and browsing identifiers are not included. These counts describe activity, not unique children or completed printing.</p>' : ''}
+      ${analyticsConfig.enabled ? '<p>On approved production sites, organizers use Microsoft Azure Monitor to count challenge starts, submissions, certificates opened, print requests, and navigation to redemption information. Counts include the challenge stage and whether a submitted challenge passed. Event payloads exclude answers, scores, certificate codes, and SDK browsing identifiers. Like any web request, Azure still receives network metadata such as the source IP address, browser headers, and Origin. These counts describe activity, not unique children or completed printing.</p>' : ''}
     </section>
 
     <section class="adult-section" aria-labelledby="more-than-dictionaries-title">

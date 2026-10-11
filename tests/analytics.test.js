@@ -89,13 +89,13 @@ test('lazy initialization queues bounded sanitized events and tolerates failures
   }
   const analytics = createAnalytics({ hostname: () => config.allowedHosts[0], load: async () => { loads++; return Sdk; } });
   const ready = analytics.initializeAnalytics(config);
-  analytics.track('quiz_started', { stage: 1, answer: 'private' });
+  for (let index = 0; index < 60; index++) analytics.track('quiz_started', { stage: 1, answer: `private-${index}` });
   analytics.track('exception');
   await ready;
   await analytics.initializeAnalytics(config);
   assert.equal(loads, 1);
   assert.equal(initializer, sanitizeTelemetry);
-  assert.deepEqual(events, [{ name: 'quiz_started', properties: { stage: 1 } }]);
+  assert.deepEqual(events, Array.from({ length: 50 }, () => ({ name: 'quiz_started', properties: { stage: 1 } })));
   const broken = createAnalytics({ hostname: () => config.allowedHosts[0], load: async () => { throw Error('blocked'); } });
   await broken.initializeAnalytics(config);
   assert.doesNotThrow(() => broken.track('quiz_started', { stage: 1 }));
