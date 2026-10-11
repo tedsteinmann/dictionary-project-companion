@@ -231,10 +231,16 @@ The POC does **not** need:
 - Donations
 - Email capture
 - Location tracking
-- Production analytics
+- Analytics beyond the optional aggregate evaluation described in [ANALYTICS.md](docs/ANALYTICS.md)
 - Multi-tenant architecture
 - Runtime organization/theme switching
 - Native mobile applications
+
+## Optional program evaluation
+
+Optional [aggregate program evaluation](docs/ANALYTICS.md) is implemented and stays
+disabled unless explicitly configured for an approved production custom domain.
+See [Azure setup](docs/AZURE-MONITOR-SETUP.md) for the pending manual rollout.
 
 ## Quiz Philosophy
 

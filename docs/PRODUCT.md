@@ -326,13 +326,18 @@ Do not build:
 - donation processing,
 - email marketing,
 - automatic location detection,
-- production analytics,
+- analytics beyond the optional aggregate evaluation in [ANALYTICS.md](ANALYTICS.md),
 - multi-tenant support,
 - multi-organization theme switching.
 
 See [three-stage implementation scope](LEVELS.md) and [mixed questions and guided lessons](MIXED-QUESTIONS.md).
 
 ## Privacy
+
+Optional aggregate evaluation is authorized only under the restricted six-event
+contract in [ANALYTICS.md](ANALYTICS.md). It is disabled by default and excludes
+child answers, scores, certificate codes and browsing identifiers. Production
+activation requires the documented operational and privacy review.
 
 Do not collect child PII.
 
@@ -392,5 +397,5 @@ Only after validating the POC:
 - classroom mode,
 - club-specific QR codes,
 - local project content,
-- analytics,
+- broader analytics beyond the authorized aggregate evaluation,
 - runtime organization configuration.
