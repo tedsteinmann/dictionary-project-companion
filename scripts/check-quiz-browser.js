@@ -19,7 +19,8 @@ export default async function checkQuizBrowser(page) {
     Sponsors: { route: 'sponsors', heading: 'Meet the project sponsors.', text: 'Participating organizations' },
     Libraries: { route: 'libraries', heading: 'Libraries', text: 'complete redemption' },
     Redeem: { route: 'redeem', heading: config => `${config.prize.title} redemption`, text: 'completion code is a reference only' },
-    Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' }
+    Contact: { route: 'contact', heading: 'Contact the project.', text: 'does not use a contact form' },
+    Privacy: { route: 'privacy', heading: 'Privacy notice.', text: 'October 30, 2026' }
   };
   assert(await publicHeader().isVisible(), 'Public routes render the compact public header');
   assert(await challengeAction().isVisible(), 'Public header exposes a single challenge action');
@@ -30,6 +31,7 @@ export default async function checkQuizBrowser(page) {
   assert(await footer.getByText('Helping children use their physical dictionaries').isVisible(), 'Public footer leads with literacy');
   assert(await footer.getByRole('navigation', { name: 'Project information' }).isVisible(), 'Public footer labels its information navigation');
   assert(await footer.getByRole('link', { name: 'Certificate redemption', exact: true }).getAttribute('href') === '#redeem', 'Certificate footer link preserves the redeem route');
+  assert(await footer.getByRole('link', { name: 'Privacy', exact: true }).getAttribute('href') === '#privacy', 'Privacy footer link preserves the privacy route');
   assert((await footer.getByRole('link', { name: 'Get Involved', exact: true }).count()) === 0, 'Footer does not hide the service-club invitation on a separate page');
   assert(await footer.getByRole('link', { name: 'Libraries', exact: true }).getAttribute('href') === '#libraries', 'Libraries footer link preserves the libraries route');
   assert((await footer.locator('.sponsor-logo').count()) === 0, 'Public footer does not duplicate sponsor logos');

@@ -1,6 +1,7 @@
 import { siteConfig } from './content/site-config.js';
 import { analyticsConfig } from './analytics-config.js';
-import { initializeAnalytics, track } from './analytics.js';
+import { ANALYTICS_START_DATE, ANALYTICS_START_DATE_DISPLAY } from './analytics-policy.js';
+import { initializeAnalytics, track, trackPageView } from './analytics.js';
 import { escapeHtml, renderSponsorNames, renderSponsors } from './sponsors.js';
 import { questions } from './content/questions.js';
 import { renderAnswerInput, readAnswer } from './components/answer-input.js';
@@ -31,7 +32,7 @@ const selectedCertificate = () => session.certificates.find((item) => item.code 
 const button = (label, route, className = 'button') =>
   `<button class="${className}" data-route="${route}">${label}</button>`;
 
-const publicRoutes = ['home', 'about', 'sponsors', 'libraries', 'redeem', 'contact'];
+const publicRoutes = ['home', 'about', 'sponsors', 'libraries', 'redeem', 'contact', 'privacy'];
 
 function organizerContact() {
   return renderOrganizerContact(siteConfig.site);
@@ -71,7 +72,8 @@ function siteFooter(route) {
     ['sponsors', 'Sponsors'],
     ['libraries', 'Libraries'],
     ['contact', 'Contact'],
-    ['redeem', 'Certificate redemption']
+    ['redeem', 'Certificate redemption'],
+    ['privacy', 'Privacy']
   ];
   return `<footer class="site-footer site-footer-public">
     <p class="site-footer-statement">Helping children use their physical dictionaries to become confident readers and independent learners.</p>
@@ -288,8 +290,9 @@ function about(route) {
 
     <section class="adult-section" aria-labelledby="privacy-title">
       <h2 id="privacy-title">A private, child-friendly activity</h2>
-      <p>The challenge asks for no name, email address, birthday, school, address, or location. Quiz progress is temporary to this browser tab; there are no child accounts or public scores.</p>
-      ${analyticsConfig.enabled ? '<p>On approved production sites, organizers use Microsoft Azure Monitor to count challenge starts, submissions, certificates opened, print requests, and navigation to redemption information. Counts include the challenge stage and whether a submitted challenge passed. Event payloads exclude answers, scores, certificate codes, and SDK browsing identifiers. Like any web request, Azure still receives network metadata such as the source IP address, browser headers, and Origin. These counts describe activity, not unique children or completed printing.</p>' : ''}
+      <p>The challenge asks for no name, email address, birthday, school, address, or location. Quiz progress is temporary to this browser tab; there are no child accounts, cookies, or public scores.</p>
+      ${analyticsConfig.enabled ? `<p>Beginning <time datetime="${ANALYTICS_START_DATE}">${ANALYTICS_START_DATE_DISPLAY}</time>, organizers use Microsoft Azure Monitor in a cookieless, storage-free mode to count anonymous screen views, challenge starts, submissions, certificates opened, print requests, and navigation to redemption information. Event payloads exclude answers, scores, certificate codes, and SDK browsing identifiers. Like any web request, Azure receives network metadata such as the source IP address (which Application Insights masks to 0.0.0.0 when stored) and browser headers.</p>` : ''}
+      <p><a href="#privacy" data-route="privacy">Read the full privacy and analytics notice →</a></p>
     </section>
 
     <section class="adult-section" aria-labelledby="more-than-dictionaries-title">
@@ -378,17 +381,58 @@ function contact(route) {
   return layout(renderContactContent(siteConfig), route, true);
 }
 
+function privacy(route) {
+  const organizerDetails = organizerContact();
+  return layout(`<section class="card adult" aria-labelledby="privacy-page-title">
+    <p class="kicker">For parents, guardians, and educators</p>
+    <h1 id="privacy-page-title">Privacy notice.</h1>
+    <p class="lede">The Dictionary Challenge is designed so children can explore their physical dictionaries safely, anonymously, and without accounts, cookies, or personal data collection.</p>
+
+    <section class="adult-section" aria-labelledby="privacy-children-title">
+      <h2 id="privacy-children-title">No personal information from children</h2>
+      <p>In alignment with US (COPPA) and European (GDPR) child-privacy protections, this activity never asks for or collects a child’s name, email address, birth date, school, street address, phone number, login, or precise location.</p>
+      <p>During a quiz attempt, selected questions, answers, and earned certificates are kept only in temporary browser tab memory (<code>sessionStorage</code>) so refreshing the page does not erase a child’s work. Closing the browser tab clears that session.</p>
+    </section>
+
+    <section class="adult-section" aria-labelledby="privacy-cookies-title">
+      <h2 id="privacy-cookies-title">No cookies or tracking identifiers</h2>
+      <p>This website sets no analytics, advertising, or tracking cookies and stores no tracking identifiers in your browser (<code>disableCookiesUsage: true</code> and <code>isStorageUseDisabled: true</code>). Because no non-essential cookies or persistent device identifiers are stored on or read from your device, a cookie consent banner is not required.</p>
+    </section>
+
+    <section class="adult-section" aria-labelledby="privacy-analytics-title">
+      <h2 id="privacy-analytics-title">What is tracked, for what purpose, and when it started</h2>
+      <p><strong>Effective and tracking start date:</strong> <time datetime="${ANALYTICS_START_DATE}">${ANALYTICS_START_DATE_DISPLAY}</time> (${analyticsConfig.enabled ? 'active on this deployment' : 'disabled on this build'}).</p>
+      <p><strong>Purpose:</strong> Sponsoring service clubs use Microsoft Azure Monitor (Application Insights) strictly for aggregate program evaluation—to understand how often the dictionary activity is used, which challenge stages are completed, and whether families view certificate printing and library prize-redemption instructions.</p>
+      <p><strong>What is counted when analytics is enabled:</strong></p>
+      <ul>
+        <li><strong>Anonymous screen views (<code>pageViews</code>):</strong> The active screen name (<code>home</code>, <code>intro</code>, <code>levels</code>, <code>challenge</code>, <code>review</code>, <code>results</code>, <code>certificate</code>, <code>about</code>, <code>sponsors</code>, <code>libraries</code>, <code>redeem</code>, <code>contact</code>, or <code>privacy</code>) with any URL query parameters stripped.</li>
+        <li><strong>Quiz starts (<code>quiz_started</code>):</strong> Counted when a new stage attempt begins, recording only the stage number (1–3).</li>
+        <li><strong>Quiz submissions (<code>quiz_submitted</code>):</strong> Counted when a 10-question attempt is submitted, recording only the stage number (1–3) and whether the attempt passed (<code>true</code> or <code>false</code>).</li>
+        <li><strong>Certificates earned (<code>certificate_earned</code>):</strong> Counted when a passing submission generates a stage certificate, recording only the stage number (1–3).</li>
+        <li><strong>Certificates viewed (<code>certificate_viewed</code>):</strong> Counted when a user opens a certificate screen, recording only the stage number (1–3).</li>
+        <li><strong>Certificate print requests (<code>certificate_print_requested</code>):</strong> Counted when the print/save button is clicked, recording only the stage number (1–3).</li>
+        <li><strong>Redemption information views (<code>redemption_viewed</code>):</strong> Counted when a visitor navigates to the certificate redemption page.</li>
+      </ul>
+      <p><strong>What is excluded:</strong> Typed quiz answers, selected choices, numerical scores, question IDs, and locally generated certificate completion codes are never transmitted. A client-side telemetry filter strips SDK-generated user, session, and device identifiers before any event leaves the browser. Like any standard web request, Azure Monitor receives basic HTTP network metadata (such as browser headers and source IP address for coarse regional routing), and Application Insights masks the stored client IP address to <code>0.0.0.0</code> by default.</p>
+    </section>
+
+    ${organizerDetails ? `<section class="adult-section" aria-labelledby="privacy-contact-title"><h2 id="privacy-contact-title">Project organizer</h2>${organizerDetails}</section>` : ''}
+  </section>`, route, true);
+}
+
 const screenRoutes = new Set([...publicRoutes, 'intro', 'levels', 'challenge', 'review', 'results', 'certificate', 'adult', 'involvement']);
 
 const screens = {
   home: welcome, intro, levels: levelPicker, challenge, review, results, certificate,
-  about, sponsors: sponsorsPage, libraries: librariesPage, redeem, contact,
+  about, sponsors: sponsorsPage, libraries: librariesPage, redeem, contact, privacy,
   adult: () => about('about')
 };
 
 function renderScreen(route) {
   return (screens[route] || screens.home)(route);
 }
+
+let lastTrackedRoute = null;
 
 function navigate(route, push = true, focus = true) {
   let safeRoute = ['adult', 'involvement'].includes(route) ? 'about' : (screenRoutes.has(route) ? route : 'home');
@@ -401,6 +445,10 @@ function navigate(route, push = true, focus = true) {
   const url = safeRoute === 'home' ? './' : `#${safeRoute}`;
   if (push && location.hash !== `#${safeRoute}`) history.pushState({ route: safeRoute }, '', url);
   else if (safeRoute !== route) history.replaceState({ route: safeRoute }, '', url);
+  if (safeRoute !== lastTrackedRoute) {
+    lastTrackedRoute = safeRoute;
+    trackPageView(safeRoute);
+  }
   app.innerHTML = renderScreen(safeRoute);
   if (footerRoot) footerRoot.innerHTML = siteFooter(safeRoute);
   if (focus) {

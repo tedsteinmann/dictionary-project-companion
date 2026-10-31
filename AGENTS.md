@@ -121,9 +121,10 @@ Do not add without a concrete requirement:
 - multi-tenancy.
 
 The authorized exception is optional aggregate program evaluation defined in
-`docs/ANALYTICS.md` and `docs/ANALYTICS-IMPLEMENTATION-PLAN.md`: six restricted
-custom events, disabled by default, with no child input or identifiers. Broader
-analytics platforms and individual tracking remain out of scope.
+`docs/ANALYTICS.md` and `docs/ANALYTICS-IMPLEMENTATION-PLAN.md`: anonymous SPA route
+views and six restricted custom events, disabled by default, cookieless and storage-free,
+with no child input or identifiers. Broader analytics platforms and individual tracking
+remain out of scope.
 
 ## Architecture
 

@@ -85,8 +85,7 @@ try {
   config = validateSiteConfig(config);
   const analytics = validateAnalyticsConfig({
     enabled: process.env.ANALYTICS_ENABLED === 'true',
-    connectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING,
-    allowedHosts: (process.env.ANALYTICS_ALLOWED_HOSTS || '').split(',').map((host) => host.trim())
+    connectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING
   });
   // Read the pinned package before replacing a successful artifact.
   const sdkRoot = resolve(root, 'node_modules/@microsoft/applicationinsights-web');

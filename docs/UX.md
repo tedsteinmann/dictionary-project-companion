@@ -187,10 +187,12 @@ Do not build a full theming system merely to enforce it.
 
 ## Navigation
 
-Enabled production builds add a short aggregate-count explanation to the grown-up
-privacy section. See [analytics behavior and rollout boundaries](ANALYTICS.md).
-This authorizes only the six restricted optional events, without child input or
-identifiers; broader tracking remains out of scope.
+A dedicated `#privacy` page and the grown-up About page explain the activity's
+child-privacy protections, the October 30, 2026 analytics start date, and what is
+counted when optional aggregate program evaluation is enabled. See
+[analytics behavior and rollout boundaries](ANALYTICS.md). This authorizes only
+anonymous screen views and the six restricted optional events, without cookies,
+child input, or identifiers; broader tracking remains out of scope.
 
 ```text
 Home
@@ -199,7 +201,8 @@ Home
  │    ├── Sponsors
  │    ├── Libraries
  │    ├── Redeem
- │    └── Contact
+ │    ├── Contact
+ │    └── Privacy
  │
  ├── Kid
  │    ├── Intro

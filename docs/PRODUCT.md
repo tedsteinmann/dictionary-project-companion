@@ -334,10 +334,11 @@ See [three-stage implementation scope](LEVELS.md) and [mixed questions and guide
 
 ## Privacy
 
-Optional aggregate evaluation is authorized only under the restricted six-event
-contract in [ANALYTICS.md](ANALYTICS.md). It is disabled by default and excludes
-child answers, scores, certificate codes and browsing identifiers. Production
-activation requires the documented operational and privacy review.
+Optional aggregate evaluation is authorized only under the restricted cookieless
+contract in [ANALYTICS.md](ANALYTICS.md) (anonymous screen views and six aggregate
+events, documented on `#privacy` with an October 30, 2026 start date). It is
+disabled by default and excludes child answers, scores, certificate codes, cookies,
+and browsing identifiers.
 
 Do not collect child PII.
 

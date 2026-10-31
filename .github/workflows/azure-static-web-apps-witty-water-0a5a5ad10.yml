@@ -30,5 +30,4 @@ jobs:
         env:
           APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
           ANALYTICS_ENABLED: ${{ vars.ANALYTICS_ENABLED }}
-          ANALYTICS_ALLOWED_HOSTS: ${{ vars.ANALYTICS_ALLOWED_HOSTS }}
           ###### End of Repository/Build Configurations ######
