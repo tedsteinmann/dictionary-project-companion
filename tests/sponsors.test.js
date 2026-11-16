@@ -12,7 +12,7 @@ import { renderContactContent } from '../src/components/contact-details.js';
 import { renderLibraryLocations } from '../src/libraries.js';
 
 const sponsor = { title: 'Local club', description: 'Helping readers.', url: 'https://example.org', logo: null };
-const prize = { title: 'Prize books', description: 'Each child who earns a certificate may choose one new book.' };
+const prize = { title: 'Prize books', description: 'Each child may redeem only one certificate for one new book.' };
 const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aV1sAAAAASUVORK5CYII=';
 
 describe('sponsor configuration and rendering', () => {
@@ -209,10 +209,11 @@ describe('production sponsor configuration', () => {
     const { redemption, libraries } = config;
 
     assert.deepEqual(config.prize, prize);
+    assert.match(config.prize.description, /Each child may redeem only one certificate/);
     assert.equal(redemption.enabled, true);
     assert.equal(
       redemption.instructions,
-      'Bring the child’s printed certificate to a participating library in exchange for one prize book.'
+      'Each child may redeem only one certificate. Bring the child’s printed certificate to a participating library in exchange for one prize book.'
     );
     assert.deepEqual(
       libraries.map(({ name, addressLines, website }) => ({ name, addressLines, website })),
