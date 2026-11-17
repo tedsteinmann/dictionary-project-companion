@@ -239,10 +239,12 @@ The POC does **not** need:
 ## Optional program evaluation
 
 Optional [aggregate program evaluation](docs/ANALYTICS.md) is implemented and stays
-disabled unless explicitly configured for an approved production custom domain.
+disabled unless explicitly configured with `ANALYTICS_ENABLED=true` and a branch-specific
+`APPLICATIONINSIGHTS_CONNECTION_STRING`. A dedicated `#privacy` page explains what is
+tracked, for what purpose, and the October 30, 2026 start date.
 Follow [Azure configuration steps](docs/AZURE-MONITOR-SETUP.md) to create the
 workspace and Application Insights resource (OTLP Off), enter the GitHub repository
-secret and variables, deploy, verify ingestion, and disable tracking when needed.
+secret and variable, deploy, verify ingestion, and disable tracking when needed.
 
 ## Quiz Philosophy
 

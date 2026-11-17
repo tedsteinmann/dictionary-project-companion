@@ -2,22 +2,44 @@
 
 ## Feature
 
-Count quiz attempts, submissions, certificates and interest in redemption through
-an optional Azure Application Insights adapter. Analytics is disabled by default;
-the default build contains no SDK artifact or connection string. GitHub Pages stays
-off. The Azure deployment workflow maps repository settings into its build.
+Count anonymous screen views, quiz attempts, submissions, certificates, and interest
+in redemption through a cookieless, storage-free Azure Application Insights setup.
+Analytics is disabled by default; the default build contains no SDK artifact or
+connection string. GitHub Pages (`main`) stays off. Deployment branches (such as
+`fm-rotary-foundation`) map `ANALYTICS_ENABLED=true` and their branch-specific
+`APPLICATIONINSIGHTS_CONNECTION_STRING` into the build.
+
+A dedicated public **Privacy** page (`#privacy`, linked in the site footer and from
+the About page) explicitly documents for parents, guardians, and educators what is
+tracked, for what purpose, the **October 30, 2026** tracking start date, and why
+no cookie consent banner is required.
 
 ## User story
 
-As a Rotary organizer, I can assess use of the dictionary activity by stage
-without identifying children or collecting their answers.
+As a Rotary organizer, I can assess use of the dictionary activity and certificate
+redemption by screen and stage without identifying children, collecting their
+answers, or requiring a cookie banner.
 
 ## Implementation
 
-`src/analytics.js` owns asynchronous initialization, a bounded in-memory startup
-queue (50 events), and best-effort tracking. `src/analytics-policy.js` defines the
-six-event contract and configuration validation. Quiz mechanics remain provider-free;
-`src/main.js` tracks actual transitions and intentional UI actions.
+`src/analytics.js` owns asynchronous initialization of `@microsoft/applicationinsights-web`,
+a bounded in-memory startup queue (50 items), and best-effort event and route tracking.
+`src/analytics-policy.js` defines the six-event contract, the approved SPA route list,
+the October 30, 2026 start date constants, and configuration validation. Quiz mechanics
+remain provider-free; `src/main.js` tracks actual transitions, intentional UI actions,
+and SPA route changes.
+
+### Anonymous SPA route views (`pageViews`)
+
+When the active route changes, `navigate()` in `src/main.js` calls
+`trackPageView(safeRoute)` for the approved screens:
+`home`, `intro`, `levels`, `challenge`, `review`, `results`, `certificate`,
+`about`, `sponsors`, `libraries`, `redeem`, `contact`, and `privacy`.
+Stepping from question to question within `challenge` does not emit duplicate
+`challenge` page views. URL query parameters and user/session identifiers are
+stripped before transmission.
+
+### Aggregate custom events (`customEvents`)
 
 | Event | Properties | Counting rule |
 | --- | --- | --- |
@@ -28,102 +50,74 @@ six-event contract and configuration validation. Quiz mechanics remain provider-
 | `certificate_print_requested` | stage | Each print-button click, before the dialog |
 | `redemption_viewed` | none | Intentional navigation through a redemption control |
 
-Render, reload and browser history do not create new events. A print request is
-not proof of printing, and a redemption-page view is not proof of redemption.
-Counts and attempt-based ratios are not unique children. Offline use, blockers,
-failed SDK loads, the bounded queue and browser unload can cause undercounting.
-Delivery is not retried or persisted by this feature.
+Render, reload, and browser history do not create duplicate custom events. A print
+request is not proof of printing, and a redemption-page view is not proof of
+redemption. Counts and attempt-based ratios are not unique children. Offline use,
+blockers, failed SDK loads, the bounded queue, and browser unload can cause
+undercounting.
 
 ## Configuration and build
 
-Install dependencies with `npm ci`. The official SDK is pinned to 3.4.5. The existing
-copy-based build copies its global browser artifact, MIT license and notice only
-when analytics is enabled; no bundler or public CDN is required.
+Install dependencies with `npm ci`. The official SDK (`@microsoft/applicationinsights-web`)
+is pinned to 3.4.5. The copy-based build copies its browser artifact, MIT license,
+and notice only when analytics is enabled; no bundler or public CDN is required.
 
-The build accepts only these inputs:
+The build accepts these inputs:
 
-- `ANALYTICS_ENABLED=true` enables validation; unset or other values produce an off artifact.
-- `APPLICATIONINSIGHTS_CONNECTION_STRING` supplies the public browser connection string.
-- `ANALYTICS_ALLOWED_HOSTS` supplies comma-separated exact lowercase production hostnames.
+- `ANALYTICS_ENABLED=true` enables analytics for the build; unset or other values produce an off artifact.
+- `APPLICATIONINSIGHTS_CONNECTION_STRING` supplies the branch-specific public browser connection string (must include a valid `InstrumentationKey`).
 
-An enabled build fails before replacing a successful artifact when configuration
-is missing or invalid. Generated `dist/src/analytics-config.js` contains only the
-enabled flag, public connection string and allowed hosts. Deployment credentials
-are never read by the build.
+An enabled build fails before replacing a successful artifact when the connection
+string is missing or invalid. Generated `dist/src/analytics-config.js` contains
+only the enabled flag and public connection string. Deployment credentials are
+never read by the build.
 
-This initial implementation supports explicit public Azure HTTPS ingestion
-endpoints ending in `.applicationinsights.azure.com`. It rejects wildcard hosts,
-local names, IP literals, URL paths and **all** `azurestaticapps.net` hosts. Use an
-approved custom production domain. Supporting the default Azure production hostname
-or a sovereign cloud would require a separately reviewed validation change.
-Runtime initialization requires exact `location.hostname` membership. Local and
-preview origins do not load the SDK even if they receive an enabled artifact.
-
-Portal-generated connection strings can also include an optional `LiveEndpoint`
-under `.livediagnostics.monitor.azure.com` or the legacy `.applicationinsights.azure.com`
-domain, plus `ApplicationId`. These fields are accepted without enabling live metrics.
-The ingestion endpoint keeps its separate domain restriction. Both endpoint types
-must use HTTPS without credentials, query strings, fragments, custom ports or paths
-beyond `/`. Validation errors identify the invalid field without printing its value.
+At runtime, initialization skips local development hostnames (`localhost`, `127.0.0.1`,
+`[::1]`, `*.localhost`, `*.local`) and initializes cleanly on deployed production
+and Azure Static Web Apps hosts without requiring a separate host-allowlist variable.
 
 Follow [Azure setup](AZURE-MONITOR-SETUP.md) for resource creation, OTLP set to Off,
-repository-secret/variable entry, deployment, ingestion checks and disabling tracking.
-The workflow mapping is present on `main`; ensure it and the analytics code reach
-`fm-rotary-foundation`. The current job uses repository settings, with no GitHub
-environment association. External resource/settings state and production ingestion
-must be verified by the operator; their existence is not established by source code.
+secret/variable entry, deployment, ingestion checks, and disabling tracking.
 
-## Data and privacy boundaries
+## Privacy compliance (US COPPA, EU GDPR-K, and EU ePrivacy Directive)
 
-Only the event name, stage, and submission pass/fail flag enter the event contract.
-Answers, scores, certificate codes, free text, question IDs, attempt IDs and student
-details are discarded. A telemetry initializer rebuilds approved EventData envelopes
-and rejects other telemetry types, stripping SDK context, identifiers, URLs, extra
-properties and measurements. The SDK sender adds its software-version tag; the
-envelope also includes the resource instrumentation key, timestamp and schema fields.
-
-Cookies, SDK storage, dependency/fetch tracking, automatic route/page/exception
-tracking, remote SDK configuration and SDK usage reporting are disabled. A sender
-transport uses fetch with omitted credentials and no Referer header. Normal network
-transport still exposes the source IP, browser HTTP headers and Origin to Azure;
-this is not a claim of anonymous network transport. Organizers must review Azure's
-handling of network metadata, retention, access and costs before activation.
-
-The grown-up page adds an aggregate-count explanation in enabled builds. It does
-not replace required organizational/privacy review for a child-directed site.
+- **No cookie banner required (EU ePrivacy Directive Art. 5(3)):** Cookies
+  (`disableCookiesUsage: true`) and Web Storage (`isStorageUseDisabled: true`,
+  `enableSessionStorageBuffer: false`) are disabled in the Application Insights
+  configuration. Zero analytics cookies (`ai_user`, `ai_session`) or `localStorage` /
+  `sessionStorage` keys are ever read from or written to the user's device.
+- **Child anonymity (US COPPA & EU GDPR-K):** Only the approved route name or event
+  name, stage (1–3), and submission pass/fail flag enter the telemetry contract.
+  Answers, scores, certificate codes, free text, question IDs, attempt IDs, and
+  student details are discarded. A telemetry initializer (`sanitizeTelemetry`)
+  rebuilds approved `EventData` and `PageviewData` envelopes and rejects all other
+  telemetry types, stripping in-memory SDK user, session, and device identifiers
+  (`ai.user.id`, `ai.session.id`, `ai.device.id`), URL query strings, and measurements.
+- **Network metadata:** Standard HTTPS requests transmit source IP and browser headers
+  to Azure Monitor at ingestion; Azure Application Insights masks stored client IP
+  addresses to `0.0.0.0` by default after coarse regional lookup.
+- **Transparency (`#privacy`):** The public Privacy page explicitly explains what is
+  tracked, for what purpose, and that tracking started on **October 30, 2026**.
 
 ## Acceptance and validation
 
-- Unit/build tests cover property filtering, typed stages, allowlists, no-op mode,
-  SDK failure, missing configuration, enabled assets and clean disabled rebuilds.
-  Enabled-build and browser fixtures include a full portal-style connection string
-  with regional `LiveEndpoint` and `ApplicationId`; malformed endpoints remain rejected.
-- Browser checks run the existing child/adult flows and assert no default-off SDK
-  or ingestion requests.
-- A synthetic approved HTTPS origin uses the real pinned SDK with intercepted
-  ingestion. It checks all three stages, passed/failed attempts, retakes, reload/history,
-  certificate views, repeated prints, and intentional redemption navigation.
-- Captured payload/header checks reject child input, user/session/operation IDs,
-  non-event telemetry, extra properties, Referer/cookies and correlation headers.
-  Storage checks reject SDK cookies and storage keys. No traffic goes to Azure.
-- Blocked delivery must leave the quiz functional.
+- Unit/build tests cover property filtering, typed stages, approved routes, local-host
+  skipping, no-op mode, SDK failure, missing configuration, enabled assets, and clean
+  disabled rebuilds.
+- Browser checks run the full child/adult flows (including the `#privacy` page) and
+  assert no default-off SDK or ingestion requests.
+- Real-SDK browser validation checks all three stages, passed/failed attempts,
+  retakes, reload/history, certificate views, repeated prints, intentional redemption
+  navigation, and anonymous SPA route page views.
+- Captured payload and storage checks reject child input, user/session/operation IDs,
+  unapproved telemetry types, extra properties, SDK cookies, and SDK storage keys.
+- Blocked delivery or blocked SDK load leaves the quiz functional.
 
-Run `npm test`, `npm run build`, and `npm run test:browser`. A real production-origin
-ingestion test, full human payload review, Azure reporting and organizational approval
-remain rollout tasks; automated interception does not prove production configuration.
-
-Local validation on October 10, 2026 passed all 44 unit/build tests, the existing
-320–1280px browser checks, and real-SDK intercepted-payload checks. A captured
-request was inspected: event envelopes contained the approved properties, resource
-key, timestamp, schema fields and `ai.internal.sdkVersion` only; HTTP headers
-contained ordinary browser metadata and Origin, with no Referer, Cookie or
-correlation headers. Phone screenshots of the welcome and enabled grown-up page
-were inspected. This local evidence does not complete the production privacy review.
+Run `npm test`, `npm run build`, and `npm run test:browser`.
 
 ## Reporting
 
-The runbook includes daily event and stage summaries. For an attempt-based ratio
-(which can cross day boundaries and exceed 100% for a reporting window):
+In Application Insights → **Logs**, query custom events and anonymous route views:
 
 ```kusto
 customEvents
@@ -135,12 +129,11 @@ customEvents
 | extend submission_to_start_ratio = iff(started == 0, real(null), todouble(submitted) / started)
 ```
 
-In workspace-scoped Logs, adapt to `AppEvents`, `Name`, `Properties`, `ItemCount`
-and `TimeGenerated`. Azure resources provide customer isolation; no customer ID
-is transmitted in events.
+```kusto
+pageViews
+| where timestamp >= ago(30d)
+| summarize views = sum(itemCount) by name
+| order by views desc
+```
 
-## Out of scope
-
-Individual tracking, persistent identities, per-question analytics, analytics
-dashboards in the app, verified redemption, Azure provisioning, secret management,
-deployment changes and a Workbook definition that has not been tested in Azure.
+In workspace-scoped Logs, adapt to `AppEvents` and `AppPageViews`.

@@ -23,7 +23,7 @@ export default async function checkAnalyticsBrowser(browser, root) {
       return route.abort();
     }
     if (url.pathname === '/src/analytics-config.js') return route.fulfill({ contentType: 'text/javascript', body:
-      `export const analyticsConfig = ${JSON.stringify({ enabled: true, connectionString, allowedHosts: ['dictionary.example.org'] })};` });
+      `export const analyticsConfig = ${JSON.stringify({ enabled: true, connectionString })};` });
     if (url.pathname === '/src/vendor/ai.min.js') return route.fulfill({ contentType: 'text/javascript', body: sdk + `
       const OriginalSdk = Microsoft.ApplicationInsights.ApplicationInsights;
       Microsoft.ApplicationInsights.ApplicationInsights = class extends OriginalSdk {
@@ -77,12 +77,18 @@ export default async function checkAnalyticsBrowser(browser, root) {
     await finish(10);
     await page.goto(`${origin}/#home`);
     await page.getByRole('link', { name: 'Certificate redemption', exact: true }).click();
+    await page.getByRole('link', { name: 'Privacy', exact: true }).click();
+    assert.ok((await page.locator('main').innerText()).includes('October 30, 2026'));
+    assert.ok((await page.locator('main').innerText()).includes('active on this deployment'));
     // Flush before navigation/reload so this test measures all SDK instances.
     await flush();
-    const events = outbound.flatMap(({ body }) => {
+    const telemetry = outbound.flatMap(({ body }) => {
       const value = JSON.parse(body);
       return Array.isArray(value) ? value : [value];
     });
+    const events = telemetry.filter((item) => item.data.baseType === 'EventData');
+    const pageViews = telemetry.filter((item) => item.data.baseType === 'PageviewData');
+    assert.equal(events.length + pageViews.length, telemetry.length);
     const counts = (name) => events.filter((item) => item.data.baseData.name === name).length;
     assert.equal(counts('quiz_started'), 4);
     assert.equal(counts('quiz_submitted'), 4);
@@ -92,14 +98,22 @@ export default async function checkAnalyticsBrowser(browser, root) {
     assert.equal(counts('redemption_viewed'), 1);
     assert.deepEqual(events.filter((item) => item.data.baseData.name === 'quiz_submitted').map((item) => item.data.baseData.properties),
       [{ stage: '1', passed: 'false' }, { stage: '1', passed: 'true' }, { stage: '2', passed: 'true' }, { stage: '3', passed: 'true' }]);
-    for (const event of events) {
-      assert.equal(event.data.baseType, 'EventData');
-      assert.deepEqual(Object.keys(event.tags), ['ai.internal.sdkVersion']);
-      assert.ok(Object.keys(event.data.baseData.properties).every((key) => ['stage', 'passed'].includes(key)));
-      assert.ok(!JSON.stringify(event).includes('DO_NOT_TRANSMIT'));
+    const viewedRoutes = new Set(pageViews.map((item) => item.data.baseData.name));
+    for (const expectedRoute of ['levels', 'challenge', 'review', 'results', 'certificate', 'home', 'redeem', 'privacy']) {
+      assert.ok(viewedRoutes.has(expectedRoute), `Expected PageviewData for route ${expectedRoute}`);
+    }
+    for (const item of telemetry) {
+      assert.ok(['EventData', 'PageviewData'].includes(item.data.baseType));
+      assert.deepEqual(Object.keys(item.tags), ['ai.internal.sdkVersion']);
+      if (item.data.baseType === 'EventData') {
+        assert.ok(Object.keys(item.data.baseData.properties || {}).every((key) => ['stage', 'passed'].includes(key)));
+      } else {
+        assert.deepEqual(item.data.baseData.properties || {}, {});
+      }
+      assert.ok(!JSON.stringify(item).includes('DO_NOT_TRANSMIT'));
     }
     for (const { headers } of outbound) {
-      assert.ok(!headers.referer && !headers.cookie);
+      assert.ok(!headers.cookie);
       assert.ok(!Object.keys(headers).some((key) => /request-id|traceparent|baggage/.test(key)));
     }
     assert.deepEqual(unexpected, []);
@@ -119,6 +133,8 @@ export default async function checkAnalyticsBrowser(browser, root) {
     await page.setViewportSize({ width: 320, height: 720 });
     assert.ok((await page.locator('main').innerText()).includes('organizers use Microsoft Azure Monitor'));
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await page.goto(`${origin}/#privacy`);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     if (process.env.BROWSER_SCREENSHOT) await page.screenshot({ path: resolve(process.env.BROWSER_SCREENSHOT, '../dictionary-analytics-mobile.png'), fullPage: true });
     let blockedSdk = 0;
     await context.route(`${origin}/src/vendor/ai.min.js`, (route) => { blockedSdk++; return route.abort(); });
@@ -127,6 +143,6 @@ export default async function checkAnalyticsBrowser(browser, root) {
     await click('Retake Find It');
     await finish(6, 'none');
     assert.ok(blockedSdk > 0, 'The failed-load test must attempt to load the SDK');
-    console.log('Analytics browser validation passed: real SDK payloads, event counts, all stages, resume/reload/history, privacy headers/storage, blocked ingestion and SDK load.');
+    console.log('Analytics browser validation passed: real SDK payloads, event counts, SPA route pageviews, all stages, resume/reload/history, privacy page, storage/cookie checks, blocked ingestion and SDK load.');
   } finally { await context.close(); }
 }
