@@ -82,6 +82,7 @@ export default async function checkQuizBrowser(page) {
   assert((await page.locator('main').innerText()).includes(`not online verification or a guaranteed claim for ${config.prize.title}`), 'Redemption explains the local reference code limitation using configured prize content');
   if (config.redemption.enabled) {
     const redeemText = await page.locator('main').innerText();
+    assert(redeemText.includes('Each child may redeem only one certificate for one new book.'), 'Redemption makes the one-certificate-per-child limit clear');
     assert(redeemText.includes(`${config.prize.title} are available beginning November 1.`), 'Redemption shows the configured prize and availability date');
     assert(redeemText.includes(config.redemption.limitedSupplyNotice), 'Redemption shows the configured limited-supply notice');
     assert(!redeemText.includes('Redemption deadline: November 1'), 'Availability date is not presented as a redemption deadline');
@@ -285,7 +286,9 @@ export default async function checkQuizBrowser(page) {
   assert(await page.getByRole('heading', { name: 'Certificate of completion' }).isVisible(), 'Find It earns certificate');
   assert((await page.locator('.certificate').innerText()).includes('Stage 1 · Find It'), 'Certificate names Find It');
   if (enabledConfig.redemption.enabled) {
-    assert((await page.locator('.certificate-redemption').innerText()).includes('Redemption: Bring this certificate to a participating library in exchange for one prize book.*'), 'Certificate uses concise redemption instructions');
+    const certificateRedemption = await page.locator('.certificate-redemption').innerText();
+    assert(certificateRedemption.includes('This certificate can be exchanged for one prize book.'), 'Certificate explains the prize exchange');
+    assert(certificateRedemption.includes('Each child may redeem only one certificate.'), 'Certificate makes the one-certificate-per-child limit clear');
     const redeemAction = page.getByRole('button', { name: 'How to redeem this certificate', exact: true });
     assert(await redeemAction.isVisible(), 'Certificate provides a no-print redemption action');
     await page.keyboard.press('Tab');
@@ -311,9 +314,8 @@ export default async function checkQuizBrowser(page) {
   assert(!(await page.locator('.brand').isVisible()), 'Print hides navigation');
   assert(await page.locator('.certificate').isVisible(), 'Print includes certificate');
   const printedCertificate = await page.locator('.certificate').innerText();
-  assert(printedCertificate.includes('Redemption: Bring this certificate to a participating library in exchange for one prize book.*'), 'Certificate marks concise redemption instructions with an asterisk');
+  assert(printedCertificate.includes('This certificate can be exchanged for one prize book. Each child may redeem only one certificate.*'), 'Certificate marks the redemption limit with an asterisk');
   assert(!printedCertificate.includes('Show this certificate to a parent'), 'Certificate omits the parent/guardian instruction');
-  assert(!printedCertificate.includes('Each qualifying child may choose one new book'), 'Certificate omits the redundant prize statement');
   assert(printedCertificate.includes('Reading rewards are available beginning November 1.'), 'Certificate includes the configured title and availability date');
   assert(printedCertificate.includes('Prize books are available while supplies last.'), 'Certificate includes the limited-supply notice');
   assert(await page.locator('.certificate-availability').isVisible(), 'Print keeps the certificate prize disclaimer visible');

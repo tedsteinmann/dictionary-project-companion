@@ -238,7 +238,7 @@ function certificateRedemptionGuidance() {
   const { redemption } = siteConfig;
   if (!redemption.enabled) return '';
   const hasAvailabilityNote = redemption.availabilityDate || redemption.limitedSupplyNotice;
-  return `<p class="certificate-redemption"><strong>Redemption:</strong> Bring this certificate to a participating library in exchange for one prize book.${hasAvailabilityNote ? '<span aria-hidden="true">*</span><span class="sr-only"> See availability note.</span>' : ''}</p>`;
+  return `<p class="certificate-redemption"><strong>Redemption:</strong> This certificate can be exchanged for one prize book. Each child may redeem only one certificate.${hasAvailabilityNote ? '<span aria-hidden="true">*</span><span class="sr-only"> See availability note.</span>' : ''}</p>`;
 }
 
 function certificateAvailabilityNote() {

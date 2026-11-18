@@ -69,7 +69,7 @@ If no root configuration exists, the build uses `src/content/site-config.js`. Th
 ```json
 {
   "title": "Prize books",
-  "description": "Each child who earns a certificate may choose one new book.",
+  "description": "Each child may redeem only one certificate for one new book.",
   "redemption": {
     "enabled": true,
     "instructions": "Bring a printed certificate with a parent or guardian.",
